@@ -1,0 +1,13 @@
+version: "3.7"
+services:
+  pagermaid:
+    build:
+      context: .
+    image: pagermaid:custom
+    restart: always
+    container_name: "pagermaid"
+    hostname: "pagermaid"
+    ports:
+    - "3333:3333"
+    volumes:
+    - ./:/pagermaid/workdir

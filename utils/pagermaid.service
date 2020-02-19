@@ -1,0 +1,14 @@
+[Unit]
+Description=PagerMaid telegram utility daemon
+After=network.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=simple
+User=pagermaid
+Group=pagermaid
+WorkingDirectory=/var/lib/pagermaid
+ExecStart=/var/lib/pagermaid/utils/pagermaid
+Restart=always

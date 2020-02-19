@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>PagerMaid Setup</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.min.css" />
+    <link rel="stylesheet" href="style.css" />
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+</head>
+
+<body>
+    <div class="demo-layout mdl-layout mdl-js-layout">
+        <main class="mdl-layout__content mdl-color--grey-800">
+            <div class="mdl-grid login-content">
+
+                <div class="mdl-layout-spacer"></div>
+
+                <div
+                    class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--4-col mdl-cell--4-col-tablet mdl-cell--4-col-desktop">
+                    <div class="mdl-card__title">
+                    {% if msg %}
+                        <h2 class="mdl-card__title-text">{{ msg }}</h2>
+                    {% else %}
+                        <h2 class="mdl-card__title-text">Setup</h2>
+                    {% endif %}
+                    </div>
+                    <div class="mdl-card__supporting-text">
+                        <form method="post" action="">
+                            {{ form.hidden_tag() }}
+                            <div class="mdl-textfield mdl-js-textfield w-100">
+                                <label class="mdl-textfield__label">Full Name</label>
+                                {{ form.full_name(placeholder="Full Name", class="mdl-textfield__input") }}
+                            </div>
+                            <div class="mdl-textfield mdl-js-textfield w-100">
+                                <label class="mdl-textfield__label">Username</label>
+                                {{ form.username(placeholder="Username", class="mdl-textfield__input") }}
+                            </div>
+                            <div class="mdl-textfield mdl-js-textfield w-100">
+                                <label class="mdl-textfield__label">Email Address</label>
+                                {{ form.email(placeholder="Email Address", class="mdl-textfield__input") }}
+                            </div>
+                            <div class="mdl-textfield mdl-js-textfield w-100">
+                                <label class="mdl-textfield__label">Password</label>
+                                {{ form.password(placeholder="Password", class="mdl-textfield__input") }}
+                            </div>
+                            <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
+                                Confirm
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="mdl-layout-spacer"></div>
+            </div>
+        </main>
+    </div>
+
+</body>
+
+</html>
