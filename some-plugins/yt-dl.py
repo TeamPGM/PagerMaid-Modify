@@ -15,7 +15,7 @@ async def ytdl(context):
     url = context.arguments
     reply = await context.get_reply_message()
     reply_id = None
-    await context.edit("正在拉取视频 . . .")
+    await context.edit("获取视频中 . . .")
     if reply:
         reply_id = reply.id
     if url is None:
@@ -27,6 +27,7 @@ async def ytdl(context):
         if not await fetch_youtube_video(url, context.chat_id, reply_id):
             await context.edit("出错了呜呜呜 ~ 视频下载失败。")
         await log(f"已拉取UTB视频，地址： {url}.")
+        await context.edit("视频获取成功！")
 
 
 async def fetch_youtube_video(url, chat_id, reply_id):
