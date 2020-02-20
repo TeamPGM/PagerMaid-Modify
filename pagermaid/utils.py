@@ -78,7 +78,7 @@ async def random_gen(selection, length=64):
     return await execute(f"head -c 65536 /dev/urandom | tr -dc {selection} | head -c {length} ; echo \'\'")
 
 
-async def fetch_youtube_audio(url, chat_id, reply_id):
+async def fetch_youtube_audio(url, chat_id, reply_id, string_2):
     """ Extracts and uploads audio from YouTube video. """
     youtube_dl_options = {
         'format': 'bestaudio/best',
@@ -95,7 +95,8 @@ async def fetch_youtube_audio(url, chat_id, reply_id):
     await bot.send_file(
          chat_id,
          "audio.mp3",
-         reply_to=reply_id
+         reply_to=reply_id,
+         caption=str(string_2)
     )
     remove("audio.mp3")
     return True

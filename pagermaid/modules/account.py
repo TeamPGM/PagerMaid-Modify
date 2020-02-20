@@ -187,31 +187,32 @@ async def profile(context):
                 await context.edit("出错了呜呜呜 ~ 指定的 UserID 已超出整数限制，您确定输对了？")
                 return
             raise exception
-    user_type = "Bot" if target_user.user.bot else "User"
+    user_type = "Bot" if target_user.user.bot else "用户"
     username_system = f"@{target_user.user.username}" if target_user.user.username is not None else (
-        "This user have not yet defined their username.")
+        "喵喵喵 ~ 好像没有设置")
     first_name = target_user.user.first_name.replace("\u2060", "")
     last_name = target_user.user.last_name.replace("\u2060", "") if target_user.user.last_name is not None else (
-        "This user did not define a last name."
+        "喵喵喵 ~ 好像没有设置"
     )
-    biography = target_user.about if target_user.about is not None else "This user did not define a biography string."
-    caption = f"**Profile:** \n" \
-              f"Username: {username_system} \n" \
-              f"UserID: {target_user.user.id} \n" \
-              f"First Name: {first_name} \n" \
-              f"Last Name: {last_name} \n" \
-              f"Biography: {biography} \n" \
-              f"Common Groups: {target_user.common_chats_count} \n" \
-              f"Verified: {target_user.user.verified} \n" \
-              f"Restricted: {target_user.user.restricted} \n" \
-              f"Type: {user_type} \n" \
-              f"Permanent Link: [{first_name}](tg://user?id={target_user.user.id})"
+    biography = target_user.about if target_user.about is not None else "没有公开的情报"
+    caption = f"**用户简介:** \n" \
+              f"道纹: {username_system} \n" \
+              f"ID: {target_user.user.id} \n" \
+              f"名字: {first_name} \n" \
+              f"姓氏: {last_name} \n" \
+              f"目前已知的情报: {biography} \n" \
+              f"共同裙: {target_user.common_chats_count} \n" \
+              f"官方认证: {target_user.user.verified} \n" \
+              f"受限制: {target_user.user.restricted} \n" \
+              f"类型: {user_type} \n" \
+              f"[{first_name}](tg://user?id={target_user.user.id})"
     reply_to = context.message.reply_to_msg_id
     photo = await context.client.download_profile_photo(
-        target_user.user.id,
-        "./" + str(target_user.user.id) + ".jpg",
-        download_big=True
-    )
+              target_user.user.id,
+              "./" + str(target_user.user.id) + ".jpg",
+              download_big=True
+               )
+
     if not reply_to:
         reply_to = None
     try:
@@ -226,7 +227,7 @@ async def profile(context):
         if not photo.startswith("http"):
             remove(photo)
         await context.delete()
+        remove(photo)
         return
     except TypeError:
         await context.edit(caption)
-    remove(photo)

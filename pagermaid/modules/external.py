@@ -42,7 +42,7 @@ async def translate(context):
 
     source_lang = LANGUAGES[f'{result.src.lower()}']
     trans_lang = LANGUAGES[f'{result.dest.lower()}']
-    result = f"**Translated** from {source_lang.title()}:\n{result.text}"
+    result = f"**文本翻译** 源语言 {source_lang.title()}:\n{result.text}"
 
     if len(result) > 4096:
         await context.edit("出错了呜呜呜 ~ 输出超出 TG 限制，正在附加文件。")
@@ -50,9 +50,9 @@ async def translate(context):
         return
     await context.edit(result)
     if len(result) <= 4096:
-        await log(f"Translated `{message}` from {source_lang} to {trans_lang}.")
+        await log(f"把 `{message}` 从 {source_lang} 翻译到了 {trans_lang}")
     else:
-        await log(f"Translated message from {source_lang} to {trans_lang}.")
+        await log(f"把一条消息从 {source_lang} 翻译到了 {trans_lang}.")
 
 
 @listener(outgoing=True, command="tts",
@@ -130,10 +130,18 @@ async def google(context):
 
 @listener(outgoing=True, command="fetchaudio",
           description="从多个平台获取音频文件。",
-          parameters="<url>")
+          parameters="<url>,<string>")
 async def fetchaudio(context):
+    if context.arguments:
+        if ',' in context.arguments:
+            url, string_2 = context.arguments.split(',', 1)
+        else:
+            url = context.arguments
+            string_2 = "#audio "
+    else:
+        await context.edit("出错了呜呜呜 ~ 错误的语法。")
+        return
     """ Fetches audio from provided URL. """
-    url = context.arguments
     reply = await context.get_reply_message()
     reply_id = None
     await context.edit("拉取音频中 . . .")
@@ -144,7 +152,7 @@ async def fetchaudio(context):
         return
     youtube_pattern = regex_compile(r"^(http(s)?://)?((w){3}.)?youtu(be|.be)?(\.com)?/.+")
     if youtube_pattern.match(url):
-        if not await fetch_youtube_audio(url, context.chat_id, reply_id):
+        if not await fetch_youtube_audio(url, context.chat_id, reply_id, string_2):
             await context.edit("出错了呜呜呜 ~ 原声带下载失败。")
         await log(f"从链接中获取了一条音频，链接： {url}.")
 
