@@ -28,12 +28,12 @@ async def ybdl(context):
         if not await fetch_video(url, context.chat_id, reply_id):
             await context.edit("出错了呜呜呜 ~ 视频下载失败。")
         await log(f"已拉取UTB视频，地址： {url}.")
-        await context.edit("视频获取成功！")
+        await context.delete()
     if bilibili_pattern.match(url):
         if not await fetch_video(url, context.chat_id, reply_id):
             await context.edit("出错了呜呜呜 ~ 视频下载失败。")
         await log(f"已拉取 Bilibili 视频，地址： {url}.")
-        await context.edit("视频获取成功！")
+        await context.delete()
 
 async def fetch_video(url, chat_id, reply_id):
     """ Extracts and uploads YouTube video. """

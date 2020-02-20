@@ -155,7 +155,7 @@ async def fetchaudio(context):
         if not await fetch_youtube_audio(url, context.chat_id, reply_id, string_2):
             await context.edit("出错了呜呜呜 ~ 原声带下载失败。")
         await log(f"从链接中获取了一条音频，链接： {url}.")
-
+        await context.delete()
 
 class GoogleSearch:
     USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0"
