@@ -36,7 +36,9 @@ async def sticker(context):
                 custom_emoji = True
         elif (DocumentAttributeFilename(file_name='AnimatedSticker.tgs') in
               message.media.document.attributes):
-            emoji = message.media.document.attributes[0].alt
+            photo = BytesIO()
+            await bot.download_file(message.media.document, "AnimatedSticker.tgs")
+            emoji = message.media.document.attributes[1].alt
             custom_emoji = True
             animated = True
             photo = 1
@@ -152,8 +154,8 @@ async def add_sticker(conversation, command, pack_title, pack_name, animated, me
 
 async def upload_sticker(animated, message, context, file, conversation):
     if animated:
-        await bot.forward_messages(
-            'Stickers', [message.id], context.chat_id)
+        await context.edit("上传动图中 . . .")
+        await conversation.send_file("AnimatedSticker.tgs", force_document=True)
     else:
         file.seek(0)
         await context.edit("上传图片中 . . .")
