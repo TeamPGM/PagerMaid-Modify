@@ -2,11 +2,14 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyo
+*.pyc
 
 # C extensions
 *.so
 
 # Distribution / packaging
+.idea/
 .Python
 build/
 develop-eggs/
@@ -106,9 +109,19 @@ celerybeat.pid
 .venv
 env/
 venv/
+work/
 ENV/
 env.bak/
 venv.bak/
+config.env
+config.yml
+pagermaid.session
+pagermaid.session-journal
+docker-compose.yml
+plugins/*.py
+plugins/*.py.disabled
+data/*
+pagermaid.egg-info/
 
 # Spyder project settings
 .spyderproject
