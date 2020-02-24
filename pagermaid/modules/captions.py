@@ -11,7 +11,7 @@ from pagermaid.utils import execute, upload_attachment
 
 
 @listener(outgoing=True, command="convert",
-          description="回复某附件消息然后转换为图片输出")
+          description="回复某条附件消息然后转换为图片输出")
 async def convert(context):
     """ Converts image to png. """
     reply = await context.get_reply_message()
@@ -44,7 +44,7 @@ async def convert(context):
           parameters="<string>,<string> <image>")
 async def caption(context):
     """ Generates images with captions. """
-    await context.edit("正在渲染图像 . . .")
+    await context.edit("正在渲染图像中 . . .")
     if context.arguments:
         if ',' in context.arguments:
             string_1, string_2 = context.arguments.split(',', 1)
@@ -87,7 +87,7 @@ async def caption(context):
         message = string_1
     remove(target_file_path)
     remove(result_file)
-    await log(f"字幕 `{message}` 添加到了一张图片.")
+    await log(f"成功将字幕 `{message}` 添加到了一张图片.")
 
 
 @listener(outgoing=True, command="ocr",
@@ -158,7 +158,7 @@ async def highlight(context):
     lexer = guess_lexer(message)
     formatter = img.JpgImageFormatter(style="colorful")
     result = syntax_highlight(message, lexer, formatter, outfile=None)
-    await context.edit("正在上传图片 . . .")
+    await context.edit("正在上传图片中 . . .")
     await context.client.send_file(
         context.chat_id,
         result,

@@ -17,7 +17,7 @@ from pagermaid.utils import clear_emojis, attach_log, fetch_youtube_audio
 
 
 @listener(outgoing=True, command="translate",
-          description="通过Google翻译将目标消息翻译成指定的语言。",
+          description="通过 Google 翻译将目标消息翻译成指定的语言。",
           parameters="<language>")
 async def translate(context):
     """ PagerMaid universal translator. """
@@ -34,7 +34,7 @@ async def translate(context):
         return
 
     try:
-        await context.edit("生成翻译中 . . .")
+        await context.edit("正在生成翻译中 . . .")
         result = translator.translate(clear_emojis(message), dest=lang)
     except ValueError:
         await context.edit("出错了呜呜呜 ~ 找不到目标语言，请更正配置文件中的错误。")
@@ -45,7 +45,7 @@ async def translate(context):
     result = f"**文本翻译** 源语言 {source_lang.title()}:\n{result.text}"
 
     if len(result) > 4096:
-        await context.edit("出错了呜呜呜 ~ 输出超出 TG 限制，正在附加文件。")
+        await context.edit("出错了呜呜呜 ~ 输出超出 TG 限制，正在尝试上传文件。")
         await attach_log(result, context.chat_id, "translation.txt", context.id)
         return
     await context.edit(result)
@@ -62,7 +62,7 @@ async def tts(context):
     """ Send TTS stuff as voice message. """
     reply = await context.get_reply_message()
     message = context.arguments
-    lang = config['application_language']
+    lang = config['application_tts']
     if message:
         pass
     elif reply:

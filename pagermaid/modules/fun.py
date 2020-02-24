@@ -31,7 +31,7 @@ async def animate(context):
 
 
 @listener(outgoing=True, command="teletype",
-          description="通过编辑消息来制作打字动画。",
+          description="通过编辑消息来制作打字动画。会产生大量操作记录！",
           parameters="<message>")
 async def teletype(context):
     """ Makes a typing animation via edits to the message. """

@@ -14,12 +14,12 @@ from pagermaid.listener import listener
 
 
 @listener(outgoing=True, command="username",
-          description="通过命令快捷设置 username",
+          description="通过命令快捷设置道纹",
           parameters="<username>")
 async def username(context):
     """ 重新配置您的用户名。 """
     if len(context.parameter) > 1:
-        await context.edit("无效的参数。")
+        await context.edit("出错了呜呜呜 ~ 您好像输入了一个无效的参数。")
     if len(context.parameter) == 1:
         result = context.parameter[0]
     else:
@@ -27,16 +27,16 @@ async def username(context):
     try:
         await bot(UpdateUsernameRequest(result))
     except UsernameOccupiedError:
-        await context.edit("用户名已存在。")
+        await context.edit("出错了呜呜呜 ~ 道纹已存在。")
         return
     except UsernameInvalidError:
-        await context.edit("出错了呜呜呜 ~ 您好像输入了一个无效的用户名。")
+        await context.edit("出错了呜呜呜 ~ 您好像输入了一个无效的道纹。")
         return
-    await context.edit("用户名设置完毕。")
+    await context.edit("道纹设置完毕。")
     if result == "":
-        await log("用户名已被取消。")
+        await log("道纹已被取消。")
         return
-    await log(f"用户名已被设置为 `{result}`.")
+    await log(f"道纹已被设置为 `{result}`.")
 
 
 @listener(outgoing=True, command="name",
@@ -51,7 +51,7 @@ async def name(context):
         first_name = context.parameter[0]
         last_name = " "
     else:
-        await context.edit("无效的参数。")
+        await context.edit("出错了呜呜呜 ~ 您好像输入了一个无效的参数。")
         return
     try:
         await bot(UpdateProfileRequest(
@@ -80,7 +80,7 @@ async def pfp(context):
         elif "image" in reply.media.document.mime_type.split('/'):
             photo = await bot.download_file(reply.media.document)
         else:
-            await context.edit("出错了呜呜呜 ~ 无法将附件解析为图片。")
+            await context.edit("出错了呜呜呜 ~ 无法将此附件解析为图片。")
 
     if photo:
         try:
@@ -90,11 +90,11 @@ async def pfp(context):
             remove(photo)
             await context.edit("头像修改成功啦 ~")
         except PhotoCropSizeSmallError:
-            await context.edit("出错了呜呜呜 ~ 图像尺寸小于最小要求。")
+            await context.edit("出错了呜呜呜 ~ 此图像尺寸小于最小要求。")
         except ImageProcessFailedError:
             await context.edit("出错了呜呜呜 ~ 服务器解释命令时发生错误。")
         except PhotoExtInvalidError:
-            await context.edit("出错了呜呜呜 ~ 无法将附件解析为图片。")
+            await context.edit("出错了呜呜呜 ~ 无法将此附件解析为图片。")
 
 
 @listener(outgoing=True, command="bio",
@@ -107,7 +107,7 @@ async def bio(context):
     except AboutTooLongError:
         await context.edit("出错了呜呜呜 ~ 情报太长啦")
         return
-    await context.edit("此情报公成功啦")
+    await context.edit("此公开情报设置成功啦 ~")
     if context.arguments == "":
         await log("公开的情报成功关闭啦")
         return
@@ -115,7 +115,7 @@ async def bio(context):
 
 
 @listener(outgoing=True, command="rmpfp",
-          description="删除指定数量的头像",
+          description="删除指定数量的咱的头像",
           parameters="<整数>")
 async def rmpfp(context):
     """ Removes your profile picture. """
@@ -146,15 +146,15 @@ async def rmpfp(context):
 
 
 @listener(outgoing=True, command="profile",
-          description="生成一个用户简介 ~ 消息有点长",
+          description="生成一位用户简介 ~ 消息有点长",
           parameters="<username>")
 async def profile(context):
     """ Queries profile of a user. """
     if len(context.parameter) > 1:
-        await context.edit("无效的参数。")
+        await context.edit("出错了呜呜呜 ~ 无效的参数。")
         return
 
-    await context.edit("正在生成用户简介摘要 . . .")
+    await context.edit("正在生成用户简介摘要中 . . .")
     if context.reply_to_msg_id:
         reply_message = await context.get_reply_message()
         user_id = reply_message.from_id
@@ -178,13 +178,13 @@ async def profile(context):
                 await context.edit("出错了呜呜呜 ~ 指定的用户不存在。")
                 return
             if str(exception).startswith("出错了呜呜呜 ~ 没有用户"):
-                await context.edit("出错了呜呜呜 ~ 指定的用户名不存在。")
+                await context.edit("出错了呜呜呜 ~ 指定的道纹不存在。")
                 return
             if str(exception).startswith("出错了呜呜呜 ~ 您确定输入了东西？") or isinstance(exception, StructError):
-                await context.edit("出错了呜呜呜 ~ 指定的UserID与用户不对应。")
+                await context.edit("出错了呜呜呜 ~ 找不到对应的 UserID 。")
                 return
             if isinstance(exception, OverflowError):
-                await context.edit("出错了呜呜呜 ~ 指定的 UserID 已超出整数限制，您确定输对了？")
+                await context.edit("出错了呜呜呜 ~ 指定的 UserID 已超出长度限制，您确定输对了？")
                 return
             raise exception
     user_type = "Bot" if target_user.user.bot else "用户"

@@ -10,7 +10,7 @@ from pagermaid.listener import listener
 async def ghost(context):
     """ Toggles ghosting of a user. """
     if not redis_status():
-        await context.edit("出错了呜呜呜 ~ Redis 离线，无法运行。")
+        await context.edit("出错了呜呜呜 ~ Redis 好像离线了，无法执行命令。")
         return
     if len(context.parameter) != 1:
         await context.edit("出错了呜呜呜 ~ 无效的参数。")
@@ -23,14 +23,14 @@ async def ghost(context):
             return
         redis.set("ghosted.chat_id." + str(context.chat_id), "true")
         await context.delete()
-        await log(f"ChatID {str(context.chat_id)} 已被添加到自动已读对话列表中。")
+        await log(f"已成功将 ChatID {str(context.chat_id)} 添加到自动已读对话列表中。")
     elif context.parameter[0] == "false":
         if context.chat_id == self_user_id:
             await context.edit("在？为什么要在收藏夹里面用？")
             return
         redis.delete("ghosted.chat_id." + str(context.chat_id))
         await context.delete()
-        await log(f"ChatID {str(context.chat_id)} 已从自动已读对话列表中移除。")
+        await log(f"已成功将 ChatID {str(context.chat_id)} 从自动已读对话列表中移除。")
     elif context.parameter[0] == "status":
         if redis.get("ghosted.chat_id." + str(context.chat_id)):
             await context.edit("emm...当前对话已被加入自动已读对话列表中。")
@@ -41,7 +41,7 @@ async def ghost(context):
 
 
 @listener(outgoing=True, command="deny",
-          description="切换拒绝聊天功能，需要 redis",
+          description="拒绝聊天功能，需要 redis",
           parameters="<true|false|status>")
 async def deny(context):
     """ Toggles denying of a user. """

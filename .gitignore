@@ -117,6 +117,7 @@ config.env
 config.yml
 pagermaid.session
 pagermaid.session-journal
+*.pagermaid
 docker-compose.yml
 plugins/*.py
 plugins/*.py.disabled
