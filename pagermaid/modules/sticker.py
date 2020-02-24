@@ -1,5 +1,6 @@
 """ PagerMaid module to handle sticker collection. """
 
+from os import remove
 from urllib import request
 from io import BytesIO
 from telethon.tl.types import DocumentAttributeFilename, MessageMediaPhoto
@@ -156,6 +157,7 @@ async def upload_sticker(animated, message, context, file, conversation):
     if animated:
         await context.edit("上传动图中 . . .")
         await conversation.send_file("AnimatedSticker.tgs", force_document=True)
+        remove("AnimatedSticker.tgs")
     else:
         file.seek(0)
         await context.edit("上传图片中 . . .")
