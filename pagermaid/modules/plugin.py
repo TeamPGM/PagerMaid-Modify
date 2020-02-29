@@ -11,7 +11,7 @@ from pagermaid.modules import plugin_list as active_plugins, __list_plugins
 
 
 @listener(outgoing=True, command="plugin", diagnostics=False,
-          description="用于管理安装到 PagerMaid 的插件。",
+          description="用于管理安装到 PagerMaid-Modify 的插件。",
           parameters="{status|install|remove|enable|disable|upload} <插件名称/文件>")
 async def plugin(context):
     if len(context.parameter) > 2 or len(context.parameter) == 0:
@@ -41,7 +41,7 @@ async def plugin(context):
                 move(file_path, f"{plugin_directory}{file_path}.disabled")
             else:
                 move(file_path, plugin_directory)
-            await context.edit(f"插件 {path.basename(file_path)[:-3]} 已安装，PagerMaid 正在重新启动。")
+            await context.edit(f"插件 {path.basename(file_path)[:-3]} 已安装，PagerMaid-Modify 正在重新启动。")
             await log(f"成功安装插件 {path.basename(file_path)[:-3]}.")
             await context.client.disconnect()
         else:
@@ -50,7 +50,7 @@ async def plugin(context):
         if len(context.parameter) == 2:
             if exists(f"{plugin_directory}{context.parameter[1]}.py"):
                 remove(f"{plugin_directory}{context.parameter[1]}.py")
-                await context.edit(f"成功删除插件 {context.parameter[1]}, PagerMaid 正在重新启动。")
+                await context.edit(f"成功删除插件 {context.parameter[1]}, PagerMaid-Modify 正在重新启动。")
                 await log(f"删除插件 {context.parameter[1]}.")
                 await context.client.disconnect()
             elif exists(f"{plugin_directory}{context.parameter[1]}.py.disabled"):
@@ -104,7 +104,7 @@ async def plugin(context):
             if exists(f"{plugin_directory}{context.parameter[1]}.py.disabled"):
                 rename(f"{plugin_directory}{context.parameter[1]}.py.disabled",
                        f"{plugin_directory}{context.parameter[1]}.py")
-                await context.edit(f"插件 {context.parameter[1]} 已启用，PagerMaid 正在重新启动。")
+                await context.edit(f"插件 {context.parameter[1]} 已启用，PagerMaid-Modify 正在重新启动。")
                 await log(f"已启用 {context.parameter[1]}.")
                 await context.client.disconnect()
             else:
@@ -116,7 +116,7 @@ async def plugin(context):
             if exists(f"{plugin_directory}{context.parameter[1]}.py") is True:
                 rename(f"{plugin_directory}{context.parameter[1]}.py",
                        f"{plugin_directory}{context.parameter[1]}.py.disabled")
-                await context.edit(f"插件 {context.parameter[1]} 已被禁用，PagerMaid 正在重新启动。")
+                await context.edit(f"插件 {context.parameter[1]} 已被禁用，PagerMaid-Modify 正在重新启动。")
                 await log(f"已关闭插件 {context.parameter[1]}.")
                 await context.client.disconnect()
             else:
@@ -137,7 +137,7 @@ async def plugin(context):
                 await context.edit("上传插件中 . . .")
                 await upload_attachment(file_name,
                                         context.chat_id, reply_id,
-                                        caption=f"PagerMaid {context.parameter[1]} plugin.")
+                                        caption=f"PagerMaid-Modify {context.parameter[1]} plugin.")
                 remove(file_name)
                 await context.delete()
             else:

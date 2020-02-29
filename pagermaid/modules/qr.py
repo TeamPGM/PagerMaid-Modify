@@ -10,7 +10,7 @@ from pagermaid.utils import obtain_message, upload_attachment
 
 
 @listener(outgoing=True, command="genqr",
-          description="生成包含文字内容的 QR Code 。",
+          description="生成 QR Code 。",
           parameters="<string>")
 async def genqr(context):
     """ Generate QR codes. """
@@ -20,11 +20,11 @@ async def genqr(context):
     except ValueError:
         await context.edit("出错了呜呜呜 ~ 无效的参数。")
         return
-    await context.edit("生成QR码。")
+    await context.edit("生成QR码中。。。")
     try:
         create(message, error='L', mode='binary').png('qr.webp', scale=6)
     except UnicodeEncodeError:
-        await context.edit("出错了呜呜呜 ~ 目标消息中的字符无效。")
+        await context.edit("出错了呜呜呜 ~ 解析目标消息中的字符出现错误。")
         return
     await upload_attachment("qr.webp", context.chat_id, reply_id)
     remove("qr.webp")
@@ -33,7 +33,7 @@ async def genqr(context):
 
 
 @listener(outgoing=True, command="parseqr",
-          description="将回复的消息文件解析为 QR码 并输出结果。")
+          description="回复一张 QR 码进行解析并发送 QR 码内容。")
 async def parseqr(context):
     """ Parse attachment of replied message as a QR Code and output results. """
     success = False

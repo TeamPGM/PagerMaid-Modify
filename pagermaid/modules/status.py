@@ -43,15 +43,15 @@ async def tty(context):
     reply_id = context.message.reply_to_msg_id
     result = await execute("fbdump | magick - image.png")
     if result == "/bin/sh: fbdump: command not found":
-        await context.edit("出错了呜呜呜 ~ 此系统上没有 fbdump")
+        await context.edit("出错了呜呜呜 ~ 此系统上没有安装 fbdump")
         remove("image.png")
         return
     if result == "/bin/sh: convert: command not found":
-        await context.edit("出错了呜呜呜 ~ ImageMagick 在该系统上不存在。")
+        await context.edit("出错了呜呜呜 ~ 此系统上没有安装 ImageMagick")
         remove("image.png")
         return
     if result == "Failed to open /dev/fb0: Permission denied":
-        await context.edit("出错了呜呜呜 ~ 运行 PagerMaid 的用户不在视频组中。")
+        await context.edit("出错了呜呜呜 ~ 运行 PagerMaid-Modify 的用户不在视频组中。")
         remove("image.png")
         return
     if not await upload_attachment("image.png", context.chat_id, reply_id,
@@ -65,11 +65,11 @@ async def tty(context):
 
 
 @listener(outgoing=True, command="status",
-          description="输出 PagerMaid 的状态。")
+          description="输出 PagerMaid-Modify 的状态。")
 async def status(context):
     database = "Connected" if redis_status() else "Disconnected"
     await context.edit(
-        f"**PagerMaid 状态** \n"
+        f"**PagerMaid-Modify 状态** \n"
         f"主机名: `{uname().node}` \n"
         f"主机平台: `{platform}` \n"
         f"Kernel 版本: `{uname().release}` \n"
@@ -80,7 +80,7 @@ async def status(context):
 
 
 @listener(outgoing=True, command="speedtest",
-          description="执行 speedtest 脚本并输出您的互联网速度。")
+          description="执行 speedtest 脚本并发送结果。")
 async def speedtest(context):
     """ Tests internet speed using speedtest. """
     await context.edit("执行测试脚本 . . .")
@@ -100,7 +100,7 @@ async def speedtest(context):
 
 
 @listener(outgoing=True, command="connection",
-          description="显示 PagerMaid 和 Telegram 之间的连接信息。")
+          description="显示 PagerMaid-Modify 和 Telegram 之间的连接信息。")
 async def connection(context):
     """ Displays connection information between PagerMaid and Telegram. """
     datacenter = await context.client(functions.help.GetNearestDcRequest())
@@ -113,7 +113,7 @@ async def connection(context):
 
 
 @listener(outgoing=True, command="ping",
-          description="计算 PagerMaid 和 Telegram 之间的延迟。")
+          description="计算 PagerMaid-Modify 和 Telegram 之间的延迟。")
 async def ping(context):
     """ Calculates latency between PagerMaid and Telegram. """
     start = datetime.now()

@@ -11,7 +11,7 @@ from pagermaid.utils import attach_log, execute
 
 
 @listener(outgoing=True, command="sh",
-          description="在 Telegram 上执行 Shell 命令。",
+          description="在 Telegram 上远程执行 Shell 命令。",
           parameters="<命令>")
 async def sh(context):
     """ Use the command-line from Telegram. """
@@ -19,7 +19,7 @@ async def sh(context):
     command = context.arguments
     hostname = node()
     if context.is_channel and not context.is_group:
-        await context.edit("`出错了呜呜呜 ~ 当前配置禁止在频道中执行 Shell 命令。`")
+        await context.edit("`出错了呜呜呜 ~ 当前 PagerMaid-Modify 的配置禁止在频道中执行 Shell 命令。`")
         return
 
     if not command:
@@ -58,15 +58,15 @@ async def sh(context):
             )
     else:
         return
-    await log(f"在 Shell 中执行命令 `{command}`")
+    await log(f"远程执行 Shell 命令： `{command}`")
 
 
 @listener(outgoing=True, command="restart", diagnostics=False,
-          description="使 PagerMaid 重新启动")
+          description="使 PagerMaid-Modify 重新启动")
 async def restart(context):
     """ To re-execute PagerMaid. """
     if not context.text[0].isalpha():
-        await context.edit("尝试重新启动系统。")
+        await context.edit("尝试重新启动 PagerMaid-Modify 。")
         await log("PagerMaid-Modify 重新启动。")
         await context.client.disconnect()
 
@@ -108,7 +108,7 @@ async def trace(context):
             await log(f"Traced redirects of {context.arguments}.")
         else:
             await context.edit(
-                "出错了呜呜呜 ~ 发出HTTP请求时出了点问题。"
+                "出错了呜呜呜 ~ 发出 HTTP 请求时出了点问题。"
             )
     else:
         await context.edit("无效的参数。")
