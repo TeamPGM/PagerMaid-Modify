@@ -29,8 +29,8 @@ redis:
   db: "14"
 
 # Locale settings
-application_language: "en"
-application_region: "United States"
+application_language: "zh-cn"
+application_region: "China"
 application_tts: "cn"
 
 # In-Chat logging settings, default settings logs directly into Kat, strongly advised to change
