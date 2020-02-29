@@ -6,6 +6,8 @@
 
 您需要 `Linux` 或 `*BSD` 系统，并且您的系统应该至少运行 `python 3.6` ，推荐虚拟环境运行。
 
+为确保 Bug reporter 的正常进行可能您需要手动私聊 [@KatOnKeyboard](https://t.me/KatOnKeyboard) 一次。
+
 ## 快速开始
 
 如果您的系统与docker兼容，并且您想要快速且受支持的安装，Docker 将帮助您快速入门。尽管很方便，但这种安装方法将系统范围的包限制在容器内。
