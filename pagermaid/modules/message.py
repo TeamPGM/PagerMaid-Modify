@@ -31,8 +31,8 @@ async def userid(context):
             else:
                 target = "*" + message.forward.sender.first_name + "*"
         await context.edit(
-            f"**Username:** {target} \n"
-            f"**UserID:** `{user_id}`"
+            f"**道纹:** {target} \n"
+            f"**用户ID:** `{user_id}`"
         )
     else:
         await context.edit("出错了呜呜呜 ~ 无法获取目标消息的信息。")
