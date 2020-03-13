@@ -83,6 +83,22 @@ async def log(context):
         await context.edit("出错了呜呜呜 ~ 日志记录已禁用。")
 
 
+@listener(outgoing=True, command="re",
+          description="在当前会话复读这条消息。",
+          parameters="<string>")
+async def log(context):
+    """ Forwards a message into log group """
+    if context.reply_to_msg_id:
+        reply_msg = await context.get_reply_message()
+        await reply_msg.forward_to(int(context.chat_id))
+    elif context.arguments:
+        await log(context.arguments)
+    else:
+        await context.edit("出错了呜呜呜 ~ 无效的参数。")
+        return
+    await context.delete()
+
+
 @listener(outgoing=True, command="leave",
           description="说 再见 然后离开会话。")
 async def leave(context):
