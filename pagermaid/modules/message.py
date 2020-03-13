@@ -45,7 +45,7 @@ async def chatid(context):
     await context.edit("ChatID: `" + str(context.chat_id) + "`")
 
 
-@listener(outgoing=True, command="log",
+@listener(outgoing=True, command="-uslog",
           description="转发一条消息到日志。",
           parameters="<string>")
 async def log(context):
@@ -60,6 +60,25 @@ async def log(context):
             await context.edit("出错了呜呜呜 ~ 无效的参数。")
             return
         await context.edit("已记录。")
+    else:
+        await context.edit("出错了呜呜呜 ~ 日志记录已禁用。")
+
+
+@listener(outgoing=True, command="log",
+          description="静默转发一条消息到日志。",
+          parameters="<string>")
+async def log(context):
+    """ Forwards a message into log group """
+    if strtobool(config['log']):
+        if context.reply_to_msg_id:
+            reply_msg = await context.get_reply_message()
+            await reply_msg.forward_to(int(config['log_chatid']))
+        elif context.arguments:
+            await log(context.arguments)
+        else:
+            await context.edit("出错了呜呜呜 ~ 无效的参数。")
+            return
+        await context.delete()
     else:
         await context.edit("出错了呜呜呜 ~ 日志记录已禁用。")
 
