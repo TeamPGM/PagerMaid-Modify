@@ -45,10 +45,10 @@ async def chatid(context):
     await context.edit("ChatID: `" + str(context.chat_id) + "`")
 
 
-@listener(outgoing=True, command="-uslog",
+@listener(outgoing=True, command="uslog",
           description="转发一条消息到日志。",
           parameters="<string>")
-async def log(context):
+async def uslog(context):
     """ Forwards a message into log group """
     if strtobool(config['log']):
         if context.reply_to_msg_id:
@@ -84,9 +84,8 @@ async def log(context):
 
 
 @listener(outgoing=True, command="re",
-          description="在当前会话复读这条消息。",
-          parameters="<string>")
-async def log(context):
+          description="在当前会话复读这条消息。")
+async def re(context):
     """ Forwards a message into log group """
     if context.reply_to_msg_id:
         reply_msg = await context.get_reply_message()
