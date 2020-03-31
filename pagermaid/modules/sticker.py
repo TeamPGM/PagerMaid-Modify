@@ -122,7 +122,7 @@ A pack can't have more than 120 stickers at the moment.":
                                   context, file, emoji)
 
         await context.edit(
-            f"这张贴纸已经被添加到 [这个](t.me/addstickers/{pack_name}) 贴纸包。",
+            f"这张图片/贴纸已经被添加到 [这个](t.me/addstickers/{pack_name}) 贴纸包。",
             parse_mode='md')
 
 
