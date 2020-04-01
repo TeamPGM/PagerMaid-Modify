@@ -2,116 +2,119 @@
 
 welcome() {
   echo ""
-  echo "Welcome to PagerMaid docker installer."
-  echo "The installation process will begin"
-  echo "in 5 seconds, if you wish to cancel,"
-  echo "please abort within 5 seconds."
+  echo "欢迎使用PagerMaid-Modify Docker 安装程序。"
+  echo "安装即将开始"
+  echo "在5秒钟内，如果您想取消，"
+  echo "请在5秒钟内终止此脚本。"
   echo ""
   sleep 5
 }
 
 docker_check() {
-  echo "Checking for docker . . ."
+  echo "正在检查 Docker 安装情况 . . ."
   if command -v docker;
   then
-    echo "Docker appears to be present, moving on . . ."
+    echo "Docker 似乎存在, 安装过程继续 . . ."
   else
-    echo "Docker is not installed on this system, please"
-    echo "install docker and add yourself to the docker"
-    echo "group and re-run this script."
+    echo "Docker 未安装在此系统上"
+    echo "请安装 Docker 并将自己添加到 Docker"
+    echo "分组并重新运行此脚本。"
     exit 1
   fi
 }
 
 git_check() {
-  echo "Checking for git . . ."
+  echo "正在检查 Git 安装情况 . . ."
   if command -v git;
   then
-    echo "Git appears to be present, moving on . . ."
+    echo "Git 似乎存在, 安装过程继续 . . ."
   else
-    echo "Git is not installed on this system, please"
-    echo "install git and re-run this script."
+    echo "Git 未安装在此系统上"
+    echo "请安装 Git 并重新运行此脚本。"
     exit 1
   fi
 }
 
 access_check() {
-  echo "Testing for docker access . . ."
+  echo "测试 Docker 环境 . . ."
   if [ -w /var/run/docker.sock ]
   then
-    echo "This user can access docker, moving on . . ."
+    echo "该用户可以使用 Docker , 安装过程继续 . . ."
   else
-    echo "This user has no access to docker, or docker is"
-    echo "not running. Please add yourself to the docker"
-    echo "group or run the script as superuser."
+    echo "该用户无权访问 Docker，或者 Docker"
+    echo "没有运行。 请添加自己到 Docker"
+    echo "分组并重新运行此脚本。"
     exit 1
   fi
 }
 
 download_repo() {
-  echo "Downloading repository . . ."
+  echo "下载 repository 中. . ."
   rm -rf /tmp/pagermaid
-  git clone https://git.stykers.moe/scm/~stykers/pagermaid.git /tmp/pagermaid
+  git clone https://github.com/xtaodada/PagerMaid-Modify.git /tmp/pagermaid
   cd /tmp/pagermaid || exit
 }
 
 configure() {
   config_file=config.yml
-  echo "Generating config file . . ."
+  echo "生成配置文件中 . . ."
   cp config.gen.yml config.yml
-  printf "Please enter application API Key: "
+  printf "请输入应用程序 api_key："
   read -r api_key <&1
   sed -i "s/KEY_HERE/$api_key/" $config_file
-  printf "Please enter application API Hash: "
+  printf "请输入应用程序 api_hash："
   read -r api_hash <&1
   sed -i "s/HASH_HERE/$api_hash/" $config_file
-  printf "Please enter application language (Example: en): "
+  printf "请输入应用程序语言（示例：zh-cn）："
   read -r application_language <&1
-  sed -i "s/en/$application_language/" $config_file
-  printf "Please enter application region (Example: United States): "
+  sed -i "s/zh-cn/$application_language/" $config_file
+  printf "请输入应用程序地区（例如：China）："
   read -r application_region <&1
-  sed -i "s/United States/$application_region/" $config_file
-  printf "Enable logging? [Y/n] "
+  sed -i "s/China/$application_region/" $config_file
+   printf "请输入 Google TTS 后缀（例如：cn）："
+  read -r application_tts <&1
+  sed -i "s/cn/$application_tts/" $config_file
+  printf "启用日志记录？ [Y/n]"
   read -r logging_confirmation <&1
   case $logging_confirmation in
       [yY][eE][sS]|[yY])
-		    printf "Please enter your logging group/channel ChatID (press Enter if you want to log into Kat): "
+		    printf "请输入您的日志记录群组/频道的 ChatID （如果要发送给 Kat ，请按Enter）："
 		    read -r log_chatid <&1
 		    if [ -z "$log_chatid" ]
 		    then
-		      echo "Setting log target to Kat."
+		      echo "LOG 将发送到 Kat."
 		    else
 		      sed -i "s/503691334/$log_chatid/" $config_file
 		    fi
 		    sed -i "s/log: False/log: True/" $config_file
 		    ;;
       [nN][oO]|[nN])
-		    echo "Moving on . . ."
+		    echo "安装过程继续 . . ."
         ;;
       *)
-	  echo "Invalid choice . . ."
+	  echo "输入错误 . . ."
 	  exit 1
 	  ;;
   esac
 }
 
 build_docker() {
-  printf "Please enter the name of the PagerMaid container: "
+  printf "请输入 PagerMaid 容器的名称："
   read -r container_name <&1
-  echo "Building docker image . . ."
+  echo "正在构建 Docker 镜像 . . ."
   docker rm -f "$container_name" > /dev/null 2>&1
   docker build - --force-rm --no-cache -t pagermaid_"$container_name < Dockerfile.persistant"
 }
 
 start_docker() {
-  echo "Starting docker container . . ."
-  echo "After logging in, press Ctrl + C to make the container restart in background mode."
+  echo "正在启动 Docker 容器 . . ."
+  echo "在登录后，请按 Ctrl + C 使容器在后台模式下重新启动。"
   sleep 3
   docker run -it --restart=always --name="$container_name" --hostname="$container_name" pagermaid_"$container_name" <&1
 }
 
 cleanup() {
-  echo "Cleaning up . . ."
+  echo "正在清理临时文件 . . ."
   rm -rf /tmp/pagermaid
 }
 

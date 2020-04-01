@@ -35,7 +35,7 @@ RUN useradd pagermaid -u 3333 -r -m -d /pagermaid
 RUN usermod -aG wheel,users pagermaid
 USER pagermaid
 RUN mkdir /pagermaid/workdir
-RUN git clone -b master https://git.stykers.moe/scm/~stykers/pagermaid.git /pagermaid/workdir
+RUN git clone -b master https://github.com/xtaodada/PagerMaid-Modify.git /pagermaid/workdir
 WORKDIR /pagermaid/workdir
 RUN python3 -m virtualenv /pagermaid/venv
 RUN source /pagermaid/venv/bin/activate; pip3 install -r requirements.txt

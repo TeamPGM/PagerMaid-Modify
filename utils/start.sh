@@ -2,6 +2,6 @@
 while true; do
     clear;
     python3 -m pagermaid;
-    echo 'Restarting...';
+    echo '正在重新启动...';
     sleep 1;
 done
