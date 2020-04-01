@@ -206,28 +206,42 @@ async def profile(context):
               f"受限制: {target_user.user.restricted} \n" \
               f"类型: {user_type} \n" \
               f"[{first_name}](tg://user?id={target_user.user.id})"
-    try:
-        reply_to = context.message.reply_to_msg_id
-    except:
-        reply_to is None
     photo = await context.client.download_profile_photo(
               target_user.user.id,
               "./" + str(target_user.user.id) + ".jpg",
               download_big=True
                )
     try:
-        await context.client.send_file(
-            context.chat_id,
-            photo,
-            caption=caption,
-            link_preview=False,
-            force_document=False,
-            reply_to=reply_to
-        )
-        if not photo.startswith("http"):
+        reply_to = context.message.reply_to_msg_id
+        try:
+            await context.client.send_file(
+                context.chat_id,
+                photo,
+                caption=caption,
+                link_preview=False,
+                force_document=False,
+                reply_to=reply_to
+            )
+            if not photo.startswith("http"):
+                remove(photo)
+            await context.delete()
             remove(photo)
-        await context.delete()
-        remove(photo)
-        return
-    except TypeError:
-        await context.edit(caption)
+            return
+        except TypeError:
+            await context.edit(caption)
+    except:
+        try:
+            await context.client.send_file(
+                context.chat_id,
+                photo,
+                caption=caption,
+                link_preview=False,
+                force_document=False
+            )
+            if not photo.startswith("http"):
+                remove(photo)
+            await context.delete()
+            remove(photo)
+            return
+        except TypeError:
+            await context.edit(caption)
