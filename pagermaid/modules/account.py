@@ -206,15 +206,15 @@ async def profile(context):
               f"受限制: {target_user.user.restricted} \n" \
               f"类型: {user_type} \n" \
               f"[{first_name}](tg://user?id={target_user.user.id})"
-    reply_to = context.message.reply_to_msg_id
+    try:
+        reply_to = context.message.reply_to_msg_id
+    except:
+        reply_to = None
     photo = await context.client.download_profile_photo(
               target_user.user.id,
               "./" + str(target_user.user.id) + ".jpg",
               download_big=True
                )
-
-    if not reply_to:
-        reply_to = None
     try:
         await context.client.send_file(
             context.chat_id,
