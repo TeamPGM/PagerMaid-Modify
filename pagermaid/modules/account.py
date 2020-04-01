@@ -209,7 +209,7 @@ async def profile(context):
     try:
         reply_to = context.message.reply_to_msg_id
     except:
-        reply_to = None
+        reply_to is None
     photo = await context.client.download_profile_photo(
               target_user.user.id,
               "./" + str(target_user.user.id) + ".jpg",
