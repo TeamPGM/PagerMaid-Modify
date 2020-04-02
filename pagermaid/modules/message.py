@@ -3,7 +3,8 @@
 import requests
 import json
 from telethon.tl.functions.messages import DeleteChatUserRequest
-from telethon.tl.functions.channels import LeaveChannelRequest
+from telethon.tl.functions.channels import LeaveChannelRequest,GetParticipantsRequest
+from telethon.tl.types import ChannelParticipantsAdmins
 from telethon.errors.rpcerrorlist import ChatIdInvalidError
 from distutils2.util import strtobool
 from pagermaid import bot, log, config
@@ -172,6 +173,23 @@ async def hitokoto(context):
     elif hitokoto_json['type'] == 'l':
         hitokoto_type = '抖机灵'
     await context.edit(f"{hitokoto_json['hitokoto']} - {hitokoto_json['from']} ({str(hitokoto_type)})")
+
+
+@listener(outgoing=True, command="admin",
+          description="@ 本群的管理员 (谨慎使用)")
+async def get_admin(context):
+    """ It can let you at all admins. """
+    if context.is_group:
+        await context.edit("正在获取管理员列表。")
+        get_admin_lists = []
+        try:
+            for user in bot(GetParticipantsRequest(channel=context.chat_id, filter=ChannelParticipantsAdmins)):
+                get_admin_lists.extend(['[' + str(user.first_name) + '](tg://user?id=' + str(user.id) + ')'])
+            await context.edit(' ，'.join(get_admin_lists))
+        except:
+            await context.edit("出错了呜呜呜 ~")
+    else:
+        await context.edit("出错了呜呜呜 ~ 当前聊天不是群聊。")
 
 
 @listener(outgoing=True, command="source",
