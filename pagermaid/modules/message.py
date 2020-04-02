@@ -175,28 +175,6 @@ async def hitokoto(context):
     await context.edit(f"{hitokoto_json['hitokoto']} - {hitokoto_json['from']} ({str(hitokoto_type)})")
 
 
-@listener(outgoing=True, command="admin",
-          description="@ 本群的管理员 (谨慎使用)")
-async def get_admin(context):
-    """ It can let you at all admins. """
-    if context.is_group:
-        await context.edit("正在获取管理员列表。")
-        get_admin_lists = []
-        try:
-            async for user in bot(GetParticipantsRequest(channel=context.chat_id,
-                                                         filter=ChannelParticipantsAdmins,
-                                                         offset=42,
-                                                         limit=100,
-                                                         hash=0
-                                                         )):
-                get_admin_lists.extend(['[' + str(user.first_name) + '](tg://user?id=' + str(user.id) + ')'])
-            await context.edit(' ，'.join(get_admin_lists))
-        except:
-            await context.edit("出错了呜呜呜 ~")
-    else:
-        await context.edit("出错了呜呜呜 ~ 当前聊天不是群聊。")
-
-
 @listener(outgoing=True, command="source",
           description="显示原始 PagerMaid git 存储库的URL。")
 async def source(context):
