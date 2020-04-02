@@ -3,7 +3,7 @@
 import requests
 import json
 from telethon.tl.functions.messages import DeleteChatUserRequest
-from telethon.tl.functions.channels import LeaveChannelRequest,GetParticipantsRequest
+from telethon.tl.functions.channels import LeaveChannelRequest, GetParticipantsRequest
 from telethon.tl.types import ChannelParticipantsAdmins
 from telethon.errors.rpcerrorlist import ChatIdInvalidError
 from distutils2.util import strtobool
@@ -183,7 +183,12 @@ async def get_admin(context):
         await context.edit("正在获取管理员列表。")
         get_admin_lists = []
         try:
-            for user in bot(GetParticipantsRequest(channel=context.chat_id, filter=ChannelParticipantsAdmins)):
+            async for user in bot(GetParticipantsRequest(channel=context.chat_id,
+                                                         filter=ChannelParticipantsAdmins,
+                                                         offset=42,
+                                                         limit=100,
+                                                         hash=0
+                                                         )):
                 get_admin_lists.extend(['[' + str(user.first_name) + '](tg://user?id=' + str(user.id) + ')'])
             await context.edit(' ，'.join(get_admin_lists))
         except:
@@ -204,6 +209,7 @@ async def source(context):
 async def site(context):
     """ Outputs the site URL. """
     await context.edit("https://katonkeyboard.moe/pagermaid.html")
+
 
 @listener(outgoing=True, command="sources",
           description="显示 PagerMaid-Modify 存储库的URL。")
