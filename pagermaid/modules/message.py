@@ -111,7 +111,7 @@ async def leave(context):
                                             user_id=context.sender_id
                                             ))
         except ChatIdInvalidError:
-            await bot(LeaveChannelRequest(chatid))
+            await bot(LeaveChannelRequest(context.chat_id))
     else:
         await context.edit("出错了呜呜呜 ~ 当前聊天不是群聊。")
 
