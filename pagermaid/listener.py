@@ -85,7 +85,7 @@ def listener(**args):
         if parameters is None:
             parameters = ""
         help_messages.update({
-            f"{command}": f"**使用:** `-{command} {parameters}`\
+            f"{command}": f"**使用方法:** `-{command} {parameters}`\
             \n{description}"
         })
 
