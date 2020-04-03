@@ -7,7 +7,7 @@ from pagermaid.listener import listener
 
 
 @listener(outgoing=True, command="prune",
-          description="从您回复的消息开始删除所有内容。")
+          description="从您回复的消息开始删除当前对话的所有消息。（非群组管理员只删除自己的消息）")
 async def prune(context):
     """ Purge every single message after the message you replied to. """
     if not context.reply_to_msg_id:
@@ -33,7 +33,7 @@ async def prune(context):
 
 
 @listener(outgoing=True, command="selfprune",
-          description="删除您发送的特定数量的消息。",
+          description="删除当前对话您发送的特定数量的消息。（倒序）",
           parameters="<integer>")
 async def selfprune(context):
     """ Deletes specific amount of messages you sent. """
@@ -58,7 +58,7 @@ async def selfprune(context):
 
 
 @listener(outgoing=True, command="delete",
-          description="删除您回复的消息。")
+          description="删除当前对话您回复的那条消息。（需要回复一条消息）")
 async def delete(context):
     """ Deletes the message you replied to. """
     target = await context.get_reply_message()
