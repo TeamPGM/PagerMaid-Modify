@@ -2,7 +2,7 @@
 
 welcome() {
   echo ""
-  echo "欢迎使用PagerMaid-Modify Docker 安装程序。"
+  echo "欢迎使用 PagerMaid-Modify Docker 安装程序。"
   echo "安装即将开始"
   echo "在5秒钟内，如果您想取消，"
   echo "请在5秒钟内终止此脚本。"
@@ -103,7 +103,7 @@ build_docker() {
   read -r container_name <&1
   echo "正在构建 Docker 镜像 . . ."
   docker rm -f "$container_name" > /dev/null 2>&1
-  docker build - --force-rm --no-cache -t pagermaid_"$container_name < Dockerfile.persistant"
+  docker build - --force-rm --no-cache -t pagermaid_"$container_name" < Dockerfile.persistant
 }
 
 start_docker() {

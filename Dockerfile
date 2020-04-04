@@ -39,4 +39,5 @@ RUN git clone -b master https://github.com/xtaodada/PagerMaid-Modify.git /pagerm
 WORKDIR /pagermaid/workdir
 RUN python3 -m virtualenv /pagermaid/venv
 RUN source /pagermaid/venv/bin/activate; pip3 install -r requirements.txt
+CMD ["sh","utils/docker-run.sh"]
 CMD ["sh","utils/entrypoint.sh"]

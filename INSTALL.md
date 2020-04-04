@@ -16,13 +16,13 @@
 
 
 ```
-curl -fsSL https://git.stykers.moe/users/stykers/repos/pagermaid/raw/utils/docker.sh | sh
+curl -fsSL https://raw.githubusercontent.com/xtaodada/PagerMaid-Modify/master/utils/docker.sh | sh
 ```
 
 如果您想在运行之前检查脚本内容：
 
 ```
-curl https://git.stykers.moe/users/stykers/repos/pagermaid/raw/utils/docker.sh -o docker.sh
+curl https://raw.githubusercontent.com/xtaodada/PagerMaid-Modify/master/utils/docker.sh -o docker.sh
 vim docker.sh
 chmod 0755 docker.sh
 ./docker.sh
