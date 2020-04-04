@@ -7,7 +7,7 @@ from pagermaid.listener import listener
 
 
 @listener(outgoing=True, command="prune",
-          description="从您回复的消息开始删除当前对话的所有消息。（非群组管理员只删除自己的消息）")
+          description="以此命令回复某条消息，将删除最新一条消息至该条消息之间的所有消息。限制：基于消息 ID 的 1000 条消息，大于 1000 条将不作出应答。（非群组管理员只删除自己的消息）")
 async def prune(context):
     """ Purge every single message after the message you replied to. """
     if not context.reply_to_msg_id:
