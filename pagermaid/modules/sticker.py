@@ -11,8 +11,8 @@ from pagermaid.listener import listener
 
 
 @listener(outgoing=True, command="sticker",
-          description="收集图像/贴纸作为贴纸，指定表情符号以设置自定义表情符号。",
-          parameters="<表情>")
+          description="收集回复的图像/贴纸作为贴纸，通过参数指定 emoji 以设置非默认的 emoji。",
+          parameters="<emoji>")
 async def sticker(context):
     """ Fetches images/stickers and add them to your pack. """
     user = await bot.get_me()
@@ -22,7 +22,7 @@ async def sticker(context):
     custom_emoji = False
     animated = False
     emoji = ""
-    await context.edit("收集贴纸中 . . .")
+    await context.edit("收集图像/贴纸中 . . .")
     if message and message.media:
         if isinstance(message.media, MessageMediaPhoto):
             photo = BytesIO()

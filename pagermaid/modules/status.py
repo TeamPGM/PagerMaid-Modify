@@ -65,11 +65,11 @@ async def tty(context):
 
 
 @listener(outgoing=True, command="status",
-          description="输出 PagerMaid-Modify 的状态。")
+          description="输出 PagerMaid-Modify 的运行状态。")
 async def status(context):
     database = "Connected" if redis_status() else "Disconnected"
     await context.edit(
-        f"**PagerMaid-Modify 状态** \n"
+        f"**PagerMaid-Modify 运行状态** \n"
         f"主机名: `{uname().node}` \n"
         f"主机平台: `{platform}` \n"
         f"Kernel 版本: `{uname().release}` \n"
@@ -100,7 +100,7 @@ async def speedtest(context):
 
 
 @listener(outgoing=True, command="connection",
-          description="显示 PagerMaid-Modify 和 Telegram 之间的连接信息。")
+          description="显示运行 PagerMaid-Modify 的服务器和 Telegram 服务器之间的连接信息。")
 async def connection(context):
     """ Displays connection information between PagerMaid and Telegram. """
     datacenter = await context.client(functions.help.GetNearestDcRequest())
@@ -113,7 +113,7 @@ async def connection(context):
 
 
 @listener(outgoing=True, command="ping",
-          description="计算 PagerMaid-Modify 和 Telegram 之间的延迟。")
+          description="计算运行 PagerMaid-Modify 的服务器和 Telegram 服务器之间的延迟。")
 async def ping(context):
     """ Calculates latency between PagerMaid and Telegram. """
     start = datetime.now()
@@ -124,7 +124,7 @@ async def ping(context):
 
 
 @listener(outgoing=True, command="topcloud",
-          description="生成资源占用的词云。")
+          description="生成一张资源占用的词云图片。")
 async def topcloud(context):
     """ Generates a word cloud of resource-hungry processes. """
     await context.edit("生成图片中 . . .")
@@ -182,7 +182,7 @@ async def topcloud(context):
     ).generate_from_frequencies(resource_dict)
 
     cloud.to_file("cloud.png")
-    await context.edit("上传图片中 . . .")
+    await context.edit("正在上传图片中 . . .")
     await context.client.send_file(
         context.chat_id,
         "cloud.png",
@@ -191,7 +191,7 @@ async def topcloud(context):
     )
     remove("cloud.png")
     await context.delete()
-    await log("生成了一张资源占用的词云。")
+    await log("生成了一张资源占用的词云图片。")
 
 
 def unit_convert(byte):
