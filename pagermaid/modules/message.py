@@ -187,10 +187,3 @@ async def source(context):
 async def site(context):
     """ Outputs the site URL. """
     await context.edit("https://katonkeyboard.moe/pagermaid.html")
-
-
-@listener(outgoing=True, command="sources",
-          description="显示 PagerMaid-Modify 存储库的URL。")
-async def sources(context):
-    """ Outputs the repository URL. """
-    await context.edit("https://github.com/xtaodada/PagerMaid-Modify/")

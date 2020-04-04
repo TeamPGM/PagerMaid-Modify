@@ -19,4 +19,4 @@ async def help(context):
         for command in sorted(help_messages, reverse=False):
             result += "`" + str(command)
             result += "`, "
-        await context.edit(result[:-2] + "\n**发送 \"-help <命令>\" 以查看特定命令的帮助。**")
+        await context.edit(result[:-2] + "\n**发送 \"-help <命令>\" 以查看特定命令的帮助。** [源代码](https://github.com/xtaodada/PagerMaid-Modify/)")
