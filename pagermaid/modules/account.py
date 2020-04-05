@@ -225,7 +225,10 @@ async def profile(context):
             if not photo.startswith("http"):
                 remove(photo)
             await context.delete()
-            remove(photo)
+            try:
+                remove(photo)
+            except:
+                pass
             return
         except TypeError:
             await context.edit(caption)
