@@ -87,18 +87,28 @@ async def log(context):
 
 
 @listener(outgoing=True, command="re",
-          description="在当前会话复读回复的消息。")
+          description="在当前会话复读回复的消息。（需要回复一条消息）",
+          parameters="次数")
 async def re(context):
-    """ Forwards a message into log group """
-    if context.reply_to_msg_id:
-        reply_msg = await context.get_reply_message()
-        await reply_msg.forward_to(int(context.chat_id))
-    elif context.arguments:
-        await log(context.arguments)
+    """ Forwards a message into this group """
+    reply = await context.get_reply_message()
+    if reply:
+        if context.arguments == '':
+            num = 1
+        else:
+            try:
+                num = int(context.arguments)
+                if num > 100:
+                    await context.edit('呜呜呜出错了...这个数字太大惹')
+                    return True
+            except:
+                await context.edit('呜呜呜出错了...可能参数不是数字')
+                return True
+        for nums in range(0, num):
+            await reply.forward_to(int(context.chat_id))
+        await context.delete()
     else:
-        await context.edit("出错了呜呜呜 ~ 无效的参数。")
-        return
-    await context.delete()
+        await context.edit("出错了呜呜呜 ~ 您好像没有回复一条消息。")
 
 
 @listener(outgoing=True, command="leave",
