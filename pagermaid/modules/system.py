@@ -4,6 +4,7 @@ from platform import node
 from getpass import getuser
 from os import geteuid
 from requests import head
+from asyncio import sleep
 from requests.exceptions import MissingSchema, InvalidURL, ConnectionError
 from pagermaid import log, bot
 from pagermaid.listener import listener
@@ -145,7 +146,9 @@ async def contact_chat(context):
         'PagerMaid_Modify',
         message
     )
-    await context.edit('您已成功加入 [Pagermaid-Modify](https://github.com/xtaodada/PagerMaid-Modify/) 用户群。')
+    notification = await context.edit('您已成功加入 [Pagermaid-Modify](https://github.com/xtaodada/PagerMaid-Modify/) 用户群。')
+    await sleep(.10)
+    await notification.delete()
 
 
 def url_tracer(url):
