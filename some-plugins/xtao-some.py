@@ -4,7 +4,7 @@ from googletrans import Translator
 from urllib.parse import urlparse
 from pagermaid import bot, log
 from pagermaid.listener import listener, config
-from pagermaid.utils import clear_emojis, obtain_message
+from pagermaid.utils import clear_emojis, obtain_message, attach_log
 from telethon.tl.types import ChannelParticipantsAdmins
 from os import remove
 
@@ -345,3 +345,40 @@ async def pixiv(context):
         await context.edit('没有找到要查询的 pixiv 作品 ...')
     except:
         await context.edit('没有找到要查询的 pixiv 作品 ...')
+
+
+@listener(outgoing=True, command="t",
+          description="通过腾讯AI开放平台将目标消息翻译成指定的语言。",
+          parameters="<文本>")
+async def tx_t(context):
+    """ PagerMaid universal translator. """
+    reply = await context.get_reply_message()
+    message = context.arguments
+    lang = 'zh'
+    if message:
+        pass
+    elif reply:
+        message = reply.text
+    else:
+        await context.edit("出错了呜呜呜 ~ 无效的参数。")
+        return
+
+    try:
+        await context.edit("正在生成翻译中 . . .")
+        tx_json = json.loads(requests.get(
+        "https://xtaolink.cn/git/m/t.php?lang=" + lang + '&text=' + clear_emojis(message)).content.decode(
+        "utf-8"))
+        if not tx_json['msg'] == 'ok':
+            context.edit("出错了呜呜呜 ~ 翻译出错")
+            return True
+        else:
+            result = '文本翻译：\n' + tx_json['data']['target_text']
+    except ValueError:
+        await context.edit("出错了呜呜呜 ~ 找不到目标语言，请更正配置文件中的错误。")
+        return
+
+    if len(result) > 4096:
+        await context.edit("输出超出 TG 限制，正在尝试上传文件。")
+        await attach_log(result, context.chat_id, "translation.txt", context.id)
+        return
+    await context.edit(result)
