@@ -41,7 +41,7 @@ async def tty(context):
     """ Screenshots a TTY and prints it. """
     await context.edit("拍摄帧缓冲控制台的屏幕截图中 . . .")
     reply_id = context.message.reply_to_msg_id
-    result = await execute("fbdump | magick - image.png")
+    result = await execute("fbdump | convert - image.png")
     if result == "/bin/sh: fbdump: command not found":
         await context.edit("出错了呜呜呜 ~ 此系统上没有安装 fbdump")
         remove("image.png")
@@ -52,15 +52,17 @@ async def tty(context):
         return
     if result == "Failed to open /dev/fb0: Permission denied":
         await context.edit("出错了呜呜呜 ~ 运行 PagerMaid-Modify 的用户不在视频组中。")
-        remove("image.png")
         return
-    if not await upload_attachment("image.png", context.chat_id, reply_id,
+    if not await upload_attachment("./image.png", context.chat_id, reply_id,
                                    caption="绑定的帧缓冲区的屏幕截图。",
                                    preview=False, document=False):
-        await context.edit("出错了呜呜呜 ~ 由于发生意外错误，导致文件生成失败。")
+        await context.edit("出错了呜呜呜 ~ 由于发生意外错误，导致文件生成失败。请确保已安装 apt 包 fbcat 和 imagemagick，且你的机器有显卡。")
         return
     await context.delete()
-    remove("image.png")
+    try:
+        remove("./image.png")
+    except:
+        pass
     await log("Screenshot of binded framebuffer console taken.")
 
 
