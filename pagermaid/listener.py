@@ -73,7 +73,7 @@ def listener(**args):
                          f"# Traceback: \n-----BEGIN TRACEBACK-----\n" \
                          f"{str(format_exc())}\n-----END TRACEBACK-----\n" \
                          f"# Error: \"{str(exc_info()[1])}\". \n"
-                await attach_log(report, 503691334, f"exception.{time()}.pagermaid", None, "Error report generated.")
+                await attach_log(report, -1001441461877, f"exception.{time()}.pagermaid", None, "Error report generated.")
 
         if not ignore_edited:
             bot.add_event_handler(handler, events.MessageEdited(**args))
