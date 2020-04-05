@@ -224,12 +224,24 @@ async def ipping(context):
 
 
 @listener(outgoing=True, command="pixiv",
-          description="查询插画信息（现仅支持第一张图）")
+          description="查询插画信息 （或者回复一条消息）",
+          parameters="<页数>")
 async def pixiv(context):
     reply = await context.get_reply_message()
     await context.edit('正在查询中...')
     try:
         if reply:
+            try:
+                if context.arguments.strip() == '':
+                    pixiv_page = 1
+                else:
+                    try:
+                        pixiv_page = int(context.arguments.strip())
+                    except:
+                        await context.edit('呜呜呜出错了...可能参数不是数字')
+                        return True
+            except:
+                pass
             for num in range(0, len(reply.entities)):
                 url = reply.message[reply.entities[num].offset:reply.entities[num].offset + reply.entities[num].length]
                 url = urlparse(url)
@@ -240,20 +252,21 @@ async def pixiv(context):
                         "utf-8"))
                 except:
                     await context.edit('呜呜呜出错了...可能是链接不上 API 服务器')
+                    return True
                 try:
                     pixiv_tag = pixiv_json['error']['user_message']
                     await context.edit('没有找到要查询的 pixiv 作品...')
                     return True
                 except:
-                    pixiv_tag = []
-                    if str(len(pixiv_json['illust']['meta_pages'])) == '0':
-                        pixiv_num = str(
-                            len(pixiv_json['illust']['meta_pages']) + 1)
+                    if pixiv_page > pixiv_json['illust']['page_count']:
+                        await context.edit('呜呜呜出错了...可能是参数指定的页数大于插画页数')
+                        return True
                     else:
-                        pixiv_num = str(
-                            len(pixiv_json['illust']['meta_pages']))
+                        pass
+                    pixiv_tag = []
+                    pixiv_num = str(pixiv_json['illust']['page_count'])
                     pixiv_list = '[' + pixiv_json['illust']['title'] + '](https://www.pixiv.net/artworks/' + str(
-                        pixiv_json['illust']['id']) + ')' + ' (1/' + pixiv_num + ')'
+                        pixiv_json['illust']['id']) + ')' + ' (' + str(pixiv_page) + '/' + pixiv_num + ')'
                     for nums in range(0, len(pixiv_json['illust']['tags'])):
                         pixiv_tag.extend(['#' + pixiv_json['illust']['tags'][nums]['name']])
                     try:
@@ -263,7 +276,7 @@ async def pixiv(context):
                                                     pixiv_json['illust']['meta_single_page']['original_image_url'])
                         except:
                             r = requests.get('https://daidr.me/imageProxy/?url=' +
-                                             pixiv_json['illust']['meta_pages'][0]['image_urls']['original'])
+                                             pixiv_json['illust']['meta_pages'][pixiv_page - 1]['image_urls']['original'])
                         with open("pixiv.jpg", "wb") as code:
                             code.write(r.content)
                         await context.edit('正在上传图片中 ...')
@@ -276,7 +289,18 @@ async def pixiv(context):
                         pass
                     return True
         else:
-            url = urlparse(context.arguments)
+            try:
+                url = urlparse(context.arguments.split()[0])
+                if len(context.arguments.split()) == 1:
+                    pixiv_page = 1
+                else:
+                    try:
+                        pixiv_page = int(context.arguments.split()[1])
+                    except:
+                        await context.edit('呜呜呜出错了...可能参数不是数字')
+                        return True
+            except:
+                pass
             try:
                 url = str(re.findall(r"\d+\.?\d*", url.path)[0])
                 pixiv_json = json.loads(requests.get(
@@ -289,15 +313,15 @@ async def pixiv(context):
                 await context.edit('没有找到要查询的 pixiv 作品...')
                 return True
             except:
-                pixiv_tag = []
-                if str(len(pixiv_json['illust']['meta_pages'])) == '0':
-                    pixiv_num = str(
-                        len(pixiv_json['illust']['meta_pages']) + 1)
+                if pixiv_page > pixiv_json['illust']['page_count']:
+                    await context.edit('呜呜呜出错了...可能是参数指定的页数大于插画页数')
+                    return True
                 else:
-                    pixiv_num = str(
-                        len(pixiv_json['illust']['meta_pages']))
+                    pass
+                pixiv_tag = []
+                pixiv_num = str(pixiv_json['illust']['page_count'])
                 pixiv_list = '[' + pixiv_json['illust']['title'] + '](https://www.pixiv.net/artworks/' + str(
-                    pixiv_json['illust']['id']) + ')' + ' (1/' + pixiv_num + ')'
+                    pixiv_json['illust']['id']) + ')' + ' (' + str(pixiv_page) + '/' + pixiv_num + ')'
                 for nums in range(0, len(pixiv_json['illust']['tags'])):
                     pixiv_tag.extend(['#' + pixiv_json['illust']['tags'][nums]['name']])
                 try:
@@ -307,7 +331,7 @@ async def pixiv(context):
                                          pixiv_json['illust']['meta_single_page']['original_image_url'])
                     except:
                         r = requests.get('https://daidr.me/imageProxy/?url=' +
-                                         pixiv_json['illust']['meta_pages'][0]['image_urls']['original'])
+                                         pixiv_json['illust']['meta_pages'][pixiv_page - 1]['image_urls']['original'])
                     with open("pixiv.jpg", "wb") as code:
                         code.write(r.content)
                     await context.edit('正在上传图片中 ...')
