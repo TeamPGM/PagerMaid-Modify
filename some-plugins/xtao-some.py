@@ -225,7 +225,7 @@ async def ipping(context):
 
 @listener(outgoing=True, command="pixiv",
           description="查询插画信息 （或者回复一条消息）",
-          parameters="<页数>")
+          parameters="[<图片链接>] <图片序号>")
 async def pixiv(context):
     reply = await context.get_reply_message()
     await context.edit('正在查询中...')

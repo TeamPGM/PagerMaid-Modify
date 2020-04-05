@@ -7,8 +7,8 @@
 #                \//_____/      \/              \/     \/        \/
 # ===================================================================
 
-# API Credentials of your telegram application created at https://my.telegram.org/apps
-api_key: "KEY_HERE"
+# API Credentials of your telegram application created at https://my.telegram.org/apps | api_key is api_id
+api_key: "ID_HERE"
 api_hash: "HASH_HERE"
 
 # Either debug logging is enabled or not

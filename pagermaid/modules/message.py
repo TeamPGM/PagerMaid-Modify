@@ -38,7 +38,7 @@ async def userid(context):
             f"**用户ID:** `{user_id}`"
         )
     else:
-        await context.edit("出错了呜呜呜 ~ 无法获取目标消息的信息。")
+        await context.edit("出错了呜呜呜 ~ 无法获取所回复消息的信息。")
 
 
 @listener(outgoing=True, command="chatid",
@@ -88,7 +88,7 @@ async def log(context):
 
 @listener(outgoing=True, command="re",
           description="在当前会话复读回复的消息。（需要回复一条消息）",
-          parameters="次数")
+          parameters="<次数>")
 async def re(context):
     """ Forwards a message into this group """
     reply = await context.get_reply_message()
@@ -124,7 +124,7 @@ async def leave(context):
         except ChatIdInvalidError:
             await bot(LeaveChannelRequest(context.chat_id))
     else:
-        await context.edit("出错了呜呜呜 ~ 当前聊天不是群聊。")
+        await context.edit("出错了呜呜呜 ~ 当前聊天似乎不是群聊。")
 
 
 @listener(outgoing=True, command="meter2feet",
@@ -182,7 +182,7 @@ async def hitokoto(context):
         hitokoto_type = '哲学'
     elif hitokoto_json['type'] == 'l':
         hitokoto_type = '抖机灵'
-    await context.edit(f"{hitokoto_json['hitokoto']} - {hitokoto_json['from']} ({str(hitokoto_type)})")
+    await context.edit(f"{hitokoto_json['hitokoto']} - {hitokoto_json['from']}（{str(hitokoto_type)}）")
 
 
 @listener(outgoing=True, command="source",
