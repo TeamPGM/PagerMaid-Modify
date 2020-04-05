@@ -5,9 +5,10 @@ from getpass import getuser
 from os import geteuid
 from requests import head
 from requests.exceptions import MissingSchema, InvalidURL, ConnectionError
-from pagermaid import log
+from pagermaid import log, bot
 from pagermaid.listener import listener
 from pagermaid.utils import attach_log, execute
+from telethon.tl.functions.messages import ImportChatInviteRequest
 
 
 @listener(outgoing=True, command="sh",
@@ -119,7 +120,7 @@ async def trace(context):
           parameters="<message>")
 async def contact(context):
     """ Sends a message to Kat. """
-    await context.edit("`对话已打开，请单击 `[here](tg://user?id=503691334)` 进入.`",
+    await context.edit("请点击 `[这里](https://t.me/PagerMaid_Modify)` 进入.",
                        parse_mode="markdown")
     message = "Hi, I would like to report something about PagerMaid."
     if context.arguments:
@@ -128,6 +129,23 @@ async def contact(context):
         503691334,
         message
     )
+
+
+@listener(outgoing=True, command="chat",
+          description="加入 Pagermaid-Modify 用户群。")
+async def contact_chat(context):
+    """ join a chatroom. """
+    message = "大家好，我是新人。"
+    try:
+        await bot(ImportChatInviteRequest('KFUDIlXq9nWYVwPW4QugXw'))
+    except:
+        await context.edit('出错了呜呜呜 ~ 请尝试手动加入 @PagerMaid_Modify')
+        return True
+    await context.client.send_message(
+        'PagerMaid_Modify',
+        message
+    )
+    await context.edit('您已成功加入 [Pagermaid-Modify](https://github.com/xtaodada/PagerMaid-Modify/) 用户群。')
 
 
 def url_tracer(url):
