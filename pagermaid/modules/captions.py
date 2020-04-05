@@ -94,6 +94,14 @@ async def caption(context):
           description="从回复的图片中提取文本")
 async def ocr(context):
     """ Extracts texts from images. """
+    args = context.parameter
+    try:
+        psm = args[0]
+    except:
+        psm = '3'
+    if not 0 <= int(psm) <= 13:
+        await context.edit(' 呜呜呜出错了...psm 取值为 0-13')
+        return
     reply = await context.get_reply_message()
     await context.edit("`正在处理图片，请稍候 . . .`")
     if reply:
@@ -113,16 +121,10 @@ async def ocr(context):
         except FileNotFoundError:
             pass
         return
-    success = False
-    if result == "/bin/sh: fbdump: command not found":
-        await context.edit("出错了呜呜呜 ~ 您好像少安装了个包？")
-    else:
-        result = await execute(f"tesseract {target_file_path} stdout", False)
-        await context.edit(f"**以下是提取到的文字: **\n{result}")
-        success = True
+    result = await execute(f"tesseract -c preserve_interword_spaces=1 -l chi_sim --psm {psm} \"{target_file_path}\" stdout 2>/dev/null", False)
+    await context.edit(f"**以下是提取到的文字: **\n{result}")
+    success = True
     remove(target_file_path)
-    if not success:
-        return
 
 
 @listener(outgoing=True, command="highlight",
