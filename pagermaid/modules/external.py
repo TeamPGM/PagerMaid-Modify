@@ -17,8 +17,8 @@ from pagermaid.utils import clear_emojis, attach_log, fetch_youtube_audio
 
 
 @listener(outgoing=True, command="translate",
-          description="通过 Google 翻译将目标消息翻译成指定的语言。",
-          parameters="<language>")
+          description="通过 Google 翻译将目标消息翻译成指定的语言。（支持回复）",
+          parameters="<文本>")
 async def translate(context):
     """ PagerMaid universal translator. """
     translator = Translator()
@@ -45,7 +45,7 @@ async def translate(context):
     result = f"**文本翻译** 源语言 {source_lang.title()}:\n{result.text}"
 
     if len(result) > 4096:
-        await context.edit("出错了呜呜呜 ~ 输出超出 TG 限制，正在尝试上传文件。")
+        await context.edit("输出超出 TG 限制，正在尝试上传文件。")
         await attach_log(result, context.chat_id, "translation.txt", context.id)
         return
     await context.edit(result)
