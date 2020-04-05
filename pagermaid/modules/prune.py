@@ -57,7 +57,7 @@ async def selfprune(context):
     await notification.delete()
 
 
-@listener(outgoing=True, command="delete",
+@listener(outgoing=True, command="del",
           description="删除当前对话您回复的那条消息。（需要回复一条消息）")
 async def delete(context):
     """ Deletes the message you replied to. """
