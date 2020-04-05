@@ -34,7 +34,7 @@ async def prune(context):
 
 @listener(outgoing=True, command="selfprune",
           description="删除当前对话您发送的特定数量的消息。（倒序）",
-          parameters="<integer>")
+          parameters="<数量>")
 async def selfprune(context):
     """ Deletes specific amount of messages you sent. """
     if not len(context.parameter) == 1:
@@ -52,6 +52,35 @@ async def selfprune(context):
         await message.delete()
         count_buffer += 1
     await log(f"批量删除了自行发送的 {str(count)} 条消息。")
+    notification = await send_prune_notify(context, count)
+    await sleep(.5)
+    await notification.delete()
+
+
+@listener(outgoing=True, command="yourprune",
+          description="删除当前对话您回复用户所发送的特定数量的消息。（倒序、需要删除消息权限）",
+          parameters="<数量>")
+async def yourprune(context):
+    """ Deletes specific amount of messages someone sent. """
+    if not context.reply_to_msg_id:
+        await context.edit("出错了呜呜呜 ~ 没有回复的消息。")
+        return
+    target = await context.get_reply_message()
+    if not len(context.parameter) == 1:
+        await context.edit("出错了呜呜呜 ~ 无效的参数。")
+        return
+    try:
+        count = int(context.parameter[0])
+    except ValueError:
+        await context.edit("出错了呜呜呜 ~ 无效的参数。")
+        return
+    count_buffer = 0
+    async for message in context.client.iter_messages(context.chat_id, from_user=target.from_id):
+        if count_buffer == count:
+            break
+        await message.delete()
+        count_buffer += 1
+    await log(f"批量删除了回复用户所发送的 {str(count)} 条消息。")
     notification = await send_prune_notify(context, count)
     await sleep(.5)
     await notification.delete()
