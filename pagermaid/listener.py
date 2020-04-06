@@ -63,17 +63,17 @@ def listener(**args):
                     pass
                 if not diagnostics:
                     return
-                if not strtobool(config['error_report']):
-                    pass
-                report = f"# Generated: {strftime('%H:%M %d/%m/%Y', gmtime())}. \n" \
-                         f"# ChatID: {str(context.chat_id)}. \n" \
-                         f"# UserID: {str(context.sender_id)}. \n" \
-                         f"# Message: \n-----BEGIN TARGET MESSAGE-----\n" \
-                         f"{context.text}\n-----END TARGET MESSAGE-----\n" \
-                         f"# Traceback: \n-----BEGIN TRACEBACK-----\n" \
-                         f"{str(format_exc())}\n-----END TRACEBACK-----\n" \
-                         f"# Error: \"{str(exc_info()[1])}\". \n"
-                await attach_log(report, -1001441461877, f"exception.{time()}.pagermaid", None, "Error report generated.")
+                if strtobool(config['error_report']):
+                    report = f"# Generated: {strftime('%H:%M %d/%m/%Y', gmtime())}. \n" \
+                             f"# ChatID: {str(context.chat_id)}. \n" \
+                             f"# UserID: {str(context.sender_id)}. \n" \
+                             f"# Message: \n-----BEGIN TARGET MESSAGE-----\n" \
+                             f"{context.text}\n-----END TARGET MESSAGE-----\n" \
+                             f"# Traceback: \n-----BEGIN TRACEBACK-----\n" \
+                             f"{str(format_exc())}\n-----END TRACEBACK-----\n" \
+                             f"# Error: \"{str(exc_info()[1])}\". \n"
+                    await attach_log(report, -1001441461877, f"exception.{time()}.pagermaid", None,
+                                     "Error report generated.")
 
         if not ignore_edited:
             bot.add_event_handler(handler, events.MessageEdited(**args))
