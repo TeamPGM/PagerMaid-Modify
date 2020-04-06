@@ -14,7 +14,7 @@ from pagermaid.listener import listener
 
 
 @listener(outgoing=True, command="username",
-          description="通过命令快捷设置道纹",
+          description="通过命令快捷设置道纹（不支持回复）",
           parameters="<username>")
 async def username(context):
     """ 重新配置您的用户名。 """
@@ -40,7 +40,7 @@ async def username(context):
 
 
 @listener(outgoing=True, command="name",
-          description="换个显示名称。",
+          description="换个名称。（不支持回复）",
           parameters="<first name> <last name>")
 async def name(context):
     """ Updates your display name. """
