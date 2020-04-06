@@ -46,6 +46,7 @@ settings = {'TIMEZONE': f'{sign}{offset_str}00'}
 
 logsync(f"sendat: local time zone offset is {sign}{abs(offset)}")
 
+mem = []
 
 helpmsg = """
 定时发送消息。
@@ -61,9 +62,13 @@ i.e.
 @listener(outgoing=True, command="sendat", diagnostics=True, ignore_edited=False,
           description=helpmsg,
           parameters="<atmsg>")
+async def sendatwrap(context):
+    await sendat(context)
+
 async def sendat(context):
-    args = " ".join(context.parameter).split("|")
+    mem_id = len(mem)
     chat = await context.get_chat()
+    args = " ".join(context.parameter).split("|")
     if not imported:
         await context.edit("Please install dateparser first: python3 -m pip install dateparser")
         return
@@ -83,24 +88,28 @@ async def sendat(context):
                 # then it should be absolute time
                 sleep_times = [abs(dateparser.parse(time_str, settings=settings).timestamp() - time.time()), 24 * 60 * 60]
                 index = 0
-                await context.edit(f"Registered.")
+                mem.append("|".join(args))
+                await context.edit(f"Registered: id {mem_id}")
                 while True:
                     last_time = time.time()
                     while time.time() < last_time + sleep_times[index]:
                         await asyncio.sleep(2)
                     await sendmsg(context, chat, args[1])
                     index = 1
+                mem[mem_id] = ""
                 return
             sleep_time = abs(dateparser.parse(time_str, settings=settings).timestamp() - time.time())
             if sleep_time < 5:
                 await context.edit(f"Sleep time too short. Should be longer than 5 seconds. Got {sleep_time}") 
                 return
-            await context.edit(f"Registered.")
+            mem.append("|".join(args))
+            await context.edit(f"Registered: id {mem_id}")
             while True:
                 last_time = time.time()
                 while time.time() < last_time + sleep_time:
                     await asyncio.sleep(2)
                 await sendmsg(context, chat, args[1])
+            mem[mem_id] = ""
             return
         elif args[0].find("*") == 0:
             times = int(args[0][1:].split(" ")[0])
@@ -109,26 +118,30 @@ async def sendat(context):
                 # then it should be absolute time
                 sleep_times = [abs(dateparser.parse(rest, settings=settings).timestamp() - time.time()), 24 * 60 * 60]
                 count = 0
-                await context.edit("Registered.")
+                mem.append("|".join(args))
+                await context.edit(f"Registered: id {mem_id}")
                 while count <= times:
                     last_time = time.time()
                     while time.time() < last_time + sleep_times[0 if count == 0 else 1]:
                         await asyncio.sleep(2)
                     await sendmsg(context, chat, args[1])
                     count += 1
+                mem[mem_id] = ""
                 return
             sleep_time = abs(dateparser.parse(rest, settings=settings).timestamp() - time.time())
             if sleep_time < 5:
                 await context.edit("Sleep time too short. Should be longer than 5 seconds.")
                 return
             count = 0
-            await context.edit("Registered.")
+            mem.append("|".join(args))
+            await context.edit(f"Registered: id {mem_id}")
             while count <= times:
                 last_time = time.time()
                 while time.time() < last_time + sleep_time:
                     await asyncio.sleep(2)
                 await sendmsg(context, chat, args[1])
                 count += 1
+            mem[mem_id] = ""
             return
         
         # absolute time
@@ -137,17 +150,42 @@ async def sendat(context):
         if delta < 3:
             await context.edit("Target time before now.")
             return
-        await context.edit("Registered.")
+        mem.append("|".join(args))
+        await context.edit(f"Registered: id {mem_id}")
         while delta > 0:
             delta = dt.timestamp() - time.time()
             await asyncio.sleep(2)
         await sendmsg(context, chat, args[1])
+        mem[mem_id] = ""
     except Exception as e:
         await log(str(e))
         await log(str(traceback.format_stack()))
         return
 
 
-async def sendmsg(context, chat, text):
-    await context.client.send_message(chat, text)
+@listener(outgoing=True, command="sendatdump", diagnostics=True, ignore_edited=False,
+          description="导出 sendat 消息")
+async def sendatdump(context):
+    if mem.count("") != 0:
+        await context.edit(".\n-sendat " + "\n-sendat ".join(mem[:].remove("")))
+    else:
+        await context.edit(".\n-sendat " + "\n-sendat ".join(mem))
 
+@listener(outgoing=True, command="sendatparse", diagnostics=True, ignore_edited=True,
+          description="导入已导出的 sendat 消息")
+async def sendatparse(context):
+    chat = await context.get_chat()
+    text = "\n".join(context.message.text.split("\n")[1:])
+    if text == "":
+        return
+    if text.find(".\n") == 0:
+        text = "\n".join(text.split("\n")[1:])
+    lines = text.split("\n")
+    for i in range(len(lines)):
+        line = lines[i]
+        sent = await sendmsg(context, chat, line)
+        sent.parameter = line.replace("-sendat ", "").split(" ")
+        await sendat(sent)
+
+async def sendmsg(context, chat, text):
+    return await context.client.send_message(chat, text)
