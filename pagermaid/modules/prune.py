@@ -81,6 +81,10 @@ async def yourprune(context):
         await message.delete()
         count_buffer += 1
     await log(f"批量删除了回复用户所发送的 {str(count)} 条消息。")
+    try:
+        await context.delete()
+    except:
+        pass
     notification = await send_prune_notify(context, count)
     await sleep(.5)
     await notification.delete()
