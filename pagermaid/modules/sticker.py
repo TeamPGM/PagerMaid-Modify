@@ -1,5 +1,6 @@
 """ PagerMaid module to handle sticker collection. """
 
+from asyncio import sleep
 from os import remove
 from urllib import request
 from io import BytesIO
@@ -121,9 +122,14 @@ A pack can't have more than 120 stickers at the moment.":
                 await add_sticker(conversation, command, pack_title, pack_name, animated, message,
                                   context, file, emoji)
 
-        await context.edit(
-            f"这张图片/贴纸已经被添加到 [这个](t.me/addstickers/{pack_name}) 贴纸包。",
-            parse_mode='md')
+        notification = await context.edit(
+                f"这张图片/贴纸已经被添加到 [这个](t.me/addstickers/{pack_name}) 贴纸包。",
+                parse_mode='md')
+        await sleep(.6)
+        try:
+            await notification.delete()
+        except:
+            pass
 
 
 async def add_sticker(conversation, command, pack_title, pack_name, animated, message, context, file, emoji):
