@@ -104,9 +104,9 @@ async def re(context):
             except:
                 await context.edit('呜呜呜出错了...可能参数不是数字')
                 return True
+        await context.delete()
         for nums in range(0, num):
             await reply.forward_to(int(context.chat_id))
-        await context.delete()
     else:
         await context.edit("出错了呜呜呜 ~ 您好像没有回复一条消息。")
 
