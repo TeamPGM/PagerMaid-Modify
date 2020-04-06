@@ -57,6 +57,10 @@ i.e.
 -sendat every 23:59:59 | 又是无所事事的一天呢。
 -sendat every 1 minutes | 又过去了一分钟。
 -sendat *3 1 minutes | 此消息将出现三次，间隔均为一分钟。
+
+此命令可与 autorespond, ghost, deny 命令串联：
+
+-sendat 10 minutes | -autorespond 我暂时有事离开一下。
 """
 
 @listener(outgoing=True, command="sendat", diagnostics=True, ignore_edited=False,
@@ -143,7 +147,22 @@ async def sendat(context):
                 count += 1
             mem[mem_id] = ""
             return
-        
+
+        if args[0].find(":") == -1:
+            # relative time
+            dt = dateparser.parse(args[0])
+            delta = time.time() - dt.timestamp()
+            if delta < 3:
+                await context.edit("Target time before now.")
+                return
+            mem.append("|".join(args))
+            await context.edit(f"Registered: id {mem_id}")
+            while dt.timestamp() + 2*delta > time.time():
+                await asyncio.sleep(2)
+            await sendmsg(context, chat, args[1])
+            mem[mem_id] = ""
+            return
+
         # absolute time
         dt = parser.parse(args[0])
         delta = dt.timestamp() - time.time()
@@ -187,5 +206,98 @@ async def sendatparse(context):
         sent.parameter = line.replace("-sendat ", "").split(" ")
         await sendat(sent)
 
-async def sendmsg(context, chat, text):
-    return await context.client.send_message(chat, text)
+""" Modified pagermaid autorespond plugin. """
+
+from telethon.events import StopPropagation
+from pagermaid import persistent_vars
+
+async def autorespond(context):
+    """ Enables the auto responder. """
+    message = "我还在睡觉... ZzZzZzZzZZz"
+    if context.arguments:
+        message = context.arguments
+    await context.edit("成功启用自动响应器。")
+    await log(f"启用自动响应器，将自动回复 `{message}`.")
+    persistent_vars.update({'autorespond': {'enabled': True, 'message': message, 'amount': 0}})
+
+from pagermaid import redis, redis_status
+
+async def ghost(context):
+    """ Toggles ghosting of a user. """
+    if not redis_status():
+        await context.edit("出错了呜呜呜 ~ Redis 好像离线了，无法执行命令。")
+        return
+    if len(context.parameter) != 1:
+        await context.edit("出错了呜呜呜 ~ 无效的参数。")
+        return
+    myself = await context.client.get_me()
+    self_user_id = myself.id
+    if context.parameter[0] == "true":
+        if context.chat_id == self_user_id:
+            await context.edit("在？为什么要在收藏夹里面用？")
+            return
+        redis.set("ghosted.chat_id." + str(context.chat_id), "true")
+        await context.delete()
+        await log(f"已成功将 ChatID {str(context.chat_id)} 添加到自动已读对话列表中。")
+    elif context.parameter[0] == "false":
+        if context.chat_id == self_user_id:
+            await context.edit("在？为什么要在收藏夹里面用？")
+            return
+        redis.delete("ghosted.chat_id." + str(context.chat_id))
+        await context.delete()
+        await log(f"已成功将 ChatID {str(context.chat_id)} 从自动已读对话列表中移除。")
+    elif context.parameter[0] == "status":
+        if redis.get("ghosted.chat_id." + str(context.chat_id)):
+            await context.edit("emm...当前对话已被加入自动已读对话列表中。")
+        else:
+            await context.edit("emm...当前对话已从自动已读对话列表中移除。")
+    else:
+        await context.edit("出错了呜呜呜 ~ 无效的参数。")
+
+
+async def deny(context):
+    """ Toggles denying of a user. """
+    if not redis_status():
+        await context.edit("出错了呜呜呜 ~ Redis 离线，无法运行。")
+        return
+    if len(context.parameter) != 1:
+        await context.edit("出错了呜呜呜 ~ 无效的参数。")
+        return
+    myself = await context.client.get_me()
+    self_user_id = myself.id
+    if context.parameter[0] == "true":
+        if context.chat_id == self_user_id:
+            await context.edit("在？为什么要在收藏夹里面用？")
+            return
+        redis.set("denied.chat_id." + str(context.chat_id), "true")
+        await context.delete()
+        await log(f"ChatID {str(context.chat_id)} 已被添加到自动拒绝对话列表中。")
+    elif context.parameter[0] == "false":
+        if context.chat_id == self_user_id:
+            await context.edit("在？为什么要在收藏夹里面用？")
+            return
+        redis.delete("denied.chat_id." + str(context.chat_id))
+        await context.delete()
+        await log(f"ChatID {str(context.chat_id)} 已从自动拒绝对话列表中移除。")
+    elif context.parameter[0] == "status":
+        if redis.get("denied.chat_id." + str(context.chat_id)):
+            await context.edit("emm...当前对话已被加入自动拒绝对话列表中。")
+        else:
+            await context.edit("emm...当前对话已从自动拒绝对话列表移除。")
+    else:
+        await context.edit("出错了呜呜呜 ~ 无效的参数。")
+
+
+async def sendmsg(context, chat, origin_text):
+    text = origin_text.strip()
+    msg = await context.client.send_message(chat, text)
+    if text.find("-autorespond") == 0:
+        msg.arguments = text.replace("-autorespond", "").lstrip()
+        await autorespond(msg)
+    elif text.find("-ghost ") == 0:
+        msg.parameter = [text[7:]]
+        await ghost(msg)
+    elif text.find("-deny ") == 0:
+        msg.parameter = [text[6:]]
+        await deny(msg)
+    return msg
