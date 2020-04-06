@@ -125,7 +125,7 @@ A pack can't have more than 120 stickers at the moment.":
         notification = await context.edit(
                 f"这张图片/贴纸已经被添加到 [这个](t.me/addstickers/{pack_name}) 贴纸包。",
                 parse_mode='md')
-        await sleep(.6)
+        await sleep(3)
         try:
             await notification.delete()
         except:
