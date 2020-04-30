@@ -142,12 +142,13 @@ async def contact_chat(context):
     except:
         await context.edit('出错了呜呜呜 ~ 请尝试手动加入 @PagerMaid_Modify')
         return True
+    await sleep(3)
     await context.client.send_message(
         'PagerMaid_Modify',
         message
     )
     notification = await context.edit('您已成功加入 [Pagermaid-Modify](https://github.com/xtaodada/PagerMaid-Modify/) 用户群。')
-    await sleep(.10)
+    await sleep(5)
     await notification.delete()
 
 
