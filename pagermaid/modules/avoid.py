@@ -28,14 +28,18 @@ async def ghost(context):
         if context.chat_id == self_user_id:
             await context.edit("在？为什么要在收藏夹里面用？")
             return
-        redis.delete("ghosted.chat_id." + str(context.chat_id))
+        try:
+            redis.delete("ghosted.chat_id." + str(context.chat_id))
+        except:
+            await context.edit("emm...当前对话不存在于自动已读对话列表中。")
+            return
         await context.delete()
         await log(f"已成功将 ChatID {str(context.chat_id)} 从自动已读对话列表中移除。")
     elif context.parameter[0] == "status":
         if redis.get("ghosted.chat_id." + str(context.chat_id)):
-            await context.edit("emm...当前对话已被加入自动已读对话列表中。")
+            await context.edit("emm...当前对话存在于自动已读对话列表中。")
         else:
-            await context.edit("emm...当前对话已从自动已读对话列表中移除。")
+            await context.edit("emm...当前对话不存在于自动已读对话列表中。")
     else:
         await context.edit("出错了呜呜呜 ~ 无效的参数。")
 
