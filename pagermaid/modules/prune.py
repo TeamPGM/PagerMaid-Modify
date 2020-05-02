@@ -71,9 +71,12 @@ async def yourprune(context):
         return
     try:
         count = int(context.parameter[0])
+        await context.delete()
     except ValueError:
         await context.edit("出错了呜呜呜 ~ 无效的参数。")
         return
+    except:
+        pass
     count_buffer = 0
     async for message in context.client.iter_messages(context.chat_id, from_user=target.from_id):
         if count_buffer == count:
@@ -81,10 +84,6 @@ async def yourprune(context):
         await message.delete()
         count_buffer += 1
     await log(f"批量删除了回复用户所发送的 {str(count)} 条消息。")
-    try:
-        await context.delete()
-    except:
-        pass
     notification = await send_prune_notify(context, count)
     await sleep(.5)
     await notification.delete()
