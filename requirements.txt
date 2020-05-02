@@ -3,6 +3,7 @@ pyqrcode
 pypng
 pyzbar
 emoji
+email_validator
 youtube_dl
 pyyaml
 redis
