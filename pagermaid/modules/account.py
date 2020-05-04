@@ -202,8 +202,8 @@ async def profile(context):
               f"姓氏: {last_name} \n" \
               f"目前已知的情报: {biography} \n" \
               f"共同裙: {target_user.common_chats_count} \n" \
-              f"官方认证: {target_user.user.verified} \n" \
-              f"受限制: {target_user.user.restricted} \n" \
+              f"官方认证: {target_user.user.verified.replace("False","否").replace("True","是")} \n" \
+              f"受限制: {target_user.user.restricted.replace("False","否").replace("True","是")} \n" \
               f"类型: {user_type} \n" \
               f"[{first_name}](tg://user?id={target_user.user.id})"
     photo = await context.client.download_profile_photo(
@@ -244,7 +244,10 @@ async def profile(context):
             if not photo.startswith("http"):
                 remove(photo)
             await context.delete()
-            remove(photo)
+            try:
+                remove(photo)
+            except:
+                pass
             return
         except TypeError:
             await context.edit(caption)
