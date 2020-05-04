@@ -195,8 +195,8 @@ async def profile(context):
         "喵喵喵 ~ 好像没有设置"
     )
     biography = target_user.about if target_user.about is not None else "没有公开的情报"
-    verified = target_user.user.verified.replace("False","否").replace("True","是")
-    restricted = target_user.user.restricted.replace("False","否").replace("True","是")
+    verified = "是" if target_user.user.verified else "否"
+    restricted = "是" if target_user.user.restricted else "否"
     caption = f"**用户简介:** \n" \
               f"道纹: {username_system} \n" \
               f"ID: {target_user.user.id} \n" \
