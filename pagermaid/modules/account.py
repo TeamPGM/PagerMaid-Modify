@@ -174,14 +174,14 @@ async def profile(context):
             user_object = await context.client.get_entity(user)
             target_user = await context.client(GetFullUserRequest(user_object.id))
         except (TypeError, ValueError, OverflowError, StructError) as exception:
-            if str(exception).startswith("出错了呜呜呜 ~ 找不到与之对应的任何内容"):
+            if str(exception).startswith("Cannot find any entity corresponding to"):
                 await context.edit("出错了呜呜呜 ~ 指定的用户不存在。")
                 return
-            if str(exception).startswith("出错了呜呜呜 ~ 没有用户"):
+            if str(exception).startswith("No user has"):
                 await context.edit("出错了呜呜呜 ~ 指定的道纹不存在。")
                 return
-            if str(exception).startswith("出错了呜呜呜 ~ 您确定输入了东西？") or isinstance(exception, StructError):
-                await context.edit("出错了呜呜呜 ~ 找不到对应的 UserID 。")
+            if str(exception).startswith("Could not find the input entity for") or isinstance(exception, StructError):
+                await context.edit("出错了呜呜呜 ~ 无法通过此 UserID 找到对应的用户。")
                 return
             if isinstance(exception, OverflowError):
                 await context.edit("出错了呜呜呜 ~ 指定的 UserID 已超出长度限制，您确定输对了？")
