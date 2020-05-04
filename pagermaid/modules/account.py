@@ -195,6 +195,8 @@ async def profile(context):
         "喵喵喵 ~ 好像没有设置"
     )
     biography = target_user.about if target_user.about is not None else "没有公开的情报"
+    verified = target_user.user.verified.replace("False","否").replace("True","是")
+    restricted = target_user.user.restricted.replace("False","否").replace("True","是")
     caption = f"**用户简介:** \n" \
               f"道纹: {username_system} \n" \
               f"ID: {target_user.user.id} \n" \
@@ -202,8 +204,8 @@ async def profile(context):
               f"姓氏: {last_name} \n" \
               f"目前已知的情报: {biography} \n" \
               f"共同裙: {target_user.common_chats_count} \n" \
-              f"官方认证: {target_user.user.verified.replace("False","否").replace("True","是")} \n" \
-              f"受限制: {target_user.user.restricted.replace("False","否").replace("True","是")} \n" \
+              f"官方认证: {verified} \n" \
+              f"受限制: {restricted} \n" \
               f"类型: {user_type} \n" \
               f"[{first_name}](tg://user?id={target_user.user.id})"
     photo = await context.client.download_profile_photo(
