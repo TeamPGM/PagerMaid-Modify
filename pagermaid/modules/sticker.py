@@ -40,7 +40,12 @@ async def sticker(context):
               message.media.document.attributes):
             photo = BytesIO()
             await bot.download_file(message.media.document, "AnimatedSticker.tgs")
-            emoji = message.media.document.attributes[0].alt
+            for index in range(len(message.media.document.attributes)):
+                try:
+                    emoji = message.media.document.attributes[index].alt
+                    break
+                except:
+                    pass
             custom_emoji = True
             animated = True
             photo = 1
