@@ -157,7 +157,17 @@ async def feet2meter(context):
           description="发送一句一言")
 async def hitokoto(context):
     """ Get hitokoto.cn """
-    hitokoto_json = json.loads(requests.get("https://v1.hitokoto.cn/?charset=utf-8").content.decode("utf-8"))
+    hitokoto_while = 1
+    try:
+        hitokoto_json = json.loads(requests.get("https://v1.hitokoto.cn/?charset=utf-8").content.decode("utf-8"))
+    except (ValueError):
+        while hitokoto_while < 10:
+            hitokoto_while += 1
+            try:
+                hitokoto_json = json.loads(requests.get("https://v1.hitokoto.cn/?charset=utf-8").content.decode("utf-8"))
+                break
+            except:
+                continue
     if hitokoto_json['type'] == 'a':
         hitokoto_type = '动画'
     elif hitokoto_json['type'] == 'b':
