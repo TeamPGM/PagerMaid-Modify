@@ -47,6 +47,7 @@ async def userid(context):
                 await context.edit(
                     f"**以下是被回复消息的信息** \n\n**道纹:** {target} \n"
                     f"**用户ID:** `{user_id}` \n\n**此消息没有包含被转发用户的信息** \n\n"
+                 )
     else:
         await context.edit("出错了呜呜呜 ~ 无法获取所回复消息的信息。")
 
