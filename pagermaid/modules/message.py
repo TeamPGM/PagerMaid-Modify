@@ -17,14 +17,14 @@ async def userid(context):
     """ Query the UserID of the sender of the message you replied to. """
     message = await context.get_reply_message()
     if message:
-            user_id = message.sender.id
-            if message.sender.username:
-                target = "@" + message.sender.username
-            else:
-                try:
-                    target = "**" + message.sender.first_name + "**"
-                except TypeError:
-                    target = "**" + "死号" + "**"
+        user_id = message.sender.id
+        if message.sender.username:
+            target = "@" + message.sender.username
+        else:
+            try:
+                target = "**" + message.sender.first_name + "**"
+            except TypeError:
+                target = "**" + "死号" + "**"
         if not message.forward:
             await context.edit(
                 f"**以下是被回复消息的信息** \n\n**道纹:** {target} \n"
