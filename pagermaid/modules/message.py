@@ -17,7 +17,6 @@ async def userid(context):
     """ Query the UserID of the sender of the message you replied to. """
     message = await context.get_reply_message()
     if message:
-        if not message.forward:
             user_id = message.sender.id
             if message.sender.username:
                 target = "@" + message.sender.username
@@ -26,17 +25,28 @@ async def userid(context):
                     target = "**" + message.sender.first_name + "**"
                 except TypeError:
                     target = "**" + "死号" + "**"
-
+        if not message.forward:
+            await context.edit(
+                f"**以下是被回复消息的信息** \n\n**道纹:** {target} \n"
+                f"**用户ID:** `{user_id}`"
+             )
         else:
-            user_id = message.forward.sender.id
-            if message.forward.sender.username:
-                target = "@" + message.forward.sender.username
-            else:
-                target = "*" + message.forward.sender.first_name + "*"
-        await context.edit(
-            f"**道纹:** {target} \n"
-            f"**用户ID:** `{user_id}`"
-        )
+            try:
+                user_f_id = message.forward.sender.id
+                if message.forward.sender.username:
+                    target_f = "@" + message.forward.sender.username
+                else:
+                    target_f = "*" + message.forward.sender.first_name + "*"
+                await context.edit(
+                    f"**以下是被回复消息的信息** \n\n**道纹:** {target} \n"
+                    f"**用户ID:** `{user_id}` \n\n**以下是转发来源信息** \n\n"
+                    f"**道纹:** {target_f} \n"
+                    f"**用户ID:** `{user_f_id}`"
+                 )
+            except:
+                await context.edit(
+                    f"**以下是被回复消息的信息** \n\n**道纹:** {target} \n"
+                    f"**用户ID:** `{user_id}` \n\n**此消息没有包含被转发用户的信息** \n\n"
     else:
         await context.edit("出错了呜呜呜 ~ 无法获取所回复消息的信息。")
 
