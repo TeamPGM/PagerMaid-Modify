@@ -27,8 +27,8 @@ async def userid(context):
                 target = "**" + "死号" + "**"
         if not message.forward:
             await context.edit(
-                f"**以下是被回复消息的信息** \n\n**道纹:** {target} \n"
-                f"**用户ID:** `{user_id}`"
+                f"**以下是被回复消息的信息：** \n\n**道纹：** {target} \n"
+                f"**用户ID：** `{user_id}`"
              )
         else:
             try:
@@ -38,15 +38,15 @@ async def userid(context):
                 else:
                     target_f = "*" + message.forward.sender.first_name + "*"
                 await context.edit(
-                    f"**以下是被回复消息的信息** \n\n**道纹:** {target} \n"
-                    f"**用户ID:** `{user_id}` \n\n**以下是转发来源信息** \n\n"
-                    f"**道纹:** {target_f} \n"
-                    f"**用户ID:** `{user_f_id}`"
+                    f"**以下是被回复消息的信息：** \n\n**道纹：** {target} \n"
+                    f"**用户ID：** `{user_id}` \n\n**以下是转发来源信息：** \n\n"
+                    f"**道纹：** {target_f} \n"
+                    f"**用户ID：** `{user_f_id}`"
                  )
             except:
                 await context.edit(
-                    f"**以下是被回复消息的信息** \n\n**道纹:** {target} \n"
-                    f"**用户ID:** `{user_id}` \n\n**此消息没有包含被转发用户的信息** \n\n"
+                    f"**以下是被回复消息的信息：** \n\n**道纹：** {target} \n"
+                    f"**用户ID：** `{user_id}` \n\n**此消息没有包含被转发用户的信息** \n\n"
                  )
     else:
         await context.edit("出错了呜呜呜 ~ 无法获取所回复消息的信息。")
@@ -113,7 +113,7 @@ async def re(context):
                     await context.edit('呜呜呜出错了...这个数字太大惹')
                     return True
             except:
-                await context.edit('呜呜呜出错了...可能参数不是数字')
+                await context.edit('呜呜呜出错了...可能参数包含了数字以外的符号')
                 return True
         await context.delete()
         for nums in range(0, num):
@@ -123,7 +123,7 @@ async def re(context):
 
 
 @listener(outgoing=True, command="leave",
-          description="说 再见 然后离开会话。")
+          description="说 “再见” 然后离开会话。")
 async def leave(context):
     """ It leaves you from the group. """
     if context.is_group:
@@ -165,7 +165,7 @@ async def feet2meter(context):
 
 
 @listener(outgoing=True, command="hitokoto",
-          description="发送一句一言")
+          description="每日一言")
 async def hitokoto(context):
     """ Get hitokoto.cn """
     hitokoto_while = 1
