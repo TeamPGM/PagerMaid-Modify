@@ -73,7 +73,7 @@ async def tts(context):
 
     try:
         await context.edit("生成语音中 . . .")
-        gTTS(message, lang)
+        gTTS(message, lang=lang)
     except AssertionError:
         await context.edit("出错了呜呜呜 ~ 无效的参数。")
         return
@@ -83,13 +83,13 @@ async def tts(context):
     except RuntimeError:
         await context.edit('出错了呜呜呜 ~ 加载语言数组时出错。')
         return
-    google_tts = gTTS(message, lang)
+    google_tts = gTTS(message, lang=lang)
     google_tts.save("vocals.mp3")
     with open("vocals.mp3", "rb") as audio:
         line_list = list(audio)
         line_count = len(line_list)
     if line_count == 1:
-        google_tts = gTTS(message, lang)
+        google_tts = gTTS(message, lang=lang)
         google_tts.save("vocals.mp3")
     with open("vocals.mp3", "r"):
         await context.client.send_file(context.chat_id, "vocals.mp3", voice_note=True)
