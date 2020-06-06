@@ -11,11 +11,15 @@ from pagermaid import bot, log, config
 from pagermaid.listener import listener
 
 
-@listener(outgoing=True, command="userid",
-          description="查询您回复消息的发送者的用户ID。")
+@listener(outgoing=True, command="id",
+          description="获取一条消息的各种信息。")
 async def userid(context):
     """ Query the UserID of the sender of the message you replied to. """
-    message = await context.get_reply_message()
+    try:
+        message = await context.get_reply_message()
+    except:
+        pass
+    text = f"**以下是当前对话的信息：** \n\n**ChatID**：`" + str(context.chat_id) + "`\n"
     if message:
         user_id = message.sender.id
         if message.sender.username:
@@ -26,10 +30,8 @@ async def userid(context):
             except TypeError:
                 target = "**" + "死号" + "**"
         if not message.forward:
-            await context.edit(
-                f"**以下是被回复消息的信息：** \n\n**道纹：** {target} \n"
-                f"**用户ID：** `{user_id}`"
-             )
+            text1 = f"**以下是被回复消息的信息：** \n\n**道纹：** {target} \n"
+                    f"**用户ID：** `{user_id}`"
         else:
             try:
                 user_f_id = message.forward.sender.id
@@ -37,26 +39,17 @@ async def userid(context):
                     target_f = "@" + message.forward.sender.username
                 else:
                     target_f = "*" + message.forward.sender.first_name + "*"
-                await context.edit(
-                    f"**以下是被回复消息的信息：** \n\n**道纹：** {target} \n"
-                    f"**用户ID：** `{user_id}` \n\n**以下是转发来源信息：** \n\n"
-                    f"**道纹：** {target_f} \n"
-                    f"**用户ID：** `{user_f_id}`"
-                 )
+                text1 = f"**以下是被回复消息的信息：** \n\n**道纹：** {target} \n"
+                        f"**用户ID：** `{user_id}` \n\n**以下是转发来源信息：** \n\n"
+                        f"**道纹：** {target_f} \n"
+                        f"**用户ID：** `{user_f_id}`"
             except:
-                await context.edit(
-                    f"**以下是被回复消息的信息：** \n\n**道纹：** {target} \n"
-                    f"**用户ID：** `{user_id}` \n\n**此消息没有包含被转发用户的信息** \n\n"
-                 )
+                text1 = f"**以下是被回复消息的信息：** \n\n**道纹：** {target} \n"
+                        f"**用户ID：** `{user_id}` \n\n**此消息没有包含被转发用户的信息** \n\n"
     else:
-        await context.edit("出错了呜呜呜 ~ 无法获取所回复消息的信息。")
-
-
-@listener(outgoing=True, command="chatid",
-          description="查询当前会话的 chatid 。")
-async def chatid(context):
-    """ Queries the chatid of the chat you are in. """
-    await context.edit("ChatID: `" + str(context.chat_id) + "`")
+        text1 = "出错了呜呜呜 ~ 无法获取所回复消息的信息。"
+    text = text + text1
+    await context.edit(text)
 
 
 @listener(outgoing=True, command="uslog",
