@@ -19,7 +19,7 @@ async def userid(context):
         message = await context.get_reply_message()
     except:
         pass
-    text = "**以下是当前对话的信息：** \n\n**ChatID**：`" + str(context.chat_id) + "`\n"
+    text = "**以下是当前对话的信息：** \n\n**ChatID**：`" + str(context.chat_id) + "`\n\n"
     if message:
         user_id = message.sender.id
         if message.sender.username:
@@ -42,7 +42,7 @@ async def userid(context):
             except:
                 text1 = "**以下是被回复消息的信息：** \n\n**道纹：** " + target + " \n" + "**用户ID：** `" + str(user_id) + "` \n\n**此消息没有包含被转发用户的信息** \n\n"
     else:
-        text1 = "出错了呜呜呜 ~ 无法获取所回复消息的信息。"
+        text1 = "无法获取所回复消息的信息或者没有回复消息。"
     text = text + text1
     await context.edit(text)
 
