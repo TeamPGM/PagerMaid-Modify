@@ -144,7 +144,7 @@ async def contact_chat(context):
         return True
     await sleep(3)
     await context.client.send_message(
-        'PagerMaid_Modify',
+        -1001441461877,
         message
     )
     notification = await context.edit('您已成功加入 [Pagermaid-Modify](https://github.com/xtaodada/PagerMaid-Modify/) 用户群。')
