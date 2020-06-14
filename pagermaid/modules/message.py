@@ -19,7 +19,7 @@ async def userid(context):
         message = await context.get_reply_message()
     except:
         pass
-    text = "**以下是当前对话的信息：** \n\n**ChatID**：`" + str(context.chat_id) + "`\n\n"
+    text = "**以下是当前对话的信息：** \n\n**ChatID**：`" + str(context.chat_id) + "`"
     if message:
         user_id = message.sender.id
         if message.sender.username:
@@ -30,7 +30,7 @@ async def userid(context):
             except TypeError:
                 target = "**" + "死号" + "**"
         if not message.forward:
-            text1 = "**以下是被回复消息的信息：** \n\n**道纹：** " + target + " \n" + "**用户ID：** `" + str(user_id) + "`"
+            text1 = "\n\n**以下是被回复消息的信息：** \n\n**道纹：** " + target + " \n" + "**用户ID：** `" + str(user_id) + "`"
         else:
             try:
                 user_f_id = message.forward.sender.id
@@ -38,11 +38,11 @@ async def userid(context):
                     target_f = "@" + message.forward.sender.username
                 else:
                     target_f = "*" + message.forward.sender.first_name + "*"
-                text1 = "**以下是被回复消息的信息：** \n\n**道纹：** " + target + " \n" + "**用户ID：** `" + str(user_id) + "` \n\n**以下是转发来源信息：** \n\n" + "**道纹：** " + target_f + " \n" + "**用户ID：** `" + str(user_f_id) + "`"
+                text1 = "\n\n**以下是被回复消息的信息：** \n\n**道纹：** " + target + " \n" + "**用户ID：** `" + str(user_id) + "` \n\n**以下是转发来源信息：** \n\n" + "**道纹：** " + target_f + " \n" + "**用户ID：** `" + str(user_f_id) + "`"
             except:
-                text1 = "**以下是被回复消息的信息：** \n\n**道纹：** " + target + " \n" + "**用户ID：** `" + str(user_id) + "` \n\n**此消息没有包含被转发用户的信息** \n\n"
+                text1 = "\n\n**以下是被回复消息的信息：** \n\n**道纹：** " + target + " \n" + "**用户ID：** `" + str(user_id) + "` \n\n**此消息没有包含被转发用户的信息** \n\n"
     else:
-        text1 = "无法获取所回复消息的信息或者没有回复消息。"
+        text1 = " "
     text = text + text1
     await context.edit(text)
 
