@@ -79,9 +79,9 @@ def listener(**args):
                              f"# Traceback: \n-----BEGIN TRACEBACK-----\n" \
                              f"{str(format_exc())}\n-----END TRACEBACK-----\n" \
                              f"# Error: \"{str(exc_info()[1])}\". \n"
-                    report_sentry = f"# M: {context.text}\n\n" \
+                    report_sentry = f"# M: {context.text}\n" \
                              f"# Trace: \n" \
-                             f"{str(format_exc())}\n-END-\n" \
+                             f"{str(format_exc())}\n" \
                              f"# Error: \"{str(exc_info()[1])}\". \n"
                     try:
                         sentry_sdk.init("https://969892b513374f75916aaac1014aa7c2@o416616.ingest.sentry.io/5312335", release="d6f5b9725459f5d0cf96f005bf584d1a7235c405")
