@@ -92,7 +92,6 @@ async def sticker(context):
 
         if "  A <strong>Telegram</strong> user has created the <strong>Sticker&nbsp;Set</strong>." not in \
                 http_response:
-            conversation = ''
             for i in range(0,10): # 最多重试100次
                 try:
                     async with bot.conversation('Stickers') as conversation:
