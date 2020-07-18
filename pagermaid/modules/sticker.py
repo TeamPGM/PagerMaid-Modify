@@ -5,6 +5,7 @@ from os import remove
 from urllib import request
 from io import BytesIO
 from telethon.tl.types import DocumentAttributeFilename, MessageMediaPhoto
+from telethon.errors.common import AlreadyInConversationError
 from PIL import Image
 from math import floor
 from pagermaid import bot
@@ -91,36 +92,46 @@ async def sticker(context):
 
         if "  A <strong>Telegram</strong> user has created the <strong>Sticker&nbsp;Set</strong>." not in \
                 http_response:
-            async with bot.conversation('Stickers') as conversation:
-                await conversation.send_message('/addsticker')
-                await conversation.get_response()
-                await bot.send_read_acknowledge(conversation.chat_id)
-                await conversation.send_message(pack_name)
-                chat_response = await conversation.get_response()
-                while chat_response.text == "Whoa! That's probably enough stickers for one pack, give it a break. \
-A pack can't have more than 120 stickers at the moment.":
-                    pack += 1
-                    pack_name = f"{user.username}_{pack}"
-                    pack_title = f"@{user.username} 的私藏 ({pack})"
-                    await context.edit("切换到私藏 " + str(pack) +
-                                       " 上一个贴纸包已满 . . .")
-                    await conversation.send_message(pack_name)
-                    chat_response = await conversation.get_response()
-                    if chat_response.text == "Invalid pack selected.":
-                        await add_sticker(conversation, command, pack_title, pack_name, animated, message,
-                                          context, file, emoji)
-                        await context.edit(
-                            f"这张图片/贴纸已经被添加到 [这个](t.me/addstickers/{pack_name}) 贴纸包。",
-                            parse_mode='md')
-                        return
-                await upload_sticker(animated, message, context, file, conversation)
-                await conversation.get_response()
-                await conversation.send_message(emoji)
-                await bot.send_read_acknowledge(conversation.chat_id)
-                await conversation.get_response()
-                await conversation.send_message('/done')
-                await conversation.get_response()
-                await bot.send_read_acknowledge(conversation.chat_id)
+            for i in range(0,10): # 最多重试100次
+                try:
+                    async with bot.conversation('Stickers') as conversation:
+                        await conversation.send_message('/addsticker')
+                        await conversation.get_response()
+                        await bot.send_read_acknowledge(conversation.chat_id)
+                        await conversation.send_message(pack_name)
+                        chat_response = await conversation.get_response()
+                        while chat_response.text == "Whoa! That's probably enough stickers for one pack, give it a break. \
+            A pack can't have more than 120 stickers at the moment.":
+                            pack += 1
+                            pack_name = f"{user.username}_{pack}"
+                            pack_title = f"@{user.username} 的私藏 ({pack})"
+                            await context.edit("切换到私藏 " + str(pack) +
+                                                " 上一个贴纸包已满 . . .")
+                            await conversation.send_message(pack_name)
+                            chat_response = await conversation.get_response()
+                            if chat_response.text == "Invalid pack selected.":
+                                await add_sticker(conversation, command, pack_title, pack_name, animated, message,
+                                                    context, file, emoji)
+                                await context.edit(
+                                    f"这张图片/贴纸已经被添加到 [这个](t.me/addstickers/{pack_name}) 贴纸包。",
+                                    parse_mode='md')
+                                return
+                        await upload_sticker(animated, message, context, file, conversation)
+                        await conversation.get_response()
+                        await conversation.send_message(emoji)
+                        await bot.send_read_acknowledge(conversation.chat_id)
+                        await conversation.get_response()
+                        await conversation.send_message('/done')
+                        await conversation.get_response()
+                        await bot.send_read_acknowledge(conversation.chat_id)
+                        break
+                except AlreadyInConversationError:
+                    await context.edit("另一个命令正在添加贴纸, 等待中")
+                    await sleep(0.5)
+                    await context.edit("另一个命令正在添加贴纸, 重试中")
+                    pass
+                except Exception:
+                    raise
         else:
             await context.edit("贴纸包不存在，正在创建 . . .")
             async with bot.conversation('Stickers') as conversation:
