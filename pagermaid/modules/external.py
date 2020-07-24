@@ -98,7 +98,7 @@ async def tts(context):
         await context.delete()
 
 
-@listener(outgoing=True, command="googletest",
+@listener(outgoing=True, command="google",
           description="使用 Google 查询",
           parameters="<query>")
 async def googletest(context):
