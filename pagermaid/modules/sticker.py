@@ -62,6 +62,7 @@ async def sticker(context):
         if not custom_emoji:
             emoji = "👀"
         pack = 1
+        sticker_already = False
         if len(split_strings) == 3:
             pack = split_strings[2]
             emoji = split_strings[1]
@@ -101,7 +102,7 @@ async def sticker(context):
                         await conversation.send_message(pack_name)
                         chat_response = await conversation.get_response()
                         while chat_response.text == "Whoa! That's probably enough stickers for one pack, give it a break. \
-            A pack can't have more than 120 stickers at the moment.":
+A pack can't have more than 120 stickers at the moment.":
                             pack += 1
                             pack_name = f"{user.username}_{pack}"
                             pack_title = f"@{user.username} 的私藏 ({pack})"
@@ -126,10 +127,12 @@ async def sticker(context):
                         await bot.send_read_acknowledge(conversation.chat_id)
                         break
                 except AlreadyInConversationError:
-                    await context.edit("另一个命令正在添加贴纸, 等待中")
-                    await sleep(0.5)
-                    await context.edit("另一个命令正在添加贴纸, 重试中")
-                    pass
+                    if not sticker_already:
+                        await context.edit("另一个命令正在添加贴纸, 重新尝试中")
+                        sticker_already = True
+                    else:
+                        pass
+                    sleep(.5)
                 except Exception:
                     raise
         else:
@@ -141,7 +144,7 @@ async def sticker(context):
         notification = await context.edit(
                 f"这张图片/贴纸已经被添加到 [这个](t.me/addstickers/{pack_name}) 贴纸包。",
                 parse_mode='md')
-        await sleep(3)
+        await sleep(5)
         try:
             await notification.delete()
         except:
