@@ -16,7 +16,7 @@ beautifulsoup4
 gtts
 gtts-token
 wordcloud
-telethon
+telethon==1.15.0
 pillow
 python-magic
 pygments
