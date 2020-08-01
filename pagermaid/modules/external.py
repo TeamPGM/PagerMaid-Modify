@@ -110,28 +110,35 @@ async def googletest(context):
         return
     query = context.arguments
     query = query.replace(' ', '+')
-    URL = f"https://google.com/search?q={query}"
+    URL = [('https://google.com.hk/search?q=' + query),('https://google.com/search?q=' + query)]
     await context.edit("正在拉取结果 . . .")
-    resp = get(URL, headers=headers)
-    if resp.status_code == 200:
-        soup = BeautifulSoup(resp.content, "html.parser")
-        results = ""
-        count = 0
-        for g in soup.find_all('div', class_='r'):
-            if count == int(config['result_length']):
-                break
-            count += 1
-            anchors = g.find_all('a')
-            if anchors:
-                title = g.find('h3').text
-                link = anchors[0]['href']
-                results += f"\n[{title}]({link}) \n"
-        await context.edit(f"**Google** |`{query}`| 🎙 🔍 \n"
-                           f"{results}",
-                           link_preview=False)
-        await log(f"在Google搜索引擎上查询了 `{query}`")
-    else:
-        await context.edit("连接到 google服务器 失败")
+    count = 0
+    for g in URL:
+        count += 1
+        resp = get(g, headers=headers)
+        if resp.status_code == 200:
+            break
+        elif count == 2 and not resp.status_code == 200:
+            await context.edit("连接到 google服务器 失败")
+            return
+        else:
+            pass
+    soup = BeautifulSoup(resp.content, "html.parser")
+    results = ""
+    count = 0
+    for g in soup.find_all('div', class_='r'):
+        if count == int(config['result_length']):
+            break
+        count += 1
+        anchors = g.find_all('a')
+        if anchors:
+            title = g.find('h3').text
+            link = anchors[0]['href']
+            results += f"\n[{title}]({link}) \n"
+    await context.edit(f"**Google** |`{query}`| 🎙 🔍 \n"
+                       f"{results}",
+                       link_preview=False)
+    await log(f"在Google搜索引擎上查询了 `{query}`")
 
 
 @listener(outgoing=True, command="fetchaudio",
