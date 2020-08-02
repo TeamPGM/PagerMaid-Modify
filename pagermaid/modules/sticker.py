@@ -93,7 +93,7 @@ async def sticker(context):
 
         if "  A <strong>Telegram</strong> user has created the <strong>Sticker&nbsp;Set</strong>." not in \
                 http_response:
-            for i in range(0,10): # 最多重试100次
+            for _ in range(20): # 最多重试20次
                 try:
                     async with bot.conversation('Stickers') as conversation:
                         await conversation.send_message('/addsticker')
@@ -132,7 +132,7 @@ A pack can't have more than 120 stickers at the moment.":
                         sticker_already = True
                     else:
                         pass
-                    sleep(.5)
+                    await sleep(.5)
                 except Exception:
                     raise
         else:
