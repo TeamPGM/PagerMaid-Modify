@@ -105,10 +105,17 @@ async def googletest(context):
     """ Searches Google for a string. """
     USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:65.0) Gecko/20100101 Firefox/65.0"
     headers = {"user-agent": USER_AGENT}
-    if context.arguments == "":
+    reply = await context.get_reply_message()
+    query = context.arguments
+    lang = config['application_language']
+    if query:
+        pass
+    elif reply:
+        query = reply.text
+    else:
         await context.edit("出错了呜呜呜 ~ 无效的参数。")
         return
-    query = context.arguments
+
     query = query.replace(' ', '+')
     URL = [('https://google.com.hk/search?q=' + query),('https://google.com/search?q=' + query)]
     await context.edit("正在拉取结果 . . .")
