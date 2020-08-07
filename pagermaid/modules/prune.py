@@ -27,7 +27,7 @@ async def prune(context):
     if messages:
         await context.client.delete_messages(input_chat, messages)
     await log(f"批量删除了 {str(count)} 条消息。")
-    notification = await send_prune_notify(context, count)
+    notification = await send_prune_notify(context, count, count)
     await sleep(.5)
     await notification.delete()
 
@@ -51,8 +51,8 @@ async def selfprune(context):
             break
         await message.delete()
         count_buffer += 1
-    await log(f"批量删除了自行发送的 {str(count)} 条消息。")
-    notification = await send_prune_notify(context, count)
+    await log(f"批量删除了自行发送的 {str(count_buffer)} / {str(count)} 条消息。")
+    notification = await send_prune_notify(context, count_buffer, count)
     await sleep(.5)
     await notification.delete()
 
@@ -83,8 +83,8 @@ async def yourprune(context):
             break
         await message.delete()
         count_buffer += 1
-    await log(f"批量删除了回复用户所发送的 {str(count)} 条消息。")
-    notification = await send_prune_notify(context, count)
+    await log(f"批量删除了回复用户所发送的 {str(count_buffer)} / {str(count)} 条消息。")
+    notification = await send_prune_notify(context, count_buffer, count)
     await sleep(.5)
     await notification.delete()
 
@@ -105,10 +105,10 @@ async def delete(context):
         await context.delete()
 
 
-async def send_prune_notify(context, count):
+async def send_prune_notify(context, count_buffer, count):
     return await context.client.send_message(
         context.chat_id,
         "删除了 "
-        + str(count)
+        + str(count_buffer) + " / " + str(count)
         + " 条消息。"
     )
