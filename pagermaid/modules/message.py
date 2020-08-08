@@ -15,35 +15,66 @@ from pagermaid.listener import listener
           description="获取一条消息的各种信息。")
 async def userid(context):
     """ Query the UserID of the sender of the message you replied to. """
-    try:
-        message = await context.get_reply_message()
-    except:
-        pass
-    text = "Message ID: `" + str(context.message.id) + "`\n**ChatID**：`" + str(context.chat_id) + "`"
+    message = await context.get_reply_message()
+    text = "Message ID: `" + str(context.message.id) + "`\n\n"
+    text += "**Chat**\nid:`" + str(context.chat_id) + "`\n"
+    if context.is_private:
+        try:
+            text += "first_name: `" + context.chat.first_name + "`\n"
+        except TypeError:
+            text += "**死号**\n"
+        if context.chat.last_name:
+            text += "last_name: `" + context.chat.last_name + "`\n"
+        if context.chat.username:
+            text += "username: @" + context.chat.username + "\n"
+        if context.chat.lang_code:
+            text += "lang_code: `" + context.chat.lang_code + "`\n"
+    if context.is_group or context.is_channel:
+        text += "title: `" + context.chat.title + "`\n"
+        if context.chat.username:
+            text += "username: @" + context.chat.username + "\n"
+        text += "date: `" + str(context.chat.date) + "`\n"
     if message:
-        user_id = message.sender.id
+        text += "\n以下是被回复消息的信息\nMessage ID: `" + str(message.id) + "`\n\n**User**\nid: `" + str(message.sender.id) + "`"
+        if message.sender.bot:
+            text += "\nis_bot: 是"
+        try:
+            text += "\nfirst_name: `" + message.sender.first_name + "`"
+        except TypeError:
+            text += "\n**死号**"
+        if message.sender.last_name:
+            text += "\nlast_name: `" + message.sender.last_name + "`"
         if message.sender.username:
-            target = "@" + message.sender.username
-        else:
-            try:
-                target = "**" + message.sender.first_name + "**"
-            except TypeError:
-                target = "**" + "死号" + "**"
-        if not message.forward:
-            text1 = "\n\n**以下是被回复消息的信息：** \n\nMessage ID: `" + str(message.id) + "`\n**道纹：** " + target + " \n" + "**用户ID：** `" + str(user_id) + "`"
-        else:
-            try:
-                user_f_id = message.forward.sender.id
-                if message.forward.sender.username:
-                    target_f = "@" + message.forward.sender.username
-                else:
-                    target_f = "*" + message.forward.sender.first_name + "*"
-                text1 = "\n\n**以下是被回复消息的信息：** \n\nMessage ID: `" + str(message.id) + "`\n**道纹：** " + target + " \n" + "**用户ID：** `" + str(user_id) + "` \n\n**以下是转发来源信息：** \n\n" + "**道纹：** " + target_f + " \n" + "**用户ID：** `" + str(user_f_id) + "`"
-            except:
-                text1 = "\n\n**以下是被回复消息的信息：** \n\nMessage ID: `" + str(message.id) + "`\n**道纹：** " + target + " \n" + "**用户ID：** `" + str(user_id) + "` \n\n**此消息没有包含被转发用户的信息**"
-    else:
-        text1 = " "
-    text = text + text1
+            text += "\nusername: @" + message.sender.username
+        if message.sender.lang_code:
+            text += "\nlang_code: `" + message.sender.lang_code + "`"
+        if message.forward:
+            if str(message.forward.chat_id).startswith('-100'):
+                text += "\n\n**Forward From Channel**\nid: `" + str(
+                    message.forward.chat_id) + "`\ntitle: `" + message.forward.chat.title + "`"
+                if message.forward.chat.username:
+                    text += "\nusername: @" + message.forward.chat.username
+                text += "\nmessage_id: `" + str(message.forward.channel_post) + "`"
+                if message.forward.post_author:
+                    text += "\npost_author: `" + message.forward.post_author + "`"
+                text += "\ndate: " + str(message.forward.date)
+            else:
+                if message.forward.sender:
+                    text += "\n\n**Forward From User**\nid: `" + str(
+                        message.forward.sender_id) + "`"
+                    if message.forward.sender.bot:
+                        text += "\nis_bot: 是"
+                    try:
+                        text += "\nfirst_name: `" + message.forward.sender.first_name + "`"
+                    except TypeError:
+                        text += "\n**死号**"
+                    if message.forward.sender.last_name:
+                        text += "\nlast_name: `" + message.forward.sender.last_name + "`"
+                    if message.forward.sender.username:
+                        text += "\nusername: @" + message.forward.sender.username
+                    if message.forward.sender.lang_code:
+                        text += "\nlang_code: `" + message.forward.sender.lang_code + "`"
+                    text += "\ndate: `" + str(message.forward.date) + "`"
     await context.edit(text)
 
 
