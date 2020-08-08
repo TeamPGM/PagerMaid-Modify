@@ -61,11 +61,18 @@ if not exists(f"{getcwd()}/data"):
 
 api_key = config['api_key']
 api_hash = config['api_hash']
-proxy_addr = config['proxy_addr'].strip()
-proxy_port = config['proxy_port'].strip()
-mtp_addr = config['mtp_addr'].strip()
-mtp_port = config['mtp_port'].strip()
-mtp_secret = config['mtp_secret'].strip()
+try:
+    proxy_addr = config['proxy_addr'].strip()
+    proxy_port = config['proxy_port'].strip()
+    mtp_addr = config['mtp_addr'].strip()
+    mtp_port = config['mtp_port'].strip()
+    mtp_secret = config['mtp_secret'].strip()
+except:
+    proxy_addr = ''
+    proxy_port = ''
+    mtp_addr = ''
+    mtp_port = ''
+    mtp_secret = ''
 try:
     redis_host = config['redis']['host']
 except KeyError:
