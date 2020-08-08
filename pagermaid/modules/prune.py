@@ -42,6 +42,7 @@ async def selfprune(context):
         return
     try:
         count = int(context.parameter[0])
+        await context.delete()
     except ValueError:
         await context.edit("出错了呜呜呜 ~ 无效的参数。")
         return
