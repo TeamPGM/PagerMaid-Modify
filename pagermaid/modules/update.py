@@ -73,11 +73,13 @@ async def update(context):
     await context.edit('找到更新，正在拉取 . . .')
 
     try:
-        # upstream_remote.pull(active_branch)
-        await execute("""git status | grep modified | sed -r "s/ +/ /" | cut -f2 | awk -F " " '{print "mkdir -p $(dirname ../for-update/" $2 ") && mv " $2 " ../for-update/" $2}' | sh""")
-        await execute("git pull")
-        await execute("""cd ../for-update/ && find -H . -type f | awk '{print "cp " $1 " ../PagerMaid-Modify/" $1}' | sh && cd ../PagerMaid-Modify""")
-        await execute("rm -rf ../for-update/")
+        try:
+            upstream_remote.pull(active_branch)
+        except:
+            await execute("""git status | grep modified | sed -r "s/ +/ /" | cut -f2 | awk -F " " '{print "mkdir -p $(dirname ../for-update/" $2 ") && mv " $2 " ../for-update/" $2}' | sh""")
+            await execute("git pull")
+            await execute("""cd ../for-update/ && find -H . -type f | awk '{print "cp " $1 " ../PagerMaid-Modify/" $1}' | sh && cd ../PagerMaid-Modify""")
+            await execute("rm -rf ../for-update/")
         await execute("python3 -m pip install -r requirements.txt --upgrade")
         await execute("python3 -m pip install -r requirements.txt")
         await log("PagerMaid-Modify 已更新。")
