@@ -3,12 +3,14 @@
 from platform import node
 from getpass import getuser
 from os import geteuid
+from os.path import exists
 from requests import head
 from asyncio import sleep
 from requests.exceptions import MissingSchema, InvalidURL, ConnectionError
 from pagermaid import log, bot
 from pagermaid.listener import listener
 from pagermaid.utils import attach_log, execute
+from telethon.errors.rpcerrorlist import UserAlreadyParticipantError
 from telethon.tl.functions.messages import ImportChatInviteRequest
 
 
@@ -137,14 +139,23 @@ async def contact(context):
 async def contact_chat(context):
     """ join a chatroom. """
     message = "大家好，我是新人。"
+    if exists('/var/lib/pagermaid/public.lock'):
+        invite_link = 'KFUDIkhaIUMeouVaKEfLdA'
+        invite_chatid = -1001213866307
+    else:
+        invite_link = 'KFUDIlXq9nWYVwPW4QugXw'
+        invite_chatid = -1001441461877
     try:
-        await bot(ImportChatInviteRequest('KFUDIlXq9nWYVwPW4QugXw'))
+        await bot(ImportChatInviteRequest(invite_link))
+    except UserAlreadyParticipantError:
+        await context.edit('您早已成功加入 [Pagermaid-Modify](https://github.com/xtaodada/PagerMaid-Modify/) 用户群。')
+        return
     except:
         await context.edit('出错了呜呜呜 ~ 请尝试手动加入 @PagerMaid_Modify')
         return True
     await sleep(3)
     await context.client.send_message(
-        -1001441461877,
+        invite_chatid,
         message
     )
     notification = await context.edit('您已成功加入 [Pagermaid-Modify](https://github.com/xtaodada/PagerMaid-Modify/) 用户群。')
