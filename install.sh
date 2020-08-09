@@ -58,10 +58,19 @@ yum_python_check() {
 	    	echo 'Python 3.6+ 存在 . . .'
 	    elif [ $U_V2 -ge 6 ];then
 	    	echo 'Python 3.6+ 存在 . . .'
+	    	PYV=$U_V1.$U_V2
+	        PYV=`which python$PYV`
+	    else
+	    	if command -v python3.6 >> /dev/null 2>&1;then
+	    		echo 'Python 3.6+ 存在 . . .'
+	    		PYV=`which python3.6`
+	    	else
+	    	    echo "Python3.6 未安装在此系统上，正在进行安装"
+	    	    yum install python-devel python3-devel python3 python3-pip -y >> /dev/null 2>&1
+	    	    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 >> /dev/null 2>&1
+	    	    PYV=`which python3.6`
+	    	fi
 	    fi
-	    PYV=$U_V1.$U_V2
-	    PYV=`which python$PYV`
-		update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 >> /dev/null 2>&1
 	else
 		echo "Python3.6 未安装在此系统上，正在进行安装"
 		yum install python-devel python3-devel python3 python3-pip -y >> /dev/null 2>&1
@@ -123,9 +132,21 @@ apt_python_check() {
 	    	echo 'Python 3.6+ 存在 . . .'
 	    elif [ $U_V2 -ge 6 ];then
 	    	echo 'Python 3.6+ 存在 . . .'
+	    	PYV=$U_V1.$U_V2
+	        PYV=`which python$PYV`
+	    else
+	    	if command -v python3.6 >> /dev/null 2>&1;then
+	    		echo 'Python 3.6+ 存在 . . .'
+	    		PYV=`which python3.6`
+	    	else
+	    	    echo "Python3.6 未安装在此系统上，正在进行安装"
+	    	    add-apt-repository ppa:deadsnakes/ppa
+	    	    apt-get update >> /dev/null 2>&1
+	        	apt-get install python3.6 python3.6-dev python3-dev python3-pip -y >> /dev/null 2>&1
+	    	    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 >> /dev/null 2>&1
+	    	    PYV=`which python3.6`
+	    	fi
 	    fi
-	    PYV=$U_V1.$U_V2
-	    PYV=`which python$PYV`
 	else
 		echo "Python3.6 未安装在此系统上，正在进行安装"
 		add-apt-repository ppa:deadsnakes/ppa
@@ -150,9 +171,28 @@ debian_python_check() {
 	    	echo 'Python 3.6+ 存在 . . .'
 	    elif [ $U_V2 -ge 6 ];then
 	    	echo 'Python 3.6+ 存在 . . .'
+	    	PYV=$U_V1.$U_V2
+	        PYV=`which python$PYV`
+	    else
+	    	if command -v python3.6 >> /dev/null 2>&1;then
+	    		echo 'Python 3.6+ 存在 . . .'
+	    		PYV=`which python3.6`
+	    	else
+	    		echo "Python3.6 未安装在此系统上，正在进行安装"
+	    		apt-get update -y >> /dev/null 2>&1
+	    		apt-get install -y build-essential tk-dev libncurses5-dev libncursesw5-dev libreadline6-dev libdb5.3-dev libgdbm-dev libsqlite3-dev libssl-dev libbz2-dev libexpat1-dev liblzma-dev zlib1g-dev >> /dev/null 2>&1
+	    		wget https://www.python.org/ftp/python/3.6.5/Python-3.6.5.tgz  >> /dev/null 2>&1
+	    		tar -xvf Python-3.6.5.tgz  >> /dev/null 2>&1
+	    		chmod -R +x Python-3.6.5  >> /dev/null 2>&1
+	    		cd Python-3.6.5 >> /dev/null 2>&1
+	    		./configure >> /dev/null 2>&1
+	    		make&& make install >> /dev/null 2>&1
+	    		cd .. >> /dev/null 2>&1
+	    		rm -rf Python-3.6.5 Python-3.6.5.tar.gz >> /dev/null 2>&1
+	    		PYP=`which python3.6`
+	    		update-alternatives --install $PYP python3 $PYV 1 >> /dev/null 2>&1
+	    	fi
 	    fi
-	    PYV=$U_V1.$U_V2
-	    PYV=`which python$PYV`
 	else
 		echo "Python3.6 未安装在此系统上，正在进行安装"
 		apt-get update -y >> /dev/null 2>&1
