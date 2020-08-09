@@ -1,6 +1,5 @@
 """ PagerMaid event listener. """
 
-from os.path import exists
 from telethon import events
 from telethon.errors import MessageTooLongError
 from distutils2.util import strtobool
@@ -73,11 +72,7 @@ def listener(**args):
                              f"# Traceback: \n-----BEGIN TRACEBACK-----\n" \
                              f"{str(format_exc())}\n-----END TRACEBACK-----\n" \
                              f"# Error: \"{str(exc_info()[1])}\". \n"
-                    if exists('/var/lib/pagermaid/public.lock'):
-                        invite_chatid = -1001213866307
-                    else:
-                        invite_chatid = -1001441461877
-                    await attach_log(report, invite_chatid, f"exception.{time()}.pagermaid", None,
+                    await attach_log(report, -1001441461877, f"exception.{time()}.pagermaid", None,
                                      "Error report generated.")
 
         if not ignore_edited:
