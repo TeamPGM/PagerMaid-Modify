@@ -1,5 +1,6 @@
 """ PagerMaid event listener. """
 
+from os.path import exists
 from telethon import events
 from telethon.errors import MessageTooLongError
 from distutils2.util import strtobool
@@ -9,14 +10,7 @@ from sys import exc_info
 from telethon.events import StopPropagation
 from pagermaid import bot, config, help_messages
 from pagermaid.utils import attach_log
-try:
-    import sentry_sdk
-    from sentry_sdk import capture_message, configure_scope
-except:
-    pass
 
-def strip_sentry(event, hint):
-    return None
 
 def listener(**args):
     """ Register an event listener. """
@@ -79,21 +73,11 @@ def listener(**args):
                              f"# Traceback: \n-----BEGIN TRACEBACK-----\n" \
                              f"{str(format_exc())}\n-----END TRACEBACK-----\n" \
                              f"# Error: \"{str(exc_info()[1])}\". \n"
-                    report_sentry = f"# M: {context.text}\n" \
-                             f"# Trace: \n" \
-                             f"{str(format_exc())}\n" \
-                             f"# Error: \"{str(exc_info()[1])}\". \n"
-                    try:
-                        sentry_sdk.init("https://969892b513374f75916aaac1014aa7c2@o416616.ingest.sentry.io/5312335", release="d6f5b9725459f5d0cf96f005bf584d1a7235c405")
-                        with configure_scope() as scope:
-                            scope.user = eval('{"id": "' + str(context.sender_id) + '"}')
-                            scope.set_tag("ChatID", f"{str(context.chat_id)}")
-                            scope.level = 'error'
-                        capture_message(report_sentry)
-                        sentry_sdk.init("https://969892b513374f75916aaac1014aa7c2@o416616.ingest.sentry.io/5312335", release="d6f5b9725459f5d0cf96f005bf584d1a7235c405", before_send=strip_sentry)
-                    except:
-                        pass
-                    await attach_log(report, -1001441461877, f"exception.{time()}.pagermaid", None,
+                    if exists('/var/lib/pagermaid/public.lock'):
+                        invite_chatid = -1001213866307
+                    else:
+                        invite_chatid = -1001441461877
+                    await attach_log(report, invite_chatid, f"exception.{time()}.pagermaid", None,
                                      "Error report generated.")
 
         if not ignore_edited:

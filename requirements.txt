@@ -31,5 +31,4 @@ flask_bcrypt
 flask_wtf
 wtforms
 cheroot
-sentry-sdk==0.16.0
 PySocks
