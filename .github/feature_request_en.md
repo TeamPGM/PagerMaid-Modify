@@ -1,0 +1,15 @@
+---
+name: 🍰 Feature Request
+about: Submit a new feature request
+---
+
+<!--
+Feature Request(https://github.com/xtaodada/PagerMaid-Modify/wiki) or [issue](https://github.com/xtaodada/PagerMaid-Modify/issues) , and provide all the information required by this template.
+Otherwise the issue will be closed immediately.
+-->
+
+### What feature is it?
+
+### What can this function do?
+
+### Additional description
