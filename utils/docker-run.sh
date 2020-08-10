@@ -75,7 +75,6 @@ login() {
   echo ""
   sleep 2
   /pagermaid/workdir/venv/bin/python -m pagermaid
-  echo "hello world" > /pagermaid/workdir/install.lock
   exit
 }
 
@@ -85,9 +84,3 @@ start_installation() {
   configure
   login
 }
-
-if [ ! -f "/pagermaid/workdir/install.lock" ]; then
-  start_installation
-else
-  /pagermaid/workdir/venv/bin/python -m pagermaid
-fi

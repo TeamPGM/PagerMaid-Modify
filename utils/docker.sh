@@ -94,7 +94,7 @@ stop_pager(){
   printf "请输入 PagerMaid 容器的名称："
   read -r container_name <&1
   echo "正在关闭 Docker 镜像 . . ."
-  docker stop -f "$container_name" > /dev/null 2>&1
+  docker stop "$container_name" > /dev/null 2>&1
   echo ""
   shon_online
 }
@@ -103,7 +103,9 @@ start_pager(){
   printf "请输入 PagerMaid 容器的名称："
   read -r container_name <&1
   echo "正在启动 Docker 容器 . . ."
-  docker run -it --restart=always --name="$container_name" --hostname="$container_name" pagermaid_"$container_name"  > /dev/null 2>&1
+  docker start $container_name  > /dev/null 2>&1
+  docker exec -it $container_name chmod  -R 777 /pagermaid/workdir  > /dev/null 2>&1
+  docker exec -dt $container_name /pagermaid/workdir/venv/bin/python -m pagermaid  > /dev/null 2>&1
   echo ""
   echo "Docker 启动完毕。"
   echo ""
@@ -115,6 +117,7 @@ restart_pager(){
   read -r container_name <&1
   echo "正在重新启动 Docker 容器 . . ."
   docker restart $container_name > /dev/null 2>&1
+  docker exec -dt pagermaid /pagermaid/workdir/venv/bin/python -m pagermaid  > /dev/null 2>&1
   echo ""
   echo "Docker 重新启动完毕。"
   echo ""
