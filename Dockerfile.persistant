@@ -39,4 +39,4 @@ WORKDIR /pagermaid/workdir
 RUN python3 -m virtualenv venv
 RUN source venv/bin/activate; pip3 install -r requirements.txt
 CMD ["sh","utils/docker-run.sh"]
-CMD ["sh","utils/entrypoint.sh"]
+
