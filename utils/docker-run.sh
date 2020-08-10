@@ -82,13 +82,13 @@ login() {
 
 systemctl_reload(){
   echo "正在写入系统进程守护 . . ."
-  sudo -i>> /dev/null 2>&1
     echo "[Unit]
     Description=PagerMaid-Modify telegram utility daemon
     After=network.target
     [Install]
     WantedBy=multi-user.target
     [Service]
+    User=pagermaid
     Type=simple
     WorkingDirectory=/pagermaid/workdir
     ExecStart=/pagermaid/workdir/venv/bin/python -m pagermaid
@@ -97,7 +97,6 @@ systemctl_reload(){
     chmod 755 pagermaid.service >> /dev/null 2>&1
     systemctl daemon-reload >> /dev/null 2>&1
     systemctl enable pagermaid >> /dev/null 2>&1
-    su pagermaid >> /dev/null 2>&1
     echo ""
     echo "请在脚本退出后输入 exit 退出 Docker"
     echo ""
