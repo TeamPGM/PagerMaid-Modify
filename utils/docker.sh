@@ -55,16 +55,16 @@ access_check() {
 build_docker() {
   printf "请输入 PagerMaid 容器的名称："
   read -r container_name <&1
-  echo "正在构建 Docker 镜像 . . ."
+  echo "正在拉取 Docker 镜像 . . ."
   docker rm -f "$container_name" > /dev/null 2>&1
-  docker build - --force-rm --no-cache -t pagermaid_"$container_name" < Dockerfile.persistant
+  docker pull pagermaid_modify
 }
 
 start_docker() {
   echo "正在启动 Docker 容器 . . ."
   echo "在登录后，请按 Ctrl + C 使容器在后台模式下重新启动。"
   sleep 3
-  docker run -it --restart=always --name="$container_name" --hostname="$container_name" pagermaid_"$container_name" <&1
+  docker run -it --restart=always --name="$container_name" --hostname="$container_name" pagermaid_modify <&1
   echo ""
   echo "Docker 创建完毕。"
   echo ""

@@ -31,13 +31,12 @@ RUN pacman -Syu --needed --noconfirm \
     file \
     procps-ng
 RUN sed -e 's;^# \(%wheel.*NOPASSWD.*\);\1;g' -i /etc/sudoers
-RUN useradd pagermaid -u 3333 -r -m -d /pagermaid
+RUN useradd pagermaid -r -m -d /pagermaid
 RUN usermod -aG wheel,users pagermaid
 USER pagermaid
 RUN mkdir /pagermaid/workdir
 RUN git clone -b master https://github.com/xtaodada/PagerMaid-Modify.git /pagermaid/workdir
 WORKDIR /pagermaid/workdir
-RUN python3 -m virtualenv /pagermaid/venv
-RUN source /pagermaid/venv/bin/activate; pip3 install -r requirements.txt
+RUN python3 -m virtualenv venv
+RUN source venv/bin/activate; pip3 install -r requirements.txt
 CMD ["sh","utils/docker-run.sh"]
-CMD ["sh","utils/entrypoint.sh"]
