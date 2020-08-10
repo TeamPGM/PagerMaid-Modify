@@ -103,11 +103,20 @@ start_pager(){
   printf "请输入 PagerMaid 容器的名称："
   read -r container_name <&1
   echo "正在启动 Docker 容器 . . ."
-  echo "在登录后，请按 Ctrl + D 使 Docker 在后台模式下运行。"
-  sleep 3
-  docker run -it --restart=always --name="$container_name" --hostname="$container_name" pagermaid_"$container_name" <&1
+  docker run -it --restart=always --name="$container_name" --hostname="$container_name" pagermaid_"$container_name"  > /dev/null 2>&1
   echo ""
   echo "Docker 启动完毕。"
+  echo ""
+  shon_online
+}
+
+restart_pager(){
+  printf "请输入 PagerMaid 容器的名称："
+  read -r container_name <&1
+  echo "正在重新启动 Docker 容器 . . ."
+  docker restart $container_name > /dev/null 2>&1
+  echo ""
+  echo "Docker 重新启动完毕。"
   echo ""
   shon_online
 }
@@ -126,8 +135,9 @@ echo "  1) Docker 安装 PagerMaid"
 echo "  2) Docker 卸载 PagerMaid"
 echo "  3) 关闭 PagerMaid"
 echo "  4) 启动 PagerMaid"
-echo "  5) 重新安装 PagerMaid"
-echo "  6) 退出脚本"
+echo "  5) 重新启动 PagerMaid"
+echo "  6) 重新安装 PagerMaid"
+echo "  7) 退出脚本"
 echo ""
 echo "     Version：0.1.0"
 echo ""
@@ -138,8 +148,9 @@ case $N in
   2) cleanup ;;
   3) stop_pager ;;
   4) start_pager ;;
-  5) reinstall_pager ;;
-  6) exit ;;
+  5) restart_pager ;;
+  6) reinstall_pager ;;
+  7) exit ;;
   *) echo "Wrong input!" ;;
 esac 
 }
