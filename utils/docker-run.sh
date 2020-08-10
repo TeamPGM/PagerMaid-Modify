@@ -70,44 +70,21 @@ configure() {
 
 login() {
   echo ""
-  echo "下面进行程序试运行。"
-  echo "请在账户授权完毕后按 Ctrl + C 退出"
+  echo "下面进行程序运行。"
+  echo "请在账户授权完毕后，按 Ctrl + D 使 Docker 在后台模式下运行。"
   echo ""
   sleep 2
-  /pagermaid/workdir/venv/bin/python -m pagermaid
-  echo ""
-  echo "程序试运行完毕。"
-  echo ""
+  while true
+  do
+    /pagermaid/workdir/venv/bin/python -m pagermaid
+  done
 }
 
-systemctl_reload(){
-  echo "正在写入系统进程守护 . . ."
-    echo "[Unit]
-    Description=PagerMaid-Modify telegram utility daemon
-    After=network.target
-    [Install]
-    WantedBy=multi-user.target
-    [Service]
-    User=pagermaid
-    Type=simple
-    WorkingDirectory=/pagermaid/workdir
-    ExecStart=/pagermaid/workdir/venv/bin/python -m pagermaid
-    Restart=always
-    ">/etc/systemd/system/pagermaid.service
-    chmod 755 pagermaid.service >> /dev/null 2>&1
-    systemctl daemon-reload >> /dev/null 2>&1
-    systemctl enable pagermaid >> /dev/null 2>&1
-    echo ""
-    echo "请在脚本退出后输入 exit 退出 Docker"
-    echo ""
-    exit
-}
 
 start_installation() {
   welcome
   configure
   login
-  systemctl_reload
 }
 
 start_installation

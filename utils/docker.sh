@@ -8,7 +8,6 @@ fi
 
 welcome() {
   echo ""
-  echo "欢迎使用 PagerMaid-Modify 一键安装程序。"
   echo "安装即将开始"
   echo "如果您想取消安装，"
   echo "请在 5 秒钟内按 Ctrl+C 终止此脚本。"
@@ -66,23 +65,83 @@ start_docker() {
   echo "在登录后，请按 Ctrl + C 使容器在后台模式下重新启动。"
   sleep 3
   docker run -it --restart=always --name="$container_name" --hostname="$container_name" pagermaid_"$container_name" <&1
-  docker restart $container_name > /dev/null 2>&1
+  echo ""
+  echo "Docker 创建完毕。"
+  echo ""
+  shon_online
 }
 
-cleanup() {
-  echo "正在清理临时文件 . . ."
-  rm -rf /tmp/pagermaid
-}
 
 start_installation() {
-  check_sys
   welcome
   docker_check
   git_check
   access_check
   build_docker
   start_docker
-  cleanup
 }
 
-start_installation
+cleanup(){
+  printf "请输入 PagerMaid 容器的名称："
+  read -r container_name <&1
+  echo "正在删除 Docker 镜像 . . ."
+  docker rm -f "$container_name" > /dev/null 2>&1
+  echo ""
+  shon_online
+}
+
+stop_pager(){
+  printf "请输入 PagerMaid 容器的名称："
+  read -r container_name <&1
+  echo "正在关闭 Docker 镜像 . . ."
+  docker stop -f "$container_name" > /dev/null 2>&1
+  echo ""
+  shon_online
+}
+
+start_pager(){
+  printf "请输入 PagerMaid 容器的名称："
+  read -r container_name <&1
+  echo "正在启动 Docker 容器 . . ."
+  echo "在登录后，请按 Ctrl + D 使 Docker 在后台模式下运行。"
+  sleep 3
+  docker run -it --restart=always --name="$container_name" --hostname="$container_name" pagermaid_"$container_name" <&1
+  echo ""
+  echo "Docker 启动完毕。"
+  echo ""
+  shon_online
+}
+
+reinstall_pager(){
+  build_docker
+  start_docker
+}
+
+shon_online(){
+echo ""
+echo "欢迎使用 PagerMaid-Modify Docker 一键安装脚本。"
+echo ""
+echo "请选择您需要进行的操作:"
+echo "  1) Docker 安装 PagerMaid"
+echo "  2) Docker 卸载 PagerMaid"
+echo "  3) 关闭 PagerMaid"
+echo "  4) 启动 PagerMaid"
+echo "  5) 重新安装 PagerMaid"
+echo "  6) 退出脚本"
+echo ""
+echo "     Version：0.1.0"
+echo ""
+echo -n "请输入编号: "
+read N
+case $N in
+  1) start_installation ;;
+  2) cleanup ;;
+  3) stop_pager ;;
+  4) start_pager ;;
+  5) reinstall_pager ;;
+  6) exit ;;
+  *) echo "Wrong input!" ;;
+esac 
+}
+
+shon_online
