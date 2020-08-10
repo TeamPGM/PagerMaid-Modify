@@ -66,14 +66,14 @@ yum_python_check() {
 	    		PYV=`which python3.6`
 	    	else
 	    	    echo "Python3.6 未安装在此系统上，正在进行安装"
-	    	    yum install python-devel python3-devel python3 python3-pip -y >> /dev/null 2>&1
+	    	    yum install python3 -y >> /dev/null 2>&1
 	    	    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 >> /dev/null 2>&1
 	    	    PYV=`which python3.6`
 	    	fi
 	    fi
 	else
 		echo "Python3.6 未安装在此系统上，正在进行安装"
-		yum install python-devel python3-devel python3 python3-pip -y >> /dev/null 2>&1
+		yum install python3 -y >> /dev/null 2>&1
 		update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 >> /dev/null 2>&1
 	fi
 	if command -v pip3 >> /dev/null 2>&1;then
@@ -97,7 +97,7 @@ yum_screen_check() {
 
 yum_require_install(){
 	echo "正在安装系统所需依赖，可能需要几分钟的时间 . . ."
-	yum install zbar zbar-devel ImageMagick wget -y >> /dev/null 2>&1
+	yum install python-devel python3-devel zbar zbar-devel ImageMagick wget -y >> /dev/null 2>&1
 	wget -T 2 -O /etc/yum.repos.d/konimex-neofetch-epel-7.repo https://copr.fedorainfracloud.org/coprs/konimex/neofetch/repo/epel-7/konimex-neofetch-epel-7.repo >> /dev/null 2>&1
 	yum groupinstall "Development Tools" -y >> /dev/null 2>&1
     yum-config-manager --add-repo https://download.opensuse.org/repositories/home:/Alexander_Pozdnyakov/CentOS_7/ >> /dev/null 2>&1
@@ -142,7 +142,7 @@ apt_python_check() {
 	    	    echo "Python3.6 未安装在此系统上，正在进行安装"
 	    	    add-apt-repository ppa:deadsnakes/ppa
 	    	    apt-get update >> /dev/null 2>&1
-	        	apt-get install python3.6 python3.6-dev python3-dev python3-pip -y >> /dev/null 2>&1
+	        	apt-get install python3.6 -y >> /dev/null 2>&1
 	    	    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 >> /dev/null 2>&1
 	    	    PYV=`which python3.6`
 	    	fi
@@ -151,7 +151,7 @@ apt_python_check() {
 		echo "Python3.6 未安装在此系统上，正在进行安装"
 		add-apt-repository ppa:deadsnakes/ppa
 		apt-get update >> /dev/null 2>&1
-		apt-get install python3.6 python3.6-dev python3-dev python3-pip -y >> /dev/null 2>&1
+		apt-get install python3.6 -y >> /dev/null 2>&1
 		update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 >> /dev/null 2>&1
 	fi
 	if command -v pip3 >> /dev/null 2>&1;then
@@ -230,7 +230,7 @@ apt_screen_check() {
 
 apt_require_install(){
 	echo "正在安装系统所需依赖，可能需要几分钟的时间 . . ."
-	apt-get install imagemagick software-properties-common tesseract-ocr tesseract-ocr-chi-sim libzbar-dev -y >> /dev/null 2>&1
+	apt-get install python3.6-dev python3-dev imagemagick software-properties-common tesseract-ocr tesseract-ocr-chi-sim libzbar-dev -y >> /dev/null 2>&1
     add-apt-repository ppa:dawidd0811/neofetch
     apt-get install neofetch -y >> /dev/null 2>&1
 }
@@ -246,6 +246,9 @@ download_repo() {
   git clone https://github.com/xtaodada/PagerMaid-Modify.git /var/lib/pagermaid >> /dev/null 2>&1
   cd /var/lib/pagermaid >> /dev/null 2>&1
   echo "Hello World!">/var/lib/pagermaid/public.lock
+}
+
+pypi_install(){
   echo "下载安装 pypi 依赖中 . . ."
   $PYV -m pip install --upgrade pip >> /dev/null 2>&1
   $PYV -m pip install -r requirements.txt >> /dev/null 2>&1
@@ -362,6 +365,7 @@ start_installation() {
     yum_screen_check
     yum_require_install
     download_repo
+    pypi_install
     configure
     login_screen
     systemctl_reload
@@ -375,6 +379,7 @@ start_installation() {
     apt_screen_check
     apt_require_install
     download_repo
+    pypi_install
     configure
     login_screen
     systemctl_reload
@@ -388,6 +393,7 @@ start_installation() {
     apt_screen_check
     debian_require_install
     download_repo
+    pypi_install
     configure
     login_screen
     systemctl_reload
@@ -467,6 +473,44 @@ restart_pager(){
 	shon_online
 }
 
+install_require(){
+  if [ "$release" = "centos" ]; then
+    echo "系统检测通过。"
+    yum_update
+    yum_git_check
+    yum_python_check
+    yum_screen_check
+    yum_require_install
+    pypi_install
+    systemctl_reload
+    shon_online
+  elif [ "$release" = "ubuntu" ]; then
+  	echo "系统检测通过。"
+    apt_update
+    apt_git_check
+    apt_python_check
+    apt_screen_check
+    apt_require_install
+    pypi_install
+    systemctl_reload
+    shon_online
+   elif [ "$release" = "debian" ]; then
+   	echo "系统检测通过。"
+   	welcome
+    apt_update
+    apt_git_check
+    debian_python_check
+    apt_screen_check
+    debian_require_install
+    pypi_install
+    systemctl_reload
+    shon_online
+  else
+    echo "目前暂时不支持此系统。"
+    fi
+  exit 1
+}
+
 shon_online(){
 echo "请选择您需要进行的操作:"
 echo "  1) 安装 PagerMaid"
@@ -476,9 +520,10 @@ echo "  4) 重新登陆 PagerMaid"
 echo "  5) 关闭 PagerMaid"
 echo "  6) 启动 PagerMaid"
 echo "  7) 重新启动 PagerMaid"
-echo "  8) 退出脚本"
+echo "  8) 重新安装 PagerMaid 依赖"
+echo "  9) 退出脚本"
 echo ""
-echo "     Version：0.1.0"
+echo "     Version：0.1.3"
 echo ""
 echo -n "请输入编号: "
 read N
@@ -490,7 +535,8 @@ case $N in
   5) stop_pager ;;
   6) start_pager ;;
   7) restart_pager ;;
-  8) exit ;;
+  8) install_require ;;
+  9) exit ;;
   *) echo "Wrong input!" ;;
 esac 
 }
