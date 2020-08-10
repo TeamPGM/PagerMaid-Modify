@@ -454,6 +454,7 @@ stop_pager(){
 	echo "正在关闭 PagerMaid . . ."
 	systemctl stop pagermaid >> /dev/null 2>&1
 	echo ""
+	sleep 3
 	shon_online
 }
 
@@ -462,6 +463,7 @@ start_pager(){
 	echo "正在启动 PagerMaid . . ."
 	systemctl start pagermaid >> /dev/null 2>&1
 	echo ""
+	sleep 3
 	shon_online
 }
 
@@ -470,6 +472,7 @@ restart_pager(){
 	echo "正在重新启动 PagerMaid . . ."
 	systemctl restart pagermaid >> /dev/null 2>&1
 	echo ""
+	sleep 3
 	shon_online
 }
 
