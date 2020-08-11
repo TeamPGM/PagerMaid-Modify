@@ -63,6 +63,8 @@ def listener(**args):
             except MessageTooLongError:
                 await context.edit("出错了呜呜呜 ~ 生成的输出太长，无法显示。")
             except BaseException:
+                exc_info = sys.exc_info()[1]
+                exc_format = format_exc()
                 try:
                     await context.edit("出错了呜呜呜 ~ 执行此命令时发生错误。")
                 except BaseException:
@@ -76,8 +78,8 @@ def listener(**args):
                              f"# Message: \n-----BEGIN TARGET MESSAGE-----\n" \
                              f"{context.text}\n-----END TARGET MESSAGE-----\n" \
                              f"# Traceback: \n-----BEGIN TRACEBACK-----\n" \
-                             f"{str(format_exc())}\n-----END TRACEBACK-----\n" \
-                             f"# Error: \"{str(sys.last_value)}\". \n"
+                             f"{str(exc_format)}\n-----END TRACEBACK-----\n" \
+                             f"# Error: \"{str(exc_info)}\". \n"
                     await attach_log(report, -1001441461877, f"exception.{time()}.pagermaid", None,
                                      "Error report generated.")
 

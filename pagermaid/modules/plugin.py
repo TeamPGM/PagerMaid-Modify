@@ -228,6 +228,9 @@ async def plugin(context):
     elif context.parameter[0] == "update":
         unneed_update = "无需更新："
         need_update = "\n需要更新："
+        if not exists(f"{plugin_directory}version.json"):
+            await context.edit("安装一个仓库内插件再试试？")
+            return
         with open(f"{plugin_directory}version.json", 'r', encoding="utf-8") as f:
             version_json = json.load(f)
         plugin_online = \
