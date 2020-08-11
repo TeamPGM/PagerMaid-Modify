@@ -8,14 +8,14 @@ with open("requirements.txt", "r") as fp:
     install_requires = fp.read()
 
 setup(
-    name="pagermaid",
-    version="2020.2.post13",
-    author="Stykers",
-    author_email="stykers@stykers.moe",
+    name="pagermaid_modify",
+    version="2020.8.post1",
+    author="xtaodada",
+    author_email="xtao@xtaolink.cn",
     description="A telegram utility daemon and plugin framework.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://katonkeyboard.moe/pagermaid.html",
+    url="https://github.com/xtaodada/PagerMaid-Modify",
     packages=find_packages(),
     entry_points={
         'console_scripts': [
