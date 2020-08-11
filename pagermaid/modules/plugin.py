@@ -1,7 +1,7 @@
 """ PagerMaid module to manage plugins. """
 
 import json
-from re import match, I
+from re import search, I
 from requests import get
 from os import remove, rename, chdir, path
 from os.path import exists
@@ -260,7 +260,7 @@ async def plugin(context):
             json.loads(get("https://raw.githubusercontent.com/xtaodada/PagerMaid_Plugins/master/list.json").content)[
                 'list']
             for i in plugin_online:
-                if match(plugin_name, i['name'], I):
+                if search(plugin_name, i['name'], I):
                     search_result.extend(['`' + i['name'] + '` / `' + i['version'] + '`\n  ' + i['des-short']])
             if len(search_result) == 0:
                 await context.edit("未在插件仓库中搜索到相关插件。")
