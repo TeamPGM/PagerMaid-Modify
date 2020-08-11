@@ -29,8 +29,8 @@ jobs:
     # 此步骤使用 GitHub 的 https://github.com/actions/setup-python
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
+      with:
+        python-version: ${{ matrix.python-version }}
     # 安装依赖
     - name: Install dependencies
       run: |
