@@ -102,8 +102,6 @@ start_pager(){
   read -r container_name <&1
   echo "正在启动 Docker 容器 . . ."
   docker start $container_name > /dev/null 2>&1
-  docker exec -it $container_name chmod -R 777 /pagermaid/workdir  > /dev/null 2>&1
-  docker exec -dt $container_name /pagermaid/workdir/venv/bin/python -m pagermaid  > /dev/null 2>&1
   echo ""
   echo "Docker 启动完毕。"
   echo ""
@@ -115,7 +113,6 @@ restart_pager(){
   read -r container_name <&1
   echo "正在重新启动 Docker 容器 . . ."
   docker restart $container_name > /dev/null 2>&1
-  docker exec -dt pagermaid /pagermaid/workdir/venv/bin/python -m pagermaid > /dev/null 2>&1
   echo ""
   echo "Docker 重新启动完毕。"
   echo ""
@@ -140,7 +137,7 @@ echo "  5) 重新启动 PagerMaid"
 echo "  6) 重新安装 PagerMaid"
 echo "  7) 退出脚本"
 echo ""
-echo "     Version：0.1.0"
+echo "     Version：0.2.0"
 echo ""
 echo -n "请输入编号: "
 read N
