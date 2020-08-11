@@ -74,12 +74,20 @@ login() {
   echo "请在账户授权完毕后，按 Ctrl + C 使 Docker 在后台模式下运行。"
   echo ""
   sleep 2
+  echo "Hello world!" > /pagermaid/workdir/install.lock
   /pagermaid/workdir/venv/bin/python -m pagermaid
   exit
 }
 
+
 start_installation() {
-  welcome
-  configure
-  login
+  if [ ! -f "/pagermaid/workdir/install.lock" ];then
+    welcome
+    configure
+    login
+  else
+    /pagermaid/workdir/venv/bin/python -m pagermaid
+  fi
 }
+
+start_installation
