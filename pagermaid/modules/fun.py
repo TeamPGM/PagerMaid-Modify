@@ -50,7 +50,10 @@ async def teletype(context):
         buffer_commit = f"{buffer}{cursor}"
         await context.edit(buffer_commit)
         await sleep(interval)
-        await context.edit(buffer)
+        try:
+            await context.edit(buffer)
+        except MessageNotModifiedError:
+            pass
         await sleep(interval)
 
 
