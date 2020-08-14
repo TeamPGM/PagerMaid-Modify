@@ -89,6 +89,9 @@ async def sticker(context):
 
         response = request.urlopen(
             request.Request(f'http://t.me/addstickers/{pack_name}'))
+        if not response.status == 200:
+            await context.edit("连接到 Telegram 服务器失败 . . .")
+            return
         http_response = response.read().decode("utf8").split('\n')
 
         if "  A <strong>Telegram</strong> user has created the <strong>Sticker&nbsp;Set</strong>." not in \
