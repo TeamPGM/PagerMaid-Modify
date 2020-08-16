@@ -32,3 +32,4 @@ flask_wtf
 wtforms
 cheroot
 PySocks
+certifi

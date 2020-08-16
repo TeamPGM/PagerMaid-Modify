@@ -1,5 +1,7 @@
 """ PagerMaid module to handle sticker collection. """
 
+import certifi
+import ssl
 from asyncio import sleep
 from os import remove
 from urllib import request
@@ -88,7 +90,7 @@ async def sticker(context):
             command = '/newanimated'
 
         response = request.urlopen(
-            request.Request(f'http://t.me/addstickers/{pack_name}'))
+            request.Request(f'http://t.me/addstickers/{pack_name}'), context=ssl.create_default_context(cafile=certifi.where()))
         if not response.status == 200:
             await context.edit("连接到 Telegram 服务器失败 . . .")
             return
