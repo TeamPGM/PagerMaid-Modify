@@ -2,7 +2,7 @@ from time import time
 from uuid import uuid1
 from os.path import exists
 from requests import get
-from pagermaid import bot, working_dir
+from pagermaid import working_dir
 from pagermaid.listener import listener
 
 

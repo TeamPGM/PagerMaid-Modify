@@ -170,7 +170,7 @@ async def highlight(context):
 
 
 async def handle_failure(context, target_file_path):
-    await context.edit("出错了呜呜呜 ~ 请向原作者报告此问题。")
+    await context.edit("出错了呜呜呜 ~ 请报告此问题。")
     try:
         remove("result.png")
         remove(target_file_path)

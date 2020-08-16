@@ -117,22 +117,6 @@ async def trace(context):
         await context.edit("无效的参数。")
 
 
-@listener(is_plugin=False, outgoing=True, command="contact",
-          description="向 Kat 发送消息。",
-          parameters="<message>")
-async def contact(context):
-    """ Sends a message to Kat. """
-    await context.edit("请点击 `[这里](https://t.me/PagerMaid_Modify)` 进入.",
-                       parse_mode="markdown")
-    message = "Hi, I would like to report something about PagerMaid."
-    if context.arguments:
-        message = context.arguments
-    await context.client.send_message(
-        503691334,
-        message
-    )
-
-
 @listener(is_plugin=False, outgoing=True, command="chat",
           description="加入 Pagermaid-Modify 用户群。")
 async def contact_chat(context):

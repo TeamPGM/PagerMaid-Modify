@@ -198,6 +198,7 @@ async def hitokoto(context):
                 break
             except:
                 continue
+    hitokoto_type = ''
     if hitokoto_json['type'] == 'a':
         hitokoto_type = '动画'
     elif hitokoto_json['type'] == 'b':
@@ -223,17 +224,3 @@ async def hitokoto(context):
     elif hitokoto_json['type'] == 'l':
         hitokoto_type = '抖机灵'
     await context.edit(f"{hitokoto_json['hitokoto']} - {hitokoto_json['from']}（{str(hitokoto_type)}）")
-
-
-@listener(is_plugin=False, outgoing=True, command="source",
-          description="显示原始 PagerMaid git 存储库的URL。")
-async def source(context):
-    """ Outputs the git repository URL. """
-    await context.edit("https://git.stykers.moe/scm/~stykers/pagermaid.git")
-
-
-@listener(is_plugin=False, outgoing=True, command="site",
-          description="显示原始 PagerMaid 项目主页的URL。")
-async def site(context):
-    """ Outputs the site URL. """
-    await context.edit("https://katonkeyboard.moe/pagermaid.html")
