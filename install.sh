@@ -317,6 +317,7 @@ configure() {
 read_checknum(){
 	if [ "$ftime" == "111" ]; then
 		echo "失败次数达到上限！" && exit 1
+        fi
 	read -p "请输入您的登录验证码: " checknum
 	screen -x -S userbot -p 0 -X stuff "$checknum"
 	screen -x -S userbot -p 0 -X stuff $'\n'
@@ -335,6 +336,7 @@ read_checknum(){
 		fi
 	fi
 }
+
 login_screen(){
 	screen -S userbot -X quit >> /dev/null 2>&1
 	screen -dmS userbot
