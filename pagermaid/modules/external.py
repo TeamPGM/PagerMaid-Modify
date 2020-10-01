@@ -2,10 +2,7 @@
 
 from googletrans import Translator, LANGUAGES
 from os import remove
-from requests import get
-from time import sleep
-from threading import Thread
-from bs4 import BeautifulSoup
+from magic_google import MagicGoogle
 from gtts import gTTS
 from re import compile as regex_compile
 from pagermaid import log
@@ -103,11 +100,9 @@ async def tts(context):
           parameters="<query>")
 async def googletest(context):
     """ Searches Google for a string. """
-    USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:65.0) Gecko/20100101 Firefox/65.0"
-    headers = {"user-agent": USER_AGENT}
+    mg = MagicGoogle()
     reply = await context.get_reply_message()
     query = context.arguments
-    lang = config['application_language']
     if query:
         pass
     elif reply:
@@ -117,31 +112,16 @@ async def googletest(context):
         return
 
     query = query.replace(' ', '+')
-    URL = [('https://google.com.hk/search?q=' + query),('https://google.com/search?q=' + query)]
     await context.edit("正在拉取结果 . . .")
-    count = 0
-    for g in URL:
-        count += 1
-        resp = get(g, headers=headers)
-        if resp.status_code == 200:
-            break
-        elif count == 2 and not resp.status_code == 200:
+    results = ""
+    for i in mg.search(query=query, num=int(config['result_length'])):
+        try:
+            title = i['text'][0:30] + '...'
+            link = i['url']
+            results += f"\n[{title}]({link}) \n"
+        except:
             await context.edit("连接到 google服务器 失败")
             return
-        else:
-            pass
-    soup = BeautifulSoup(resp.content, "html.parser")
-    results = ""
-    count = 0
-    for g in soup.find_all('div', class_='r'):
-        if count == int(config['result_length']):
-            break
-        count += 1
-        anchors = g.find_all('a')
-        if anchors:
-            title = g.find('h3').text
-            link = anchors[0]['href']
-            results += f"\n[{title}]({link}) \n"
     await context.edit(f"**Google** |`{query}`| 🎙 🔍 \n"
                        f"{results}",
                        link_preview=False)
