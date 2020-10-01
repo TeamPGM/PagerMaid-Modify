@@ -64,7 +64,13 @@ def listener(**args):
                 await function(context)
                 if posthog_capture:
                     try:
-                        posthog.capture(str(context.sender_id), 'Function ' + context.text.split()[0].replace('-', ''))
+                        if context.sender_id > 0 or context.sender_id == 1087968824:
+                            posthog.capture(str(context.sender_id),
+                                            'Function ' + context.text.split()[0].replace('-', ''))
+                        else:
+                            me = await bot.get_me()
+                            posthog.capture(str(me.id),
+                                            'Function ' + context.text.split()[0].replace('-', ''))
                     except:
                         logs.info(
                             "上报命令使用状态出错了呜呜呜 ~。"
@@ -94,7 +100,13 @@ def listener(**args):
                     await attach_report(report, f"exception.{time()}.pagermaid", None,
                                      "Error report generated.")
                     try:
-                        posthog.capture(str(context.sender_id), 'Error ' + context.text.split()[0].replace('-', ''), {'ChatID': str(context.chat_id), 'cause': str(exc_info)})
+                        if context.sender_id > 0 or context.sender_id == 1087968824:
+                            posthog.capture(str(context.sender_id), 'Error ' + context.text.split()[0].replace('-', ''),
+                                            {'ChatID': str(context.chat_id), 'cause': str(exc_info)})
+                        else:
+                            me = await bot.get_me()
+                            posthog.capture(str(me.id), 'Error ' + context.text.split()[0].replace('-', ''),
+                                            {'ChatID': str(context.chat_id), 'cause': str(exc_info)})
                     except:
                         logs.info(
                             "上报错误出错了呜呜呜 ~。"
