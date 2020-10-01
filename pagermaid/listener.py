@@ -1,6 +1,6 @@
 """ PagerMaid event listener. """
 
-import sys
+import sys, posthog
 
 from telethon import events
 from telethon.errors import MessageTooLongError
@@ -8,8 +8,10 @@ from distutils2.util import strtobool
 from traceback import format_exc
 from time import gmtime, strftime, time
 from telethon.events import StopPropagation
-from pagermaid import bot, config, help_messages
-from pagermaid.utils import attach_log
+from pagermaid import bot, config, help_messages, logs
+from pagermaid.utils import attach_report
+
+posthog.api_key = '1WepU-o7JwNKYqPNymWr_mrCu3RVPD-p28PUikPDfsI'
 
 def noop(*args, **kw):
     pass
@@ -54,10 +56,19 @@ def listener(**args):
                         parameter = []
                     context.parameter = parameter
                     context.arguments = context.pattern_match.group(1)
+                    posthog_capture = True
                 except BaseException:
+                    posthog_capture = False
                     context.parameter = None
                     context.arguments = None
                 await function(context)
+                if posthog_capture:
+                    try:
+                        posthog.capture(str(context.sender_id), 'Function ' + context.text.split()[0].replace('-', ''))
+                    except:
+                        logs.info(
+                            "上报命令使用状态出错了呜呜呜 ~。"
+                        )
             except StopPropagation:
                 raise StopPropagation
             except MessageTooLongError:
@@ -80,8 +91,14 @@ def listener(**args):
                              f"# Traceback: \n-----BEGIN TRACEBACK-----\n" \
                              f"{str(exc_format)}\n-----END TRACEBACK-----\n" \
                              f"# Error: \"{str(exc_info)}\". \n"
-                    await attach_log(report, -1001441461877, f"exception.{time()}.pagermaid", None,
+                    await attach_report(report, f"exception.{time()}.pagermaid", None,
                                      "Error report generated.")
+                    try:
+                        posthog.capture(str(context.sender_id), 'Error ' + context.text.split()[0].replace('-', ''), {'ChatID': str(context.chat_id), 'cause': str(exc_info)})
+                    except:
+                        logs.info(
+                            "上报错误出错了呜呜呜 ~。"
+                        )
 
         if not ignore_edited:
             bot.add_event_handler(handler, events.MessageEdited(**args))
