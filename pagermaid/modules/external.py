@@ -33,7 +33,7 @@ async def translate(context):
             result = translator.translate(clear_emojis(message), dest=lang)
         except:
             from translate import Translator as trans
-            result = trans(to_lang=lang.replace('zh-cn', 'cn').translate(clear_emojis(message))
+            result = trans(to_lang=lang.replace('zh-cn', 'zh')).translate(clear_emojis(message))
     except ValueError:
         await context.edit("出错了呜呜呜 ~ 找不到目标语言，请更正配置文件中的错误。")
         return
