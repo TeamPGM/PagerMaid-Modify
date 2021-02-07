@@ -26,6 +26,7 @@ def move_plugin(file_path):
 
 
 def update_version(file_path, plugin_content, plugin_name, version):
+    plugin_directory = f"{working_dir}/plugins/"
     with open(file_path, 'wb') as f:
         f.write(plugin_content)
     with open(f"{plugin_directory}version.json", 'r', encoding="utf-8") as f:
