@@ -87,6 +87,10 @@ Pagermaid 是一个用在 Telegram 的实用工具。
 
 尤其是需要保护好 `pagermaid.session` ，任何拥有此文件的人都可以进行包括修改二次验证密码、更改手机号等操作。
 
+# 与原作者联络
+
+您可以在搭建完毕后在 Telegram 客户端上使用 -contact <message> 并点击链接进入通过 Pagermaid 自动打开的 PM ，如果您安装上出现了问题，请通过 [stykers@stykers.moe](mailto:stykers@stykers.moe) 给我发电子邮件，或在 Telegram [@KatOnKeyboard](https://t.me/KatOnKeyboard) 上给我发消息。
+
 # 特别感谢
 
 [Amine Oversoul](https://bitbucket.org/oversoul/pagermaid-ui)
