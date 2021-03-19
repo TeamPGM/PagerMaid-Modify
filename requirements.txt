@@ -13,7 +13,7 @@ pytz
 cowpy
 googletrans
 translate
-gtts
+gtts>=2.2.2
 gtts-token
 wordcloud
 telethon
