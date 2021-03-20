@@ -11,7 +11,7 @@ coloredlogs
 requests
 pytz
 cowpy
-googletrans
+googletrans>=4.0.0-rc1
 translate
 gtts>=2.2.2
 gtts-token
