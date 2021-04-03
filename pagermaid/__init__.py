@@ -1,5 +1,10 @@
 """ PagerMaid initialization. """
 
+import sentry_sdk
+
+from sentry_sdk.integrations.redis import RedisIntegration
+from subprocess import run, PIPE
+from time import time
 from os import getcwd, makedirs
 from os.path import exists
 from sys import version_info, platform
@@ -106,6 +111,39 @@ elif not mtp_addr == '' and not mtp_port == '' and not mtp_secret == '':
 else:
     bot = TelegramClient("pagermaid", api_key, api_hash, auto_reconnect=True)
 redis = StrictRedis(host=redis_host, port=redis_port, db=redis_db)
+
+
+async def save_id():
+    me = await bot.get_me()
+    sentry_sdk.set_user({"id": me.id, "ip_address": "{{auto}}"})
+    logs.info("设置用户标识成功。")
+
+
+with bot:
+    bot.loop.run_until_complete(save_id())
+
+
+def before_send(event, hint):
+    global report_time
+    if time() <= report_time + 30:
+        report_time = time()
+        return None
+    else:
+        report_time = time()
+        return event
+
+
+report_time = time()
+git_hash = run("git rev-parse --short HEAD", stdout=PIPE, shell=True).stdout.decode()
+sentry_sdk.init(
+    "https://969892b513374f75916aaac1014aa7c2@o416616.ingest.sentry.io/5312335",
+    traces_sample_rate=1.0,
+    release=git_hash,
+    before_send=before_send,
+    environment="production",
+    integrations=[RedisIntegration()]
+)
+
 
 def redis_status():
     try:

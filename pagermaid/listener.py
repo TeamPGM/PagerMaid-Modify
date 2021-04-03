@@ -1,6 +1,6 @@
 """ PagerMaid event listener. """
 
-import sys
+import sys, sentry_sdk, re
 
 from telethon import events
 from telethon.errors import MessageTooLongError
@@ -55,25 +55,15 @@ def listener(**args):
                         parameter = []
                     context.parameter = parameter
                     context.arguments = context.pattern_match.group(1)
-                    ana = True
                 except BaseException:
-                    ana = False
                     context.parameter = None
                     context.arguments = None
                 await function(context)
-                if ana:
-                    try:
-                        msg_report = await bot.send_message(1263764543, context.text.split()[0].replace('-', '/run '))
-                        await msg_report.delete()
-                    except:
-                        logs.info(
-                            "上报命令使用状态出错了呜呜呜 ~。"
-                        )
             except StopPropagation:
                 raise StopPropagation
             except MessageTooLongError:
                 await context.edit("出错了呜呜呜 ~ 生成的输出太长，无法显示。")
-            except BaseException:
+            except BaseException as e:
                 exc_info = sys.exc_info()[1]
                 exc_format = format_exc()
                 try:
@@ -94,8 +84,9 @@ def listener(**args):
                     await attach_report(report, f"exception.{time()}.pagermaid", None,
                                      "Error report generated.")
                     try:
-                        msg_report = await bot.send_message(1263764543, context.text.split()[0].replace('-', '/error '))
-                        await msg_report.delete()
+                        sentry_sdk.set_context("Target", {"ChatID": str(context.chat_id), "UserID": str(context.sender_id), "Msg": context.text})
+                        sentry_sdk.set_tag('com', re.findall("\w+",str.lower(context.text.split()[0]))[0])
+                        sentry_sdk.capture_exception(e)
                     except:
                         logs.info(
                             "上报错误出错了呜呜呜 ~。"
