@@ -116,7 +116,10 @@ redis = StrictRedis(host=redis_host, port=redis_port, db=redis_db)
 
 async def save_id():
     me = await bot.get_me()
-    sentry_sdk.set_user({"id": me.id, "ip_address": "{{auto}}"})
+    if me.username is not None:
+        sentry_sdk.set_user({"id": me.id, "name": me.first_name, "username": me.username, "ip_address": "{{auto}}"})
+    else:
+        sentry_sdk.set_user({"id": me.id, "name": me.first_name, "ip_address": "{{auto}}"})
     logs.info("设置用户标识成功。")
 
 
