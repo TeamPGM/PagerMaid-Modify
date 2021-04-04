@@ -125,6 +125,9 @@ with bot:
 
 def before_send(event, hint):
     global report_time
+    exc_info = hint.get("exc_info")
+    if exc_info and isinstance(exc_info[0], CancelledError):
+        return None
     if time() <= report_time + 30:
         report_time = time()
         return None
@@ -134,7 +137,7 @@ def before_send(event, hint):
 
 
 report_time = time()
-git_hash = run("git rev-parse --short HEAD", stdout=PIPE, shell=True).stdout.decode()
+git_hash = run("git rev-parse HEAD", stdout=PIPE, shell=True).stdout.decode()
 sentry_sdk.init(
     "https://969892b513374f75916aaac1014aa7c2@o416616.ingest.sentry.io/5312335",
     traces_sample_rate=1.0,
