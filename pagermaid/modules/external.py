@@ -1,6 +1,6 @@
 """ PagerMaid features that uses external HTTP APIs other than Telegram. """
 
-from googletrans import Translator, LANGUAGES
+from pygoogletranslation import Translator
 from os import remove
 from magic_google import MagicGoogle
 from gtts import gTTS
@@ -18,7 +18,7 @@ async def translate(context):
     translator = Translator()
     reply = await context.get_reply_message()
     message = context.arguments
-    lang = config['application_language']
+    ap_lang = config['application_language']
     if message:
         pass
     elif reply:
@@ -30,17 +30,18 @@ async def translate(context):
     try:
         await context.edit(lang('translate_processing'))
         try:
-            result = translator.translate(clear_emojis(message), dest=lang)
+            result = translator.translate(clear_emojis(message), dest=ap_lang)
         except:
             from translate import Translator as trans
-            result = trans(to_lang=lang.replace('zh-cn', 'zh')).translate(clear_emojis(message))
+            result = trans(to_lang=ap_lang.replace('zh-cn', 'zh')).translate(clear_emojis(message))
     except ValueError:
         await context.edit(lang('translate_ValueError'))
         return
 
-    source_lang = LANGUAGES[f'{result.src.lower()}']
-    trans_lang = LANGUAGES[f'{result.dest.lower()}']
-    result = f"**{lang('translate_hits')}** {lang('translate_original_lang')} {source_lang.title()}:\n{result.text}"
+    source_lang = result.src
+    source_text = result.origin
+    trans_lang = result.dest
+    result = f"**{lang('translate_hits')}**\n{lang('translate_original_lang')}: {source_lang}\n{source_text} -> {result.text}"
 
     if len(result) > 4096:
         await context.edit(lang('translate_tg_limit_uploading_file'))
@@ -48,9 +49,9 @@ async def translate(context):
         return
     await context.edit(result)
     if len(result) <= 4096:
-        await log(f"{translate('get')} `{message}` {lang('translate_from')} {source_lang} {lang('translate_to')} {trans_lang}")
+        await log(f"{lang('translate_get')}: `{source_text}` \n{lang('translate_from')} {source_lang} {lang('translate_to')} {trans_lang}")
     else:
-        await log(f"{translate('get')}{translate('from')} {source_lang} {lang('translate_to')} {trans_lang}.")
+        await log(f"{lang('translate_get')}{translate('translate_from')} {source_lang} {lang('translate_to')} {trans_lang}.")
 
 
 @listener(is_plugin=False, outgoing=True, command="tts",
@@ -60,7 +61,7 @@ async def tts(context):
     """ Send TTS stuff as voice message. """
     reply = await context.get_reply_message()
     message = context.arguments
-    to_lang = config['application_tts']
+    ap_lang = config['application_tts']
     if message:
         pass
     elif reply:
@@ -71,7 +72,7 @@ async def tts(context):
 
     try:
         await context.edit(lang('tts_processing'))
-        gTTS(message, lang=to_lang)
+        gTTS(message, lang=ap_lang)
     except AssertionError:
         await context.edit(lang('tts_AssertionError'))
         return
@@ -81,13 +82,13 @@ async def tts(context):
     except RuntimeError:
         await context.edit(lang('tts_RuntimeError'))
         return
-    google_tts = gTTS(message, lang=to_lang)
+    google_tts = gTTS(message, lang=ap_lang)
     google_tts.save("vocals.mp3")
     with open("vocals.mp3", "rb") as audio:
         line_list = list(audio)
         line_count = len(line_list)
     if line_count == 1:
-        google_tts = gTTS(message, lang=to_lang)
+        google_tts = gTTS(message, lang=ap_lang)
         google_tts.save("vocals.mp3")
     with open("vocals.mp3", "r"):
         await context.client.send_file(context.chat_id, "vocals.mp3", voice_note=True)

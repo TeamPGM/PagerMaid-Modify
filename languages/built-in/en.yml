@@ -168,7 +168,7 @@ translate_ValueError: Something went wrong ~ The target language could not be fo
 translate_hits: text translation
 translate_original_lang: source language
 translate_tg_limit_uploading_file: The output exceeds the TG limit, and it is trying to upload a file.
-translate_get: put a message
+translate_get: Message
 translate_from: from
 translate_to: translated to
 # tts
