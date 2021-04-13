@@ -105,7 +105,7 @@ async def speedtest(context):
         f"Latency: `{result['ping']}` \n"
         f"Timestamp: `{result['timestamp']}`"
     )
-    await context.client.send_file(context.chat.id, result['share'], caption=des)
+    await context.client.send_file(context.chat_id, result['share'], caption=des)
     await context.delete()
 
 
