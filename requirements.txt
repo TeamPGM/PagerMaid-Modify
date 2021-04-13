@@ -21,7 +21,7 @@ pillow
 python-magic
 pygments
 distutils2-py3
-speedtest-cli
+speedtest-cli>=2.1.3
 gitpython
 werkzeug
 flask

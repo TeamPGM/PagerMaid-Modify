@@ -65,7 +65,29 @@ async def update(context):
 
     upstream_remote = repo.remote('upstream')
     upstream_remote.fetch(active_branch)
-    changelog = await changelog_gen(repo, f'HEAD..upstream/{active_branch}')
+    try:
+        changelog = await changelog_gen(repo, f'HEAD..upstream/{active_branch}')
+    except:
+        distribution = await execute('lsb_release -a')
+        if distribution.find('Ubuntu') != -1 or distribution.find('Debain') != -1:
+            try:
+                await execute('apt-get install --upgrade git -y')
+            except:
+                await context.edit(lang('update_failed') + '\n' + lang('update_auto_upgrade_git_failed_ubuntu'))
+                return
+        elif distribution.find('Cent') != -1:
+            try:
+                await execute('yum install git -y')
+            except:
+                await context.edit(lang('update_failed') + '\n' + lang('update_auto_upgrade_git_failed_cent'))
+                return
+        else:
+            try:
+                await execute('apt-get install --upgrade git -y')
+                await execute('yum install git -y')
+            except:
+                pass
+        await context.edit(lang('update_auto_upgrade_git_hint'))
 
 
     if not parameter:

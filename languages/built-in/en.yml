@@ -228,10 +228,10 @@ coin_lost: I lost my coin
 # help
 ## lang
 lang_des: Switch language.
-lang_change_to: The language has been switched to
+lang_change_to: The language has been switched to 
 lang_reboot: Restarting.
-lang_current_lang: The current language is
-lang_all_lang: All available languages ​​are
+lang_current_lang: The current language is 
+lang_all_lang: All available languages ​​are 
 
 # message
 ## id
@@ -434,7 +434,7 @@ chat_join_success: You have successfully joined
 #update
 ## update
 update_des: Check for updates from remote sources and install them to PagerMaid-Modify.
-update_processing: Checking the remote source for update..."
+update_processing: Checking the remote source for update...
 update_platform_version: system version number
 update_git_version: Git version number
 update_local_git_change: local modification
@@ -453,3 +453,6 @@ update_hint: Please use the following command to update
 update_found_pulling: An update was found and is being pulled...
 update_success: Update successfully
 update_failed: update failed
+update_auto_upgrade_git_failed_ubuntu: It is detected that your system is Ubuntu or Debain. Try to upgrade git automatically but failed. Please upgrade manually.
+update_auto_upgrade_git_failed_cent: It is detected that your system is CentOS, try to upgrade git automatically but failed, please upgrade manually.
+update_auto_upgrade_git_hint: Your git version is too low and has tried to automatically upgrade for you. If you are reminded of this error again, please upgrade manually. 
