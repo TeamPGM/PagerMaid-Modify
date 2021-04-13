@@ -60,7 +60,7 @@ async def tts(context):
     """ Send TTS stuff as voice message. """
     reply = await context.get_reply_message()
     message = context.arguments
-    lang = config['application_tts']
+    to_lang = config['application_tts']
     if message:
         pass
     elif reply:
@@ -71,7 +71,7 @@ async def tts(context):
 
     try:
         await context.edit(lang('tts_processing'))
-        gTTS(message, lang=lang)
+        gTTS(message, lang=to_lang)
     except AssertionError:
         await context.edit(lang('tts_AssertionError'))
         return
@@ -81,13 +81,13 @@ async def tts(context):
     except RuntimeError:
         await context.edit(lang('tts_RuntimeError'))
         return
-    google_tts = gTTS(message, lang=lang)
+    google_tts = gTTS(message, lang=to_lang)
     google_tts.save("vocals.mp3")
     with open("vocals.mp3", "rb") as audio:
         line_list = list(audio)
         line_count = len(line_list)
     if line_count == 1:
-        google_tts = gTTS(message, lang=lang)
+        google_tts = gTTS(message, lang=to_lang)
         google_tts.save("vocals.mp3")
     with open("vocals.mp3", "r"):
         await context.client.send_file(context.chat_id, "vocals.mp3", voice_note=True)
