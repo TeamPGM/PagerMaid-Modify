@@ -12,6 +12,7 @@ RUN source ~/.bashrc \
     && apt install --no-install-recommends -y \
         software-properties-common \
         build-essential \
+        sudo \
         python3 \
         python3-dev \
         python3-pip \
