@@ -305,9 +305,9 @@ apt_disable: 已禁用
 apt_uploading: 上传插件中 . . .
 apt_updated: 已更新
 apt_why_not_install_a_plugin: 安装一个仓库内插件再试试？
-apt_loading_from_online_but_nothing_need_to_update: 正在读取云端插件列表...完成\n正在读取本地插件版本信息...完成\n**没有需要更新的插件。**
-apt_loading_from_online_and_updating: 正在读取云端插件列表...完成\n正在读取本地插件版本信息...完成\n正在更新插件...
-apt_reading_list: 正在读取云端插件列表...完成\n正在读取本地插件版本信息...完成\n
+apt_loading_from_online_but_nothing_need_to_update: "正在读取云端插件列表...完成\n正在读取本地插件版本信息...完成\n**没有需要更新的插件。**"
+apt_loading_from_online_and_updating: "正在读取云端插件列表...完成\n正在读取本地插件版本信息...完成\n正在更新插件..."
+apt_reading_list: "正在读取云端插件列表...完成\n正在读取本地插件版本信息...完成\n"
 apt_search_no_name: 没插件名我怎么搜索？
 apt_search_not_found: 未在插件仓库中搜索到相关插件。
 apt_search_result_hint: 以下是插件仓库的搜索结果

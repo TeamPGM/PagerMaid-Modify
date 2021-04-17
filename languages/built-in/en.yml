@@ -307,9 +307,9 @@ apt_disable: disabled
 apt_uploading: uploading plugin...
 apt_updated: updated
 apt_why_not_install_a_plugin: Install a plug-in in the warehouse and try again?
-apt_loading_from_online_but_nothing_need_to_update: Reading cloud plug-in list...Done\nReading local plug-in version information...Done\n**There are no plug-ins that need to be updated. **
-apt_loading_from_online_and_updating: Reading cloud plug-in list...complete\nreading local plug-in version information...complete\nupdating plug-in...
-apt_reading_list: Reading cloud plug-in list...complete\nreading local plug-in version information...complete\n
+apt_loading_from_online_but_nothing_need_to_update: "Reading cloud plug-in list...Done\nReading local plug-in version information...Done\n**There are no plug-ins that need to be updated. **"
+apt_loading_from_online_and_updating: "Reading cloud plug-in list...complete\nreading local plug-in version information..."complete\nupdating plug-in...
+apt_reading_list: "Reading cloud plug-in list...complete\nreading local plug-in version information...complete\n"
 apt_search_no_name: How can I search without a plug-in name?
 apt_search_not_found: No related plugins were found in the plugin repository.
 apt_search_result_hint: The following are the search results of the plugin repository
