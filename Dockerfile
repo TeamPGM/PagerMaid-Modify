@@ -41,7 +41,7 @@ RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
 RUN ln -sf /usr/bin/python3 /usr/bin/python \
     && python -m pip install --upgrade pip \
     && pip install wheel \
-    && pip install eyed3 pycryptodome
+    && rm -rf /pagermaid/.cache
 RUN echo "pagermaid ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/pagermaid
 RUN useradd pagermaid -r -m -d /pagermaid
 RUN usermod -aG sudo,users pagermaid
@@ -50,5 +50,5 @@ RUN mkdir /pagermaid/workdir
 RUN git clone -b master https://github.com/Xtao-Labs/PagerMaid-Modify.git /pagermaid/workdir
 WORKDIR /pagermaid/workdir
 RUN python -m pip install -r requirements.txt \
-    && sudo rm -rf /root/.cache
+    && rm -rf /pagermaid/.cache
 CMD ["sh","utils/docker-run.sh"]
