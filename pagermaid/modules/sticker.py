@@ -105,8 +105,15 @@ async def sticker(context):
             pack_title += " (animated)"
             command = '/newanimated'
 
-        response = request.urlopen(
-            request.Request(f'http://t.me/addstickers/{pack_name}'), context=ssl.create_default_context(cafile=certifi.where()))
+        try:
+            response = request.urlopen(
+                request.Request(f'http://t.me/addstickers/{pack_name}'), context=ssl.create_default_context(cafile=certifi.where()))
+        except UnicodeEncodeError:
+            pack_name = 's' + hex(context.sender.id)[2:]
+            if animated:
+                pack_name = 's' + hex(context.sender.id)[2:] + '_animated'
+            response = request.urlopen(
+                request.Request(f'http://t.me/addstickers/{pack_name}'), context=ssl.create_default_context(cafile=certifi.where()))
         if not response.status == 200:
             try:
                 await context.edit(lang('sticker_telegram_server_error'))
