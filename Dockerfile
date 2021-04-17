@@ -49,7 +49,7 @@ RUN ln -sf /usr/bin/python3 /usr/bin/python \
     && pip install eyed3 pycryptodome
 RUN sed -e 's;^# \(%wheel.*NOPASSWD.*\);\1;g' -i /etc/sudoers
 RUN useradd pagermaid -r -m -d /pagermaid
-RUN usermod -aG wheel,users pagermaid
+RUN usermod -aG sudo,users pagermaid
 USER pagermaid
 RUN mkdir /pagermaid
 RUN git clone -b master https://github.com/Xtao-Labs/PagerMaid-Modify.git /pagermaid
