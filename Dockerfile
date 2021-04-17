@@ -49,6 +49,6 @@ USER pagermaid
 RUN mkdir /pagermaid/workdir
 RUN git clone -b master https://github.com/Xtao-Labs/PagerMaid-Modify.git /pagermaid/workdir
 WORKDIR /pagermaid/workdir
-RUN pip -m pip install -r requirements.txt
-RUN sudo rm -rf /root/.cache
+RUN python -m pip install -r requirements.txt \
+    && sudo rm -rf /root/.cache
 CMD ["sh","utils/docker-run.sh"]
