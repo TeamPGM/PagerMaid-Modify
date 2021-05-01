@@ -1,0 +1,3 @@
+#!/usr/bin/with-contenv bash
+
+chown -R pagermaid:pagermaid /pagermaid
