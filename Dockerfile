@@ -7,7 +7,8 @@ ARG WORK_DIR=/pagermaid/workdir
 ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
     SHELL=/bin/bash \
     LANG=zh_CN.UTF-8 \
-    PS1="\u@\h:\w \$ "
+    PS1="\u@\h:\w \$ " \
+    RUN_AS_ROOT=true
 SHELL ["/bin/bash", "-c"]
 WORKDIR $WORK_DIR
 RUN source ~/.bashrc \
@@ -46,6 +47,7 @@ RUN source ~/.bashrc \
     && apt-get install --no-install-recommends -y \
         ## 这是跨平台交叉编译要用到的包，如果自行构建，有可能不需要
         build-essential \
+        apt-utils \
         python3-dev \
         libxslt1-dev \
         libxml2-dev \
@@ -89,6 +91,7 @@ RUN source ~/.bashrc \
     ## 卸载编译依赖，清理安装缓存
     && sudo apt-get purge --auto-remove -y \
         build-essential \
+        apt-utils \
         python3-dev \
         libxslt1-dev \
         libxml2-dev \
