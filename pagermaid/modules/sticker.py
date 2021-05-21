@@ -24,7 +24,7 @@ async def sticker(context):
     if redis_status():
         if redis.get("sticker.round"):
             pic_round = True
-        if len(context.parameter) != 1:
+        if len(context.parameter) == 1:
             if context.parameter[0] == "set_round":
                 if pic_round:
                     redis.delete("sticker.round")
