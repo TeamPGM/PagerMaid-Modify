@@ -39,7 +39,7 @@ async def sticker(context):
                     except:
                         pass
                 return
-            elif context.parameter[0] == "png":
+            elif "png" in context.parameter[0]:
                 pic_round = False
     user = await bot.get_me()
     if not user.username:
@@ -101,12 +101,14 @@ async def sticker(context):
         sticker_already = False
         if len(split_strings) == 3:
             pack = split_strings[2]
-            emoji = split_strings[1]
+            if split_strings[1].replace("png", "") != "":
+                emoji = split_strings[1].replace("png", "")
         elif len(split_strings) == 2:
             if split_strings[1].isnumeric():
                 pack = int(split_strings[1])
             else:
-                emoji = split_strings[1]
+                if split_strings[1].replace("png", "") != "":
+                    emoji = split_strings[1].replace("png", "")
 
         pack_name = f"{user.username}_{pack}"
         pack_title = f"@{user.username} {lang('sticker_pack_title')} ({pack})"
