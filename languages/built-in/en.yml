@@ -388,6 +388,10 @@ sticker_no_pack_exist_creating: The sticker pack does not exist, it is being cre
 # upload_sticker
 us_animated_uploading: Upload animations...
 us_static_uploading: Uploading pictures...
+us_static_rounding: Rounding in progress...
+us_change_rounding_true: Automatic conversion of rounded corners for stickers has been turned on.
+us_change_rounding_false: Automatic conversion of rounded corners for stickers has been turned off.
+
 # system
 # sh
 sh_des: remotely execute Shell commands on Telegram.

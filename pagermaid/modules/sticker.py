@@ -8,18 +8,39 @@ from urllib import request
 from io import BytesIO
 from telethon.tl.types import DocumentAttributeFilename, MessageMediaPhoto
 from telethon.errors.common import AlreadyInConversationError
-from PIL import Image
+from PIL import Image, ImageOps
 from math import floor
-from pagermaid import bot
+from pagermaid import bot, redis, redis_status
 from pagermaid.listener import listener
 from pagermaid.utils import lang
 
 
-@listener(is_plugin=False, outgoing=True, command="sticker",
+@listener(is_plugin=False, outgoing=True, command="s",
           description=lang('sticker_des'),
           parameters="<emoji>")
 async def sticker(context):
     """ Fetches images/stickers and add them to your pack. """
+    pic_round = False
+    if redis_status():
+        if redis.get("sticker.round"):
+            pic_round = True
+        if len(context.parameter) != 1:
+            if context.parameter[0] == "set_round":
+                if pic_round:
+                    redis.delete("sticker.round")
+                    try:
+                        await context.edit(lang('us_change_rounding_false'))
+                    except:
+                        pass
+                else:
+                    redis.set("sticker.round", "true")
+                    try:
+                        await context.edit(lang('us_change_rounding_true'))
+                    except:
+                        pass
+                return
+            elif context.parameter[0] == "png":
+                pic_round = False
     user = await bot.get_me()
     if not user.username:
         user.username = user.first_name
@@ -98,6 +119,12 @@ async def sticker(context):
             except:
                 pass
             image = await resize_image(photo)
+            if pic_round:
+                try:
+                    await context.edit(lang('us_static_rounding'))
+                except:
+                    pass
+                image = await rounded_image(photo)
             file.name = "sticker.png"
             image.save(file, "PNG")
         else:
@@ -260,5 +287,53 @@ async def resize_image(photo):
         image = image.resize(size_new)
     else:
         image.thumbnail(maxsize)
+
+    return image
+
+async def rounded_image(photo):
+    image = Image.open(photo)
+    w = image.width
+    h = image.height
+    resize_size = 0
+    # 比较长宽
+    if w > h:
+        resize_size = h
+    else:
+        resize_size = w
+    half_size = floor(resize_size/2)
+
+    # 获取圆角模版，切割成4个角
+    tl = (0, 0, 256, 256)
+    tr = (256, 0, 512, 256)
+    bl = (0, 256, 256, 512)
+    br = (256, 256, 512, 512)
+    border = Image.open('pagermaid/static/images/rounded.png').convert('L')
+    tlp = border.crop(tl)
+    trp = border.crop(tr)
+    blp = border.crop(bl)
+    brp = border.crop(br)
+
+    # 缩放四个圆角
+    tlp = tlp.resize((half_size, half_size))
+    trp = trp.resize((half_size, half_size))
+    blp = blp.resize((half_size, half_size))
+    brp = brp.resize((half_size, half_size))
+
+
+    # 扩展四个角大小到目标图大小
+    # tlp = ImageOps.expand(tlp, (0, 0, w - tlp.width, h - tlp.height))
+    # trp = ImageOps.expand(trp, (w - trp.width, 0, 0, h - trp.height))
+    # blp = ImageOps.expand(blp, (0, h - blp.height, w - blp.width, 0))
+    # brp = ImageOps.expand(brp, (w - brp.width, h - brp.height, 0, 0))
+
+    # 四个角合并到一张新图上
+    ni = Image.new('RGB', (w, h), (0, 0, 0)).convert('L')
+    ni.paste(tlp, (0, 0))
+    ni.paste(trp, (w - trp.width, 0))
+    ni.paste(blp, (0, h - blp.height))
+    ni.paste(brp, (w - brp.width, h - brp.height))
+
+    # 合并圆角和原图
+    image.putalpha(ImageOps.invert(ni))
 
     return image

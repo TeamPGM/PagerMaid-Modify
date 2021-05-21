@@ -406,6 +406,9 @@ sticker_no_pack_exist_creating: 贴纸包不存在，正在创建 . . .
 ## upload_sticker
 us_animated_uploading: 上传动图中 . . .
 us_static_uploading: 上传图片中 . . .
+us_static_rounding: 图片圆角处理中 . . .
+us_change_rounding_true: 已开启贴纸自动转换圆角功能
+us_change_rounding_false: 已关闭贴纸自动转换圆角功能
 
 # system
 ## sh
