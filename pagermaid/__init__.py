@@ -136,7 +136,7 @@ async def save_id():
         sentry_sdk.set_user({"id": me.id, "name": me.first_name, "username": me.username, "ip_address": "{{auto}}"})
     else:
         sentry_sdk.set_user({"id": me.id, "name": me.first_name, "ip_address": "{{auto}}"})
-    logs.info(lang('save_id'))
+    logs.info(f"{lang('save_id')} {me.first_name}({me.id})")
 
 
 with bot:
