@@ -409,6 +409,12 @@ us_static_uploading: 上传图片中 . . .
 us_static_rounding: 图片圆角处理中 . . .
 us_change_rounding_true: 已开启贴纸自动转换圆角功能
 us_change_rounding_false: 已关闭贴纸自动转换圆角功能
+## merge
+merge_command_error: 命令参数错误！
+merge_processing_left: 正在处理第【
+merge_processing_right: 】条消息。
+merge_total_processed_left: 共处理了【
+merge_total_processed_right: 】张贴纸。
 
 # system
 ## sh

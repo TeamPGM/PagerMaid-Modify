@@ -391,6 +391,12 @@ us_static_uploading: 上傳圖片中…
 us_static_rounding: 圖片圓角處理中…
 us_change_rounding_true: 已開啟貼紙自動轉換圓角功能
 us_change_rounding_false: 已關閉貼紙自動轉換圓角功能
+## merge
+merge_command_error: 命令參數錯誤！
+merge_processing_left: 正在處理第【
+merge_processing_right: 】條消息。
+merge_total_processed_left: 共處理了【
+merge_total_processed_right: 】張貼紙。
 
 # system
 # sh
