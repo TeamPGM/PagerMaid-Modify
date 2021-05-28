@@ -358,7 +358,7 @@ speedtest_ConnectFailure: Connection failure.
 # connection
 connection_des: 顯示伺服器和Telegram之間的資訊。
 connection_hint: 連接資訊
-connection_country: 國家
+connection_country: 地區
 connection_dc: 連到的DC
 connection_nearest_dc: 最近的DC
 # ping

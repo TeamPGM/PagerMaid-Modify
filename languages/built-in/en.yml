@@ -357,8 +357,8 @@ speedtest_ServerFailure: Unable to determine the best server.
 speedtest_ConnectFailure: Connection failure.
 # connection
 connection_des: Display the connection information between the server running PagerMaid-Modify and the Telegram server.
-connection_hint: connection information
-connection_country: country
+connection_hint: Connection information
+connection_country: Area
 connection_dc: Data center connected to
 connection_nearest_dc: nearest data center
 # ping
