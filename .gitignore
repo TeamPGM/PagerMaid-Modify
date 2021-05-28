@@ -123,6 +123,9 @@ docker-compose.yml
 plugins/
 data/*
 pagermaid.egg-info/
+dump.rdb
+keyword.list
+requirements2.txt
 
 # Spyder project settings
 .spyderproject

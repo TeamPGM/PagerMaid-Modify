@@ -10,6 +10,6 @@ services:
     volumes:
       - ./:/pagermaid/workdir
     environment:
-      - RUN_AS_ROOT=true    # 是否以root权限运行pagermaid，true为是
-      - PUID=917            # 当 RUN_AS_ROOT=false 才生效，即以普通用户权限运行pagermaid
-      - PGID=917            # 当 RUN_AS_ROOT=false 才生效，即以普通用户权限运行pagermaid
+      - RUN_AS_ROOT=true    # 是否以root权限运行pagermaid，true为是，false为否
+      - PUID=917            # 当 RUN_AS_ROOT=false时才生效，即以普通用户权限运行pagermaid，可以修改为你定义用户的UID
+      - PGID=917            # 当 RUN_AS_ROOT=false时才生效，即以普通用户权限运行pagermaid，可以修改为你定义用户的GID
