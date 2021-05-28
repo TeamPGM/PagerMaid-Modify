@@ -107,7 +107,9 @@ async def speedtest(context):
     result = test.results.dict()
     des = (
         f"**Speedtest** \n"
-        f"Server: `{result['server']['name']}` \n"
+        f"Server: `{result['server']['name']} - "
+        f"{result['server']['cc']}` \n"
+        f"Sponsor: `{result['server']['sponsor']}` \n"
         f"Upload: `{unit_convert(result['upload'])}` \n"
         f"Download: `{unit_convert(result['download'])}` \n"
         f"Latency: `{result['ping']}` \n"
