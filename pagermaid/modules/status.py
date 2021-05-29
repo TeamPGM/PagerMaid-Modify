@@ -1,14 +1,15 @@
 """ PagerMaid module that contains utilities related to system status. """
 
+from json import loads
 from os import remove, popen
 from datetime import datetime
-from speedtest import Speedtest, ShareResultsConnectFailure, ShareResultsSubmitFailure, SpeedtestBestServerFailure
+from speedtest import distance, Speedtest, ShareResultsConnectFailure, ShareResultsSubmitFailure, NoMatchedServers, SpeedtestBestServerFailure
 from telethon import functions
 from platform import python_version, uname
 from wordcloud import WordCloud
 from telethon import version as telethon_version
 from sys import platform
-from re import sub
+from re import sub, findall
 from pathlib import Path
 from pagermaid import log, config, redis_status
 from pagermaid.utils import execute, upload_attachment
@@ -90,18 +91,43 @@ async def status(context):
           description=lang('speedtest_des'))
 async def speedtest(context):
     """ Tests internet speed using speedtest. """
-    await context.edit(lang('speedtest_processing'))
     test = Speedtest()
+    server, server_json = [], False
+    if len(context.parameter) == 1:
+        try:
+            server = [int(context.parameter[0])]
+        except ValueError:
+            await context.edit(lang('arg_error'))
+            return
+    elif len(context.parameter) >= 2:
+        try:
+            temp_json = findall(r'{(.*?)}', context.text.replace("'", '"'))
+            if len(temp_json) == 1:
+                server_json = loads("{" + temp_json[0] + "}")
+                server_json['d'] = distance(test.lat_lon, (float(server_json['lat']), float(server_json['lon'])))
+                test.servers = [server_json]
+            else:
+                await context.edit(lang('arg_error'))
+                return
+        except:
+            pass
+    await context.edit(lang('speedtest_processing'))
     try:
-        test.get_best_server()
-    except SpeedtestBestServerFailure:
+        if len(server) == 0:
+            if not server_json:
+                test.get_best_server()
+            else:
+                test.get_best_server(servers=test.servers)
+        else:
+            test.get_servers(servers=server)
+    except (SpeedtestBestServerFailure, NoMatchedServers) as e:
         await context.edit(lang('speedtest_ServerFailure'))
         return
     test.download()
     test.upload()
     try:
         test.results.share()
-    except ShareResultsConnectFailure or ShareResultsSubmitFailure:
+    except (ShareResultsConnectFailure, ShareResultsSubmitFailure) as e:
         await context.edit(lang('speedtest_ConnectFailure'))
         return
     result = test.results.dict()
