@@ -3,7 +3,8 @@
 from json import loads
 from os import remove, popen
 from datetime import datetime
-from speedtest import distance, Speedtest, ShareResultsConnectFailure, ShareResultsSubmitFailure, NoMatchedServers, SpeedtestBestServerFailure
+from speedtest import distance, Speedtest, ShareResultsConnectFailure, ShareResultsSubmitFailure, NoMatchedServers, \
+    SpeedtestBestServerFailure
 from telethon import functions
 from platform import python_version, uname
 from wordcloud import WordCloud
@@ -15,6 +16,14 @@ from pagermaid import log, config, redis_status
 from pagermaid.utils import execute, upload_attachment
 from pagermaid.listener import listener
 from pagermaid.utils import lang
+
+DCs = {
+    1: "149.154.175.50",
+    2: "149.154.167.51",
+    3: "149.154.175.100",
+    4: "149.154.167.91",
+    5: "91.108.56.130"
+}
 
 
 @listener(is_plugin=False, outgoing=True, command="sysinfo",
@@ -73,13 +82,13 @@ async def tty(context):
 async def status(context):
     database = lang('status_online') if redis_status() else lang('status_offline')
     text = (f"**{lang('status_hint')}** \n"
-        f"{lang('status_name')}: `{uname().node}` \n"
-        f"{lang('status_platform')}: `{platform}` \n"
-        f"{lang('status_release')}: `{uname().release}` \n"
-        f"{lang('status_python')}: `{python_version()}` \n"
-        f"{lang('status_telethon')}: `{telethon_version.__version__}` \n"
-        f"{lang('status_db')}: `{database}`"
-    )
+            f"{lang('status_name')}: `{uname().node}` \n"
+            f"{lang('status_platform')}: `{platform}` \n"
+            f"{lang('status_release')}: `{uname().release}` \n"
+            f"{lang('status_python')}: `{python_version()}` \n"
+            f"{lang('status_telethon')}: `{telethon_version.__version__}` \n"
+            f"{lang('status_db')}: `{database}`"
+            )
     await context.edit(text)
     dialogs = await context.client.get_dialogs()
     dialogs = len(dialogs)
@@ -155,6 +164,23 @@ async def connection(context):
         f"{lang('connection_country')}: `{datacenter.country}` \n"
         f"{lang('connection_dc')}: `{datacenter.this_dc}` \n"
         f"{lang('connection_nearest_dc')}: `{datacenter.nearest_dc}`"
+    )
+
+
+@listener(is_plugin=False, outgoing=True, command="pingdc",
+          description=lang('pingdc_des'))
+async def pingdc(context):
+    """ Ping your or other data center's IP addresses. """
+    data = []
+    for dc in range(1, 6):
+        result = await execute(f"ping -c 1 {DCs[dc]} | awk -F '/' " + "'END {print $5}'")
+        data.append(result)
+    await context.edit(
+        f"{lang('pingdc_1')}: `{data[0]}ms`\n"
+        f"{lang('pingdc_2')}: `{data[1]}ms`\n"
+        f"{lang('pingdc_3')}: `{data[2]}ms`\n"
+        f"{lang('pingdc_4')}: `{data[3]}ms`\n"
+        f"{lang('pingdc_5')}: `{data[4]}ms`"
     )
 
 

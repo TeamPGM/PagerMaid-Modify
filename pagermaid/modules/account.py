@@ -7,6 +7,7 @@ from telethon.errors.rpcerrorlist import PhotoExtInvalidError, UsernameOccupiedE
 from telethon.tl.functions.account import UpdateProfileRequest, UpdateUsernameRequest
 from telethon.tl.functions.photos import DeletePhotosRequest, GetUserPhotosRequest, UploadProfilePhotoRequest
 from telethon.tl.functions.users import GetFullUserRequest
+from telethon.tl.functions.contacts import BlockRequest, UnblockRequest
 from telethon.tl.types import InputPhoto, MessageMediaPhoto, MessageEntityMentionName
 from struct import error as StructError
 from pagermaid import bot, log
@@ -158,8 +159,8 @@ async def profile(context):
     await context.edit(lang('profile_process'))
     if context.reply_to_msg_id:
         reply_message = await context.get_reply_message()
-        user_id = reply_message.from_id
-        target_user = await context.client(GetFullUserRequest(user_id))
+        user = reply_message.from_id
+        target_user = await context.client(GetFullUserRequest(user))
     else:
         if len(context.parameter) == 1:
             user = context.parameter[0]
@@ -170,7 +171,10 @@ async def profile(context):
             user = user_object.id
         if context.message.entities is not None:
             if isinstance(context.message.entities[0], MessageEntityMentionName):
-                return await context.client(GetFullUserRequest(context.message.entities[0].user_id))
+                user = context.message.entities[0].user_id
+            else:
+                await context.edit(f"{lang('error_prefix')}{lang('arg_error')}")
+                return
         try:
             user_object = await context.client.get_entity(user)
             target_user = await context.client(GetFullUserRequest(user_object.id))
@@ -202,7 +206,7 @@ async def profile(context):
               f"{lang('profile_username')}: {username_system} \n" \
               f"ID: {target_user.user.id} \n" \
               f"{lang('profile_fname')}: {first_name} \n" \
-              f"{lang('pfofile_lname')}: {last_name} \n" \
+              f"{lang('profile_lname')}: {last_name} \n" \
               f"{lang('profile_bio')}: {biography} \n" \
               f"{lang('profile_gic')}: {target_user.common_chats_count} \n" \
               f"{lang('profile_verified')}: {verified} \n" \
@@ -254,3 +258,87 @@ async def profile(context):
             return
         except TypeError:
             await context.edit(caption)
+
+
+@listener(is_plugin=False, outgoing=True, command="block",
+          description=lang('block_des'),
+          parameters="<username/uid/reply>")
+async def block_user(context):
+    """ Block an user. """
+    user = None
+    if len(context.parameter) > 1:
+        await context.edit(f"{lang('error_prefix')}{lang('arg_error')}")
+        return
+
+    await context.edit(lang('block_process'))
+    if context.reply_to_msg_id:
+        reply_message = await context.get_reply_message()
+        user = reply_message.from_id.user_id
+    else:
+        if len(context.parameter) == 1:
+            user = context.parameter[0]
+            if user.isnumeric():
+                user = int(user)
+        else:
+            user_object = await context.client.get_me()
+            user = user_object.id
+        if context.message.entities is not None:
+            if isinstance(context.message.entities[0], MessageEntityMentionName):
+                user = context.message.entities[0].user_id
+            else:
+                await context.edit(f"{lang('error_prefix')}{lang('arg_error')}")
+                return
+    result = None
+    if not user:
+        await context.edit(f"{lang('error_prefix')}{lang('arg_error')}")
+        return
+    try:
+        result = await context.client(BlockRequest(id=user))
+    except Exception:
+        pass
+    if result:
+        await context.edit(f"{lang('block_success')} `{user}`")
+    else:
+        await context.edit(f"`{user}` {lang('block_exist')}")
+
+
+@listener(is_plugin=False, outgoing=True, command="unblock",
+          description=lang('unblock_des'),
+          parameters="<username/uid/reply>")
+async def unblock_user(context):
+    """ Unblock an user. """
+    user = None
+    if len(context.parameter) > 1:
+        await context.edit(f"{lang('error_prefix')}{lang('arg_error')}")
+        return
+
+    await context.edit(lang('unblock_process'))
+    if context.reply_to_msg_id:
+        reply_message = await context.get_reply_message()
+        user = reply_message.from_id.user_id
+    else:
+        if len(context.parameter) == 1:
+            user = context.parameter[0]
+            if user.isnumeric():
+                user = int(user)
+        else:
+            user_object = await context.client.get_me()
+            user = user_object.id
+        if context.message.entities is not None:
+            if isinstance(context.message.entities[0], MessageEntityMentionName):
+                user = context.message.entities[0].user_id
+            else:
+                await context.edit(f"{lang('error_prefix')}{lang('arg_error')}")
+                return
+    result = None
+    if not user:
+        await context.edit(f"{lang('error_prefix')}{lang('arg_error')}")
+        return
+    try:
+        result = await context.client(UnblockRequest(id=user))
+    except Exception:
+        pass
+    if result:
+        await context.edit(f"{lang('unblock_success')} `{user}`")
+    else:
+        await context.edit(f"`{user}` {lang('unblock_exist')}")

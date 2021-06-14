@@ -79,12 +79,22 @@ profile_no: 否
 profile_name: 用户简介
 profile_username: 道纹
 profile_fname: 名字
-pfofile_lname: 姓氏
+profile_lname: 姓氏
 profile_bio: 目前已知的情报
 profile_gic: 共同裙
 profile_verified: 官方认证
 profile_restricted: 受限制
 profile_type: 类型
+## block
+block_des: 拉黑一个用户
+block_process: 正在拉黑中 . . .
+block_success: 成功拉黑
+block_exist: 已存在黑名单中。
+## unblock
+unblock_des: 取消拉黑一个用户
+unblock_process: 正在取消拉黑中 . . .
+unblock_success: 成功取消拉黑
+unblock_exist: 不存在黑名单中。
 
 # avoid
 ## ghost
@@ -378,6 +388,13 @@ connection_hint: 连接信息
 connection_country: 地区
 connection_dc: 连接到的数据中心
 connection_nearest_dc: 最近的数据中心
+## pingdc
+pingdc_des: 测试您的服务器到 Telegram 数据服务器的延迟之间的延迟。
+pingdc_1: DC1(美国-迈阿密)
+pingdc_2: DC2(荷兰-阿姆斯特丹)
+pingdc_3: DC3(美国-迈阿密)
+pingdc_4: DC4(荷兰-阿姆斯特丹)
+pingdc_5: DC5(新加坡)
 ## ping
 ping_des: 计算运行 PagerMaid-Modify 的服务器和 Telegram 服务器之间的延迟。
 ## topcloud
