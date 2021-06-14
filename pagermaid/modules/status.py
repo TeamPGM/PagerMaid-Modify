@@ -156,9 +156,12 @@ async def speedtest(context):
     data = get(result['share']).content
     with open('speedtest.jpg', mode='wb') as f:
         f.write(data)
-    img = Image.open('speedtest.jpg')
-    c = img.crop((17, 11, 727, 389))
-    c.save('speedtest.jpg')
+    try:
+        img = Image.open('speedtest.jpg')
+        c = img.crop((17, 11, 727, 389))
+        c.save('speedtest.jpg')
+    except:
+        pass
     try:
         msg = await context.client.send_file(context.chat_id, 'speedtest.jpg', caption=des)
     except:
