@@ -17,6 +17,8 @@ from distutils2.util import strtobool
 from coloredlogs import ColoredFormatter
 from telethon import TelegramClient
 from telethon.errors.rpcerrorlist import MessageNotModifiedError, MessageIdInvalidError
+from sqlite3 import OperationalError
+
 
 persistent_vars = {}
 module_dir = __path__[0]
@@ -154,6 +156,8 @@ def before_send(event, hint):
         return None
     elif exc_info and isinstance(exc_info[0], MessageIdInvalidError):
         return None
+    elif exc_info and isinstance(exc_info[0], OperationalError):
+        return None
     if time() <= report_time + 30:
         report_time = time()
         return None
@@ -165,7 +169,7 @@ def before_send(event, hint):
 report_time = time()
 git_hash = run("git rev-parse HEAD", stdout=PIPE, shell=True).stdout.decode()
 sentry_sdk.init(
-    "https://e0db801a51f9485e85cb990e0ff34e81@o416616.ingest.sentry.io/5312335",
+    "https://26b73b1d975042e597bf0c9eab3913e8@o416616.ingest.sentry.io/5312335",
     traces_sample_rate=1.0,
     release=git_hash,
     before_send=before_send,

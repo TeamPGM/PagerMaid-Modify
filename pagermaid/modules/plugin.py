@@ -13,22 +13,45 @@ from pagermaid.utils import upload_attachment, lang
 from pagermaid.modules import plugin_list as active_plugins, __list_plugins
 
 
+def get_html(url):
+    data = get(url)
+    return data.status_code, data.content
+
+
+def remove_plugin(name):
+    plugin_directory = f"{working_dir}/plugins/"
+    try:
+        remove(f"{plugin_directory}{name}")
+    except FileNotFoundError:
+        pass
+    try:
+        remove(f"{plugin_directory}{name}.disabled")
+    except FileNotFoundError:
+        pass
+
+
+def download(name):
+    status, html = get_html(f'https://raw.githubusercontent.com/Xtao-Labs/PagerMaid_Plugins/master/{name}.py')
+    with open(f'plugins/{name}.py', mode='wb') as f:
+        f.write(html)
+    return f'plugins/{name}.py'
+
+
 def move_plugin(file_path):
     plugin_directory = f"{working_dir}/plugins/"
-    if exists(f"{plugin_directory}{file_path}"):
+    try:
         remove(f"{plugin_directory}{file_path}")
-        move(file_path, plugin_directory)
-    elif exists(f"{plugin_directory}{file_path}.disabled"):
+    except FileNotFoundError:
+        pass
+    try:
         remove(f"{plugin_directory}{file_path}.disabled")
-        move(file_path, f"{plugin_directory}{file_path}.disabled")
-    else:
-        move(file_path, plugin_directory)
+    except FileNotFoundError:
+        pass
+    move(file_path, plugin_directory)
 
 
-def update_version(file_path, plugin_content, plugin_name, version):
+def update_version(plugin_name, version):
     plugin_directory = f"{working_dir}/plugins/"
-    with open(file_path, 'wb') as f:
-        f.write(plugin_content)
     with open(f"{plugin_directory}version.json", 'r', encoding="utf-8") as f:
         version_json = json.load(f)
         version_json[plugin_name] = version
@@ -60,57 +83,49 @@ async def plugin(context):
                     pass
                 return
             move_plugin(file_path)
-            await context.edit(f"{lang('apt_plugin')} {path.basename(file_path)[:-3]} {lang('apt_installed')},{lang('apt_reboot')}")
+            await context.edit(
+                f"{lang('apt_plugin')} {path.basename(file_path)[:-3]} {lang('apt_installed')},{lang('apt_reboot')}")
             await log(f"{lang('apt_install_success')} {path.basename(file_path)[:-3]}.")
             await context.client.disconnect()
         elif len(context.parameter) >= 2:
             await context.edit(lang('apt_processing'))
+            process_list = context.parameter
+            del process_list[0]
             success_list = []
             failed_list = []
             noneed_list = []
-            for x in range(len(context.parameter) - 1):
-                plugin_name = context.parameter[1 + x]
-                plugin_online = \
-                json.loads(get("https://raw.githubusercontent.com/xtaodada/PagerMaid_Plugins/master/list.json").content)[
-                    'list']
+            temp, plugin_list = get_html("https://raw.githubusercontent.com/Xtao-Labs/PagerMaid_Plugins/master"
+                                         "/list.json")
+            plugin_list = json.loads(plugin_list)['list']
+            for i in process_list:
                 if exists(f"{plugin_directory}version.json"):
                     with open(f"{plugin_directory}version.json", 'r', encoding="utf-8") as f:
                         version_json = json.load(f)
                     try:
-                        plugin_version = version_json[plugin_name]
+                        plugin_version = version_json[i]
                     except:
-                        plugin_version = False
+                        plugin_version = 0
                 else:
                     temp_dict = {}
                     with open(f"{plugin_directory}version.json", 'w') as f:
                         json.dump(temp_dict, f)
-                    plugin_version = False
-                flag = False
-                for i in plugin_online:
-                    if i['name'] == plugin_name:
-                        flag = True
-                        if plugin_version:
-                            if (float(i['version']) - float(plugin_version)) <= 0:
-                                noneed_list.append(plugin_name)
-                                break
-                            else:
-                                file_path = plugin_name + ".py"
-                                plugin_content = get(
-                                    f"https://raw.githubusercontent.com/xtaodada/PagerMaid_Plugins/master/{plugin_name}.py").content
-                                update_version(file_path, plugin_content, plugin_name, i['version'])
-                                move_plugin(file_path)
-                                success_list.append(path.basename(file_path)[:-3])
-                                break
+                    plugin_version = 0
+                temp = True
+                for x in plugin_list:
+                    if x['name'] == i:
+                        if (float(x['version']) - float(plugin_version)) <= 0:
+                            noneed_list.append(i)
+                            temp = False
+                            break
                         else:
-                            file_path = plugin_name + ".py"
-                            plugin_content = get(
-                                f"https://raw.githubusercontent.com/xtaodada/PagerMaid_Plugins/master/{plugin_name}.py").content
-                            update_version(file_path, plugin_content, plugin_name, i['version'])
-                            move_plugin(file_path)
-                            success_list.append(path.basename(file_path)[:-3])
-                if not flag:
-                    now_message += f"{lang('apt_not_found')} {plugin_name} 。\n"
-                    failed_list.append(plugin_name)
+                            remove_plugin(f'{i}.py')
+                            download(i)
+                            update_version(i, plugin_list['version'])
+                            success_list.append(i)
+                            temp = False
+                            break
+                if temp:
+                    failed_list.append(i)
             message = ""
             if len(success_list) > 0:
                 message += lang('apt_install_success') + " : %s\n" % ", ".join(success_list)
@@ -195,7 +210,8 @@ async def plugin(context):
             if exists(f"{plugin_directory}{context.parameter[1]}.py.disabled"):
                 rename(f"{plugin_directory}{context.parameter[1]}.py.disabled",
                        f"{plugin_directory}{context.parameter[1]}.py")
-                await context.edit(f"{lang('apt_plugin')} {context.parameter[1]} {lang('apt_enable')},{lang('apt_reboot')}")
+                await context.edit(
+                    f"{lang('apt_plugin')} {context.parameter[1]} {lang('apt_enable')},{lang('apt_reboot')}")
                 await log(f"{lang('apt_enable')} {context.parameter[1]}.")
                 await context.client.disconnect()
             else:
@@ -207,7 +223,8 @@ async def plugin(context):
             if exists(f"{plugin_directory}{context.parameter[1]}.py") is True:
                 rename(f"{plugin_directory}{context.parameter[1]}.py",
                        f"{plugin_directory}{context.parameter[1]}.py.disabled")
-                await context.edit(f"{lang('apt_plugin')} {context.parameter[1]} {lang('apt_disable')},{lang('apt_reboot')}")
+                await context.edit(
+                    f"{lang('apt_plugin')} {context.parameter[1]} {lang('apt_disable')},{lang('apt_reboot')}")
                 await log(f"{lang('apt_disable')} {context.parameter[1]}.")
                 await context.client.disconnect()
             else:
@@ -244,8 +261,9 @@ async def plugin(context):
             return
         with open(f"{plugin_directory}version.json", 'r', encoding="utf-8") as f:
             version_json = json.load(f)
-        plugin_online = \
-        json.loads(get("https://raw.githubusercontent.com/xtaodada/PagerMaid_Plugins/master/list.json").content)['list']
+        temp, plugin_list = get_html("https://raw.githubusercontent.com/Xtao-Labs/PagerMaid_Plugins/master/list"
+                                     ".json")
+        plugin_online = json.loads(plugin_list)['list']
         for key, value in version_json.items():
             if value == "0.0":
                 continue
@@ -271,11 +289,8 @@ async def plugin(context):
                 await context.edit(lang('apt_loading_from_online_and_updating'))
                 plugin_directory = f"{working_dir}/plugins/"
                 for i in need_update_list:
-                    file_path = i + ".py"
-                    plugin_content = get(
-                        f"https://raw.githubusercontent.com/xtaodada/PagerMaid_Plugins/master/{i}.py").content
-                    with open(file_path, 'wb') as f:
-                        f.write(plugin_content)
+                    remove_plugin(i)
+                    download(i)
                     with open(f"{plugin_directory}version.json", 'r', encoding="utf-8") as f:
                         version_json = json.load(f)
                     for m in plugin_online:
@@ -283,7 +298,6 @@ async def plugin(context):
                             version_json[i] = m['version']
                     with open(f"{plugin_directory}version.json", 'w') as f:
                         json.dump(version_json, f)
-                    move_plugin(file_path)
                 await context.edit(lang('apt_reading_list') + need_update)
                 await context.client.disconnect()
     elif context.parameter[0] == "search":
@@ -292,9 +306,9 @@ async def plugin(context):
         elif len(context.parameter) == 2:
             search_result = []
             plugin_name = context.parameter[1]
-            plugin_online = \
-            json.loads(get("https://raw.githubusercontent.com/xtaodada/PagerMaid_Plugins/master/list.json").content)[
-                'list']
+            temp, plugin_list = get_html(
+                "https://raw.githubusercontent.com/Xtao-Labs/PagerMaid_Plugins/master/list.json")
+            plugin_online = json.loads(plugin_list)['list']
             for i in plugin_online:
                 if search(plugin_name, i['name'], I):
                     search_result.extend(['`' + i['name'] + '` / `' + i['version'] + '`\n  ' + i['des-short']])
@@ -310,19 +324,23 @@ async def plugin(context):
         elif len(context.parameter) == 2:
             search_result = ''
             plugin_name = context.parameter[1]
-            plugin_online = \
-            json.loads(get("https://raw.githubusercontent.com/xtaodada/PagerMaid_Plugins/master/list.json").content)[
-                'list']
+            temp, plugin_list = get_html(
+                "https://raw.githubusercontent.com/Xtao-Labs/PagerMaid_Plugins/master/list.json")
+            plugin_online = json.loads(plugin_list)['list']
             for i in plugin_online:
                 if plugin_name == i['name']:
                     if i['supported']:
                         search_support = lang('apt_search_supporting')
                     else:
                         search_support = lang('apt_search_not_supporting')
-                    search_result = lang('apt_plugin_name')+ ':`' + i['name'] + '`\n' + lang('apt_plugin_ver')+ ':`Ver  ' + i['version'] + '`\n' + lang('apt_plugin_section')+ ':`' + i[
-                        'section'] + '`\n' + lang('apt_plugin_maintainer')+ ':`' + \
-                                    i['maintainer'] + '`\n' + lang('apt_plugin_size')+ ':`' + i['size'] + '`\n' + lang('apt_plugin_support')+ ':' + search_support + '\n' + lang('apt_plugin_des_short')+ ':' + i[
-                                        'des-short'] + '\n\n' + i['des']
+                    search_result = f"{lang('apt_plugin_name')}:`{i['name']}`\n" \
+                                    f"{lang('apt_plugin_ver')}:`Ver  {i['version']}`\n" \
+                                    f"{lang('apt_plugin_section')}:`{i['section']}`\n" \
+                                    f"{lang('apt_plugin_maintainer')}:`{i['maintainer']}`\n" \
+                                    f"{lang('apt_plugin_size')}:`{i['size']}`\n" \
+                                    f"{lang('apt_plugin_support')}:{search_support}\n" \
+                                    f"{lang('apt_plugin_des_short')}:{i['des-short']}\n\n" \
+                                    f"{i['des']}"
                     break
             if search_result == '':
                 await context.edit(lang('apt_search_not_found'))
