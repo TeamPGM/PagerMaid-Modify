@@ -1,6 +1,8 @@
 """ PagerMaid module that contains utilities related to system status. """
 
 from json import loads
+from PIL import Image
+from requests import get
 from os import remove, popen
 from datetime import datetime
 from speedtest import distance, Speedtest, ShareResultsConnectFailure, ShareResultsSubmitFailure, NoMatchedServers, \
@@ -150,7 +152,21 @@ async def speedtest(context):
         f"Latency: `{result['ping']}` \n"
         f"Timestamp: `{result['timestamp']}`"
     )
-    await context.client.send_file(context.chat_id, result['share'], caption=des)
+    # 开始处理图片
+    data = get(result['share']).content
+    with open('speedtest.jpg', mode='wb') as f:
+        f.write(data)
+    img = Image.open('speedtest.jpg')
+    c = img.crop((17, 11, 727, 389))
+    c.save('speedtest.jpg')
+    try:
+        msg = await context.client.send_file(context.chat_id, 'speedtest.jpg', caption=des)
+    except:
+        return
+    try:
+        remove('speedtest.jpg')
+    except:
+        pass
     await context.delete()
 
 
