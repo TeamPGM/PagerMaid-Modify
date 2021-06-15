@@ -26,7 +26,7 @@ cd /var/lib && git clone https://github.com/xtaodada/PagerMaid-Modify.git pagerm
 sudo apt-get install imagemagick -y
 ```
 
-## neofetch：
+## neofetch
 
 ?> 此软件包用于显示系统信息，如您没有显示系统信息需求，您可以无需安装此软件包。
 
