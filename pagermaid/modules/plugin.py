@@ -120,7 +120,7 @@ async def plugin(context):
                         else:
                             remove_plugin(f'{i}.py')
                             download(i)
-                            update_version(i, plugin_list['version'])
+                            update_version(i, x['version'])
                             success_list.append(i)
                             temp = False
                             break

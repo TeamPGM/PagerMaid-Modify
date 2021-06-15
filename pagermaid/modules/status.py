@@ -154,20 +154,20 @@ async def speedtest(context):
     )
     # 开始处理图片
     data = get(result['share']).content
-    with open('speedtest.jpg', mode='wb') as f:
+    with open('speedtest.png', mode='wb') as f:
         f.write(data)
     try:
-        img = Image.open('speedtest.jpg')
+        img = Image.open('speedtest.png')
         c = img.crop((17, 11, 727, 389))
-        c.save('speedtest.jpg')
+        c.save('speedtest.png')
     except:
         pass
     try:
-        msg = await context.client.send_file(context.chat_id, 'speedtest.jpg', caption=des)
+        await context.client.send_file(context.chat_id, 'speedtest.png', caption=des)
     except:
         return
     try:
-        remove('speedtest.jpg')
+        remove('speedtest.png')
     except:
         pass
     await context.delete()
