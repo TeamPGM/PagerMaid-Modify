@@ -420,10 +420,18 @@ merge_total_processed_right: 】張貼紙。
 
 # system
 # sh
-sh_des: 執行Shell指令
+sh_des: 執行 Shell 指令
 sh_parameters: <指令>
 sh_channel: Error！不能在頻道執行指令。
 sh_success: 執行Shell指令
+# eval
+eval_des: 執行 Python 指令
+eval_parameters: <指令>
+eval_channel: Error！不能在頻道執行指令。
+eval_success: 執行 Python 指令
+eval_need_dev: '**請注意：此命令可以直接操作您的賬戶**
+
+此命令僅適用於開發者，如果您知道您在做什麼的話，請手動在 Redis 數據庫配置 dev 項為任意值。'
 # restart
 restart_des: 重新啟動
 restart_processing: 嘗試重新啟動

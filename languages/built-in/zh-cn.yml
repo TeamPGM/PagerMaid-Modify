@@ -445,6 +445,14 @@ sh_des: 在 Telegram 上远程执行 Shell 命令。
 sh_parameters: <命令>
 sh_channel: 出错了呜呜呜 ~ 当前 PagerMaid-Modify 的配置禁止在频道中执行 Shell 命令。
 sh_success: 远程执行 Shell 命令
+## eval
+eval_des: 在 Telegram 上远程执行 Python 命令。
+eval_parameters: <命令>
+eval_channel: 出错了呜呜呜 ~ 当前 PagerMaid-Modify 的配置禁止在频道中执行 Python 命令。
+eval_success: 远程执行 Python 命令
+eval_need_dev: '**请注意：此命令可以直接操作您的账户**
+
+此命令仅适用于开发者，如果您知道您在做什么的话，请手动在 Redis 数据库配置 dev 项为任意值。'
 ## restart
 restart_des: 使 PagerMaid-Modify 重新启动
 restart_processing: 尝试重新启动 PagerMaid-Modify.
