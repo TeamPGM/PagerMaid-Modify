@@ -11,11 +11,11 @@ from telethon.tl.functions.contacts import BlockRequest, UnblockRequest
 from telethon.tl.types import InputPhoto, MessageMediaPhoto, MessageEntityMentionName
 from struct import error as StructError
 from pagermaid import bot, log
-from pagermaid.utils import lang
+from pagermaid.utils import lang, alias_command
 from pagermaid.listener import listener
 
 
-@listener(is_plugin=False, outgoing=True, command="username",
+@listener(is_plugin=False, outgoing=True, command=alias_command('username'),
           description=lang('username_des'),
           parameters="<username>")
 async def username(context):
@@ -41,7 +41,7 @@ async def username(context):
     await log(f"{lang('username_whatset')}`{result}`")
 
 
-@listener(is_plugin=False, outgoing=True, command="name",
+@listener(is_plugin=False, outgoing=True, command=alias_command('name'),
           description=lang('name_des'),
           parameters="<first name> <last name>")
 async def name(context):
@@ -69,7 +69,7 @@ async def name(context):
         await log(f"{lang('name_whatset')}`{first_name}`.")
 
 
-@listener(is_plugin=False, outgoing=True, command="pfp",
+@listener(is_plugin=False, outgoing=True, command=alias_command('pfp'),
           description=lang('pfp_des'))
 async def pfp(context):
     """ Sets your profile picture. """
@@ -99,7 +99,7 @@ async def pfp(context):
             await context.edit(f"{lang('error_prefix')}{lang('pfp_e_notp')}")
 
 
-@listener(is_plugin=False, outgoing=True, command="bio",
+@listener(is_plugin=False, outgoing=True, command=alias_command('bio'),
           description="设置咱的公开情报",
           parameters="<string>")
 async def bio(context):
@@ -116,7 +116,7 @@ async def bio(context):
     await log(f"{lang('bio_whatset')}`{context.arguments}`.")
 
 
-@listener(is_plugin=False, outgoing=True, command="rmpfp",
+@listener(is_plugin=False, outgoing=True, command=alias_command('rmpfp'),
           description=lang('rmpfp_des'),
           parameters=f"<{lang('int')}>")
 async def rmpfp(context):
@@ -147,7 +147,7 @@ async def rmpfp(context):
     await context.edit(f"`{lang('rmpfp_p')}{len(input_photos)} {lang('rmpfp_l')}`")
 
 
-@listener(is_plugin=False, outgoing=True, command="profile",
+@listener(is_plugin=False, outgoing=True, command=alias_command('profile'),
           description=lang('profile_des'),
           parameters="<username>")
 async def profile(context):
@@ -260,7 +260,7 @@ async def profile(context):
             await context.edit(caption)
 
 
-@listener(is_plugin=False, outgoing=True, command="block",
+@listener(is_plugin=False, outgoing=True, command=alias_command('block'),
           description=lang('block_des'),
           parameters="<username/uid/reply>")
 async def block_user(context):
@@ -302,7 +302,7 @@ async def block_user(context):
         await context.edit(f"`{user}` {lang('block_exist')}")
 
 
-@listener(is_plugin=False, outgoing=True, command="unblock",
+@listener(is_plugin=False, outgoing=True, command=alias_command('unblock'),
           description=lang('unblock_des'),
           parameters="<username/uid/reply>")
 async def unblock_user(context):

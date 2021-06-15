@@ -228,6 +228,13 @@ lang_change_to: The language has been switched to
 lang_reboot: Restarting.
 lang_current_lang: The current language is
 lang_all_lang: "All available languages are "
+# alias
+alias_des: Redirect original command.
+alias_list: 'The following is a list of redirect commands:'
+alias_no: You have not redirected any original commands.
+alias_success: Edit redirection command success，PagerMaid-Modify is restarting.
+alias_exist: Something went wrong, woooo~ The command that is redirected is already occupied.
+alias_no_exist: Something went wrong, woooo~ The original command is not redirected.
 # message
 # id
 id_des: Get various information about a message.

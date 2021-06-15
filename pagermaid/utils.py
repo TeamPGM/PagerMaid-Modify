@@ -9,13 +9,22 @@ from re import sub, IGNORECASE
 from asyncio import create_subprocess_shell
 from asyncio.subprocess import PIPE
 from youtube_dl import YoutubeDL
-from pagermaid import module_dir, bot, lang_dict
+from pagermaid import module_dir, bot, lang_dict, alias_dict
 
 
 def lang(text: str) -> str:
     """ i18n """
     result = lang_dict.get(text, text)
     return result
+
+
+def alias_command(command):
+    """ alias """
+    try:
+        command = alias_dict[command]
+    except KeyError:
+        pass
+    return command
 
 
 async def upload_attachment(file_path, chat_id, reply_id, caption=None, preview=None, document=None):

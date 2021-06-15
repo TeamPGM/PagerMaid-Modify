@@ -223,6 +223,13 @@ lang_change_to: 語言已切換到
 lang_reboot: 正在重新啟動。
 lang_current_lang: 目前語言是
 lang_all_lang: 所有語言有這些：
+# alias
+alias_des: 重定向原始命令。
+alias_list: 以下是重定向命令列表：
+alias_no: 您還沒有重定向任何原始命令。
+alias_success: 編輯重定向命令成功，PagerMaid-Modify 正在重新啟動。
+alias_exist: 出錯了嗚嗚嗚 ~ 重定向指向的命令已被佔用。
+alias_no_exist: 出錯了嗚嗚嗚 ~ 原始命令沒有被重定向。
 # message
 # id
 id_des: 獲取一條訊息的所有資訊。

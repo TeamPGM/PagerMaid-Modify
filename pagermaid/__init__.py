@@ -10,6 +10,7 @@ from os import getcwd, makedirs
 from os.path import exists
 from sys import version_info, platform
 from yaml import load, FullLoader, safe_load
+from json import load as load_json
 from shutil import copyfile
 from redis import StrictRedis
 from logging import getLogger, INFO, DEBUG, ERROR, StreamHandler, basicConfig
@@ -18,7 +19,6 @@ from coloredlogs import ColoredFormatter
 from telethon import TelegramClient
 from telethon.errors.rpcerrorlist import MessageNotModifiedError, MessageIdInvalidError
 from sqlite3 import OperationalError
-
 
 persistent_vars = {}
 module_dir = __path__[0]
@@ -53,16 +53,30 @@ except Exception as e:
     print(e)
     exit(1)
 
+
+# alias
+alias_dict: dict = {}
+
+if exists("data/alias.json"):
+    try:
+        with open("data/alias.json", encoding="utf-8") as f:
+            alias_dict = load_json(f)
+    except Exception as e:
+        print("Reading alias file failed")
+        print(e)
+        exit(1)
+
+
 def lang(text: str) -> str:
     """ i18n """
     result = lang_dict.get(text, text)
     return result
 
+
 if strtobool(config['debug']):
     logs.setLevel(DEBUG)
 else:
     logs.setLevel(INFO)
-
 
 if platform == "linux" or platform == "linux2" or platform == "darwin" or platform == "freebsd7" \
         or platform == "freebsd8" or platform == "freebsdN" or platform == "openbsd6":
@@ -121,9 +135,11 @@ if not proxy_addr == '' and not proxy_port == '':
         import socks
     except:
         pass
-    bot = TelegramClient("pagermaid", api_key, api_hash, auto_reconnect=True, proxy=(socks.SOCKS5, proxy_addr, int(proxy_port)))
+    bot = TelegramClient("pagermaid", api_key, api_hash, auto_reconnect=True,
+                         proxy=(socks.SOCKS5, proxy_addr, int(proxy_port)))
 elif not mtp_addr == '' and not mtp_port == '' and not mtp_secret == '':
     from telethon import connection
+
     bot = TelegramClient("pagermaid", api_key, api_hash, auto_reconnect=True,
                          connection=connection.ConnectionTcpMTProxyRandomizedIntermediate,
                          proxy=(mtp_addr, int(mtp_port), mtp_secret))

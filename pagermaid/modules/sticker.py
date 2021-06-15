@@ -12,11 +12,11 @@ from PIL import Image, ImageOps
 from math import floor
 from pagermaid import bot, redis, redis_status
 from pagermaid.listener import listener
-from pagermaid.utils import lang
+from pagermaid.utils import lang, alias_command
 from pagermaid import log
 
 
-@listener(is_plugin=False, outgoing=True, command="s",
+@listener(is_plugin=False, outgoing=True, command=alias_command("s"),
           description=lang('sticker_des'),
           parameters="<emoji>")
 async def sticker(context):

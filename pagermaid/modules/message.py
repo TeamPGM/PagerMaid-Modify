@@ -9,10 +9,10 @@ from telethon.errors.rpcerrorlist import ChatIdInvalidError
 from distutils2.util import strtobool
 from pagermaid import bot, log, config
 from pagermaid.listener import listener
-from pagermaid.utils import lang
+from pagermaid.utils import lang, alias_command
 
 
-@listener(is_plugin=False, outgoing=True, command="id",
+@listener(is_plugin=False, outgoing=True, command=alias_command("id"),
           description=lang('id_des'))
 async def userid(context):
     """ Query the UserID of the sender of the message you replied to. """
@@ -80,7 +80,7 @@ async def userid(context):
     await context.edit(text)
 
 
-@listener(is_plugin=False, outgoing=True, command="uslog",
+@listener(is_plugin=False, outgoing=True, command=alias_command("uslog"),
           description=lang('uslog_des'),
           parameters="<string>")
 async def uslog(context):
@@ -99,7 +99,7 @@ async def uslog(context):
         await context.edit(lang('uslog_log_disable'))
 
 
-@listener(is_plugin=False, outgoing=True, command="log",
+@listener(is_plugin=False, outgoing=True, command=alias_command("log"),
           description=lang('log_des'),
           parameters="<string>")
 async def logging(context):
@@ -118,7 +118,7 @@ async def logging(context):
         await context.edit(lang('uslog_log_disable'))
 
 
-@listener(is_plugin=False, outgoing=True, command="re",
+@listener(is_plugin=False, outgoing=True, command=alias_command("re"),
           description=lang('re_des'),
           parameters=lang('re_parameters'))
 async def re(context):
@@ -143,7 +143,7 @@ async def re(context):
         await context.edit(lang('not_reply'))
 
 
-@listener(is_plugin=False, outgoing=True, command="leave",
+@listener(is_plugin=False, outgoing=True, command=alias_command("leave"),
           description=lang('leave_res'))
 async def leave(context):
     """ It leaves you from the group. """
@@ -159,7 +159,7 @@ async def leave(context):
         await context.edit(lang('leave_not_group'))
 
 
-@listener(is_plugin=False, outgoing=True, command="meter2feet",
+@listener(is_plugin=False, outgoing=True, command=alias_command("meter2feet"),
           description=lang('m2f_des'),
           parameters="<meters>")
 async def meter2feet(context):
@@ -172,7 +172,7 @@ async def meter2feet(context):
     await context.edit(f"{lang('m2f_get')} {str(meter)}{lang('m2f_meter')} {lang('m2f_covert_to')}  {str(feet)}{lang('m2f_feet')}")
 
 
-@listener(is_plugin=False, outgoing=True, command="feet2meter",
+@listener(is_plugin=False, outgoing=True, command=alias_command("feet2meter"),
           description=lang('f2m_des'),
           parameters="<feet>")
 async def feet2meter(context):
@@ -185,7 +185,7 @@ async def feet2meter(context):
     await context.edit(f"{lang('m2f_get')} {str(feet)} {lang('m2f_feet')}{lang('m2f_covert_to')} {str(meter)}{lang('m2f_meter')}")
 
 
-@listener(is_plugin=False, outgoing=True, command="hitokoto",
+@listener(is_plugin=False, outgoing=True, command=alias_command("hitokoto"),
           description=lang('hitokoto_des'))
 async def hitokoto(context):
     """ Get hitokoto.cn """

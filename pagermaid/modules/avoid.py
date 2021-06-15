@@ -1,11 +1,11 @@
 """ PagerMaid module for different ways to avoid users. """
 
 from pagermaid import redis, log, redis_status
-from pagermaid.utils import lang
+from pagermaid.utils import lang, alias_command
 from pagermaid.listener import listener
 
 
-@listener(is_plugin=False, outgoing=True, command="ghost",
+@listener(is_plugin=False, outgoing=True, command=alias_command('ghost'),
           description=lang('ghost_des'),
           parameters="<true|false|status>")
 async def ghost(context):
@@ -45,7 +45,7 @@ async def ghost(context):
         await context.edit(f"{lang('error_prefix')}{lang('arg_error')}")
 
 
-@listener(is_plugin=False, outgoing=True, command="deny",
+@listener(is_plugin=False, outgoing=True, command=alias_command('deny'),
           description=lang('deny_des'),
           parameters="<true|false|status>")
 async def deny(context):

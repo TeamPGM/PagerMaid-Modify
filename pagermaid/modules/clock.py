@@ -4,10 +4,10 @@ from datetime import datetime
 from pytz import country_names, country_timezones, timezone
 from pagermaid import config
 from pagermaid.listener import listener
-from pagermaid.utils import lang
+from pagermaid.utils import lang, alias_command
 
 
-@listener(is_plugin=False, outgoing=True, command="time",
+@listener(is_plugin=False, outgoing=True, command=alias_command('time'),
           description=lang('time_des'),
           parameters=lang('time_parameters'))
 async def time(context):
