@@ -189,7 +189,8 @@ async def contact_chat(context):
         -1001441461877,
         message
     )
-    notification = await context.edit(f'{lang("chat_join_success")} [Pagermaid-Modify](https://github.com/xtaodada/PagerMaid-Modify/) {lang("chat_already_join2")}。')
+    notification = await context.edit(
+        f'{lang("chat_join_success")} [Pagermaid-Modify](https://github.com/xtaodada/PagerMaid-Modify/) {lang("chat_already_join2")}。')
     await sleep(5)
     await notification.delete()
 
@@ -215,8 +216,8 @@ def url_tracer(url):
 async def aexec(code, event):
     exec(
         f"async def __aexec(e, client): "
-        + "\n msg = event = e"
-        + "\n reply = await event.get_reply_message()"
+        + "\n msg = context = e"
+        + "\n reply = await context.get_reply_message()"
         + "\n chat = e.chat_id"
         + "".join(f"\n {l}" for l in code.split("\n")),
     )
