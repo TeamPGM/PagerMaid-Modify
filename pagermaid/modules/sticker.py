@@ -7,6 +7,7 @@ from os import remove
 from urllib import request
 from io import BytesIO
 from telethon.tl.types import DocumentAttributeFilename, MessageMediaPhoto
+from telethon.tl.functions.contacts import UnblockRequest
 from telethon.errors.common import AlreadyInConversationError
 from PIL import Image, ImageOps
 from math import floor
@@ -21,6 +22,11 @@ from pagermaid import log
           parameters="<emoji>")
 async def sticker(context):
     """ Fetches images/stickers and add them to your pack. """
+    # 首先解封 sticker Bot
+    try:
+        await context.client(UnblockRequest(id=429000))
+    except:
+        pass
     pic_round = False
     is_batch = False
     package_name = ""
