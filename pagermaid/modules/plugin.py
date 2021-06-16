@@ -21,11 +21,11 @@ def get_html(url):
 def remove_plugin(name):
     plugin_directory = f"{working_dir}/plugins/"
     try:
-        remove(f"{plugin_directory}{name}")
+        remove(f"{plugin_directory}{name}.py")
     except FileNotFoundError:
         pass
     try:
-        remove(f"{plugin_directory}{name}.disabled")
+        remove(f"{plugin_directory}{name}.py.disabled")
     except FileNotFoundError:
         pass
 
@@ -118,7 +118,7 @@ async def plugin(context):
                             temp = False
                             break
                         else:
-                            remove_plugin(f'{i}.py')
+                            remove_plugin(i)
                             download(i)
                             update_version(i, x['version'])
                             success_list.append(i)
