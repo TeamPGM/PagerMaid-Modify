@@ -21,6 +21,7 @@ async def update(context):
         return
     await context.edit(lang('update_processing'))
     parameter = None
+    changelog = None
     if len(context.parameter) == 1:
         parameter = context.parameter[0]
     repo_url = 'https://github.com/Xtao-Labs/PagerMaid-Modify.git'
