@@ -160,7 +160,7 @@ elif not http_addr == '' and not http_port == '':
         import python_socks
 
         bot = TelegramClient("pagermaid", api_key, api_hash, auto_reconnect=True,
-                             proxy=(python_socks.ProxyType.HTTP, proxy_addr, int(proxy_port)))
+                             proxy=(python_socks.ProxyType.HTTP, http_addr, int(http_port)))
     except:
         bot = TelegramClient("pagermaid", api_key, api_hash, auto_reconnect=True)
 elif not mtp_addr == '' and not mtp_port == '' and not mtp_secret == '':
