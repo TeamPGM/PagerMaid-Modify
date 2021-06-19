@@ -4,7 +4,12 @@ import sentry_sdk
 
 from sentry_sdk.integrations.redis import RedisIntegration
 from concurrent.futures import CancelledError
-from asyncio.exceptions import CancelledError as CancelError
+python36 = True
+try:
+    from asyncio.exceptions import CancelledError as CancelError
+    python36 = False
+except:
+    pass
 from subprocess import run, PIPE
 from time import time
 from os import getcwd, makedirs
@@ -221,10 +226,11 @@ def before_send(event, hint):
         return None
     elif exc_info and isinstance(exc_info[1], AlreadyInConversationError):
         return None
-    elif exc_info and isinstance(exc_info[1], CancelError):
-        return None
     elif exc_info and isinstance(exc_info[1], ConnectedError):
         return None
+    if not python36:
+        if exc_info and isinstance(exc_info[1], CancelError):
+            return None
     if time() <= report_time + 30:
         report_time = time()
         return None
