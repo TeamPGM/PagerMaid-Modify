@@ -111,12 +111,16 @@ api_hash = config['api_hash']
 try:
     proxy_addr = config['proxy_addr'].strip()
     proxy_port = config['proxy_port'].strip()
+    http_addr = config['http_addr'].strip()
+    http_port = config['http_port'].strip()
     mtp_addr = config['mtp_addr'].strip()
     mtp_port = config['mtp_port'].strip()
     mtp_secret = config['mtp_secret'].strip()
 except:
     proxy_addr = ''
     proxy_port = ''
+    http_addr = ''
+    http_port = ''
     mtp_addr = ''
     mtp_port = ''
     mtp_secret = ''
@@ -140,11 +144,20 @@ if api_key is None or api_hash is None:
 
 if not proxy_addr == '' and not proxy_port == '':
     try:
-        import socks
+        import python_socks
+
+        bot = TelegramClient("pagermaid", api_key, api_hash, auto_reconnect=True,
+                             proxy=(python_socks.ProxyType.SOCKS5, proxy_addr, int(proxy_port)))
     except:
-        pass
-    bot = TelegramClient("pagermaid", api_key, api_hash, auto_reconnect=True,
-                         proxy=(socks.SOCKS5, proxy_addr, int(proxy_port)))
+        bot = TelegramClient("pagermaid", api_key, api_hash, auto_reconnect=True)
+elif not http_addr == '' and not http_port == '':
+    try:
+        import python_socks
+
+        bot = TelegramClient("pagermaid", api_key, api_hash, auto_reconnect=True,
+                             proxy=(python_socks.ProxyType.HTTP, proxy_addr, int(proxy_port)))
+    except:
+        bot = TelegramClient("pagermaid", api_key, api_hash, auto_reconnect=True)
 elif not mtp_addr == '' and not mtp_port == '' and not mtp_secret == '':
     from telethon import connection
 
