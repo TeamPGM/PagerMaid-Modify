@@ -33,23 +33,30 @@ async def userid(context):
             text += "lang_code: `" + msg_from.lang_code + "`\n"
     if context.is_group or context.is_channel:
         text += "title: `" + msg_from.title + "`\n"
-        if msg_from.username:
-            text += "username: @" + msg_from.username + "\n"
+        try:
+            if msg_from.username:
+                text += "username: @" + msg_from.username + "\n"
+        except AttributeError:
+            await context.edit(lang('leave_not_group'))
+            return
         text += "date: `" + str(msg_from.date) + "`\n"
     if message:
-        text += "\n" + lang('id_hint') + "\nMessage ID: `" + str(message.id) + "`\n\n**User**\nid: `" + str(message.sender.id) + "`"
-        if message.sender.bot:
-            text += f"\nis_bot: {lang('id_is_bot_yes')}"
+        text += "\n" + lang('id_hint') + "\nMessage ID: `" + str(message.id) + "`\n\n**User**\nid: `" + str(message.sender_id) + "`"
         try:
-            text += "\nfirst_name: `" + message.sender.first_name + "`"
-        except TypeError:
-            text += f"\n**{lang('id_da')}**"
-        if message.sender.last_name:
-            text += "\nlast_name: `" + message.sender.last_name + "`"
-        if message.sender.username:
-            text += "\nusername: @" + message.sender.username
-        if message.sender.lang_code:
-            text += "\nlang_code: `" + message.sender.lang_code + "`"
+            if message.sender.bot:
+                text += f"\nis_bot: {lang('id_is_bot_yes')}"
+            try:
+                text += "\nfirst_name: `" + message.sender.first_name + "`"
+            except TypeError:
+                text += f"\n**{lang('id_da')}**"
+            if message.sender.last_name:
+                text += "\nlast_name: `" + message.sender.last_name + "`"
+            if message.sender.username:
+                text += "\nusername: @" + message.sender.username
+            if message.sender.lang_code:
+                text += "\nlang_code: `" + message.sender.lang_code + "`"
+        except AttributeError:
+            pass
         if message.forward:
             if str(message.forward.chat_id).startswith('-100'):
                 text += "\n\n**Forward From Channel**\nid: `" + str(
@@ -64,18 +71,21 @@ async def userid(context):
                 if message.forward.sender:
                     text += "\n\n**Forward From User**\nid: `" + str(
                         message.forward.sender_id) + "`"
-                    if message.forward.sender.bot:
-                        text += f"\nis_bot: {lang('id_is_bot_yes')}"
                     try:
-                        text += "\nfirst_name: `" + message.forward.sender.first_name + "`"
-                    except TypeError:
-                        text += f"\n**{lang('id_da')}**"
-                    if message.forward.sender.last_name:
-                        text += "\nlast_name: `" + message.forward.sender.last_name + "`"
-                    if message.forward.sender.username:
-                        text += "\nusername: @" + message.forward.sender.username
-                    if message.forward.sender.lang_code:
-                        text += "\nlang_code: `" + message.forward.sender.lang_code + "`"
+                        if message.forward.sender.bot:
+                            text += f"\nis_bot: {lang('id_is_bot_yes')}"
+                        try:
+                            text += "\nfirst_name: `" + message.forward.sender.first_name + "`"
+                        except TypeError:
+                            text += f"\n**{lang('id_da')}**"
+                        if message.forward.sender.last_name:
+                            text += "\nlast_name: `" + message.forward.sender.last_name + "`"
+                        if message.forward.sender.username:
+                            text += "\nusername: @" + message.forward.sender.username
+                        if message.forward.sender.lang_code:
+                            text += "\nlang_code: `" + message.forward.sender.lang_code + "`"
+                    except AttributeError:
+                        pass
                     text += "\ndate: `" + str(message.forward.date) + "`"
     await context.edit(text)
 

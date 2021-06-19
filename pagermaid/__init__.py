@@ -17,8 +17,14 @@ from logging import getLogger, INFO, DEBUG, ERROR, StreamHandler, basicConfig
 from distutils2.util import strtobool
 from coloredlogs import ColoredFormatter
 from telethon import TelegramClient
-from telethon.errors.rpcerrorlist import MessageNotModifiedError, MessageIdInvalidError
+from telethon.errors.rpcerrorlist import MessageNotModifiedError, MessageIdInvalidError, ChannelPrivateError, \
+    ChatSendMediaForbiddenError, YouBlockedUserError, FloodWaitError, ChatWriteForbiddenError
+from telethon.errors.common import AlreadyInConversationError
+from requests.exceptions import ChunkedEncodingError
 from sqlite3 import OperationalError
+from http.client import RemoteDisconnected
+from urllib.error import URLError
+from concurrent.futures._base import TimeoutError
 
 persistent_vars = {}
 module_dir = __path__[0]
@@ -164,15 +170,41 @@ with bot:
 def before_send(event, hint):
     global report_time
     exc_info = hint.get("exc_info")
-    if exc_info and isinstance(exc_info[0], ConnectionError):
+    if exc_info and isinstance(exc_info[1], ConnectionError):
         return None
-    elif exc_info and isinstance(exc_info[0], CancelledError):
+    elif exc_info and isinstance(exc_info[1], CancelledError):
         return None
-    elif exc_info and isinstance(exc_info[0], MessageNotModifiedError):
+    elif exc_info and isinstance(exc_info[1], MessageNotModifiedError):
         return None
-    elif exc_info and isinstance(exc_info[0], MessageIdInvalidError):
+    elif exc_info and isinstance(exc_info[1], MessageIdInvalidError):
         return None
-    elif exc_info and isinstance(exc_info[0], OperationalError):
+    elif exc_info and isinstance(exc_info[1], OperationalError):
+        return None
+    elif exc_info and isinstance(exc_info[1], ChannelPrivateError):
+        return None
+    elif exc_info and isinstance(exc_info[1], BufferError):
+        return None
+    elif exc_info and isinstance(exc_info[1], RemoteDisconnected):
+        return None
+    elif exc_info and isinstance(exc_info[1], ChatSendMediaForbiddenError):
+        return None
+    elif exc_info and isinstance(exc_info[1], TypeError):
+        return None
+    elif exc_info and isinstance(exc_info[1], URLError):
+        return None
+    elif exc_info and isinstance(exc_info[1], YouBlockedUserError):
+        return None
+    elif exc_info and isinstance(exc_info[1], FloodWaitError):
+        return None
+    elif exc_info and isinstance(exc_info[1], ChunkedEncodingError):
+        return None
+    elif exc_info and isinstance(exc_info[1], TimeoutError):
+        return None
+    elif exc_info and isinstance(exc_info[1], UnicodeEncodeError):
+        return None
+    elif exc_info and isinstance(exc_info[1], ChatWriteForbiddenError):
+        return None
+    elif exc_info and isinstance(exc_info[1], AlreadyInConversationError):
         return None
     if time() <= report_time + 30:
         report_time = time()
@@ -185,7 +217,7 @@ def before_send(event, hint):
 report_time = time()
 git_hash = run("git rev-parse HEAD", stdout=PIPE, shell=True).stdout.decode()
 sentry_sdk.init(
-    "https://26b73b1d975042e597bf0c9eab3913e8@o416616.ingest.sentry.io/5312335",
+    "https://77fbfe3e22a24652894aaec0e6074c7b@o416616.ingest.sentry.io/5312335",
     traces_sample_rate=1.0,
     release=git_hash,
     before_send=before_send,

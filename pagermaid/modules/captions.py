@@ -24,9 +24,14 @@ async def convert(context):
         )
     if target_file_path is None:
         await context.edit(lang('convert_no_file'))
-    result = await execute(f"{module_dir}/assets/caption.sh \"" + target_file_path +
-                           "\" result.png" + " \"" + str("") +
-                           "\" " + "\"" + str("") + "\"")
+        return
+    try:
+        result = await execute(f"{module_dir}/assets/caption.sh \"" + target_file_path +
+                               "\" result.png" + " \"" + str("") +
+                               "\" " + "\"" + str("") + "\"")
+    except TypeError:
+        await context.edit(lang('convert_error'))
+        return
     if not result:
         await handle_failure(context, target_file_path)
         return
@@ -158,7 +163,11 @@ async def highlight(context):
             await context.edit(lang('highlight_no_file'))
             return
     lexer = guess_lexer(message)
-    formatter = img.JpgImageFormatter(style="colorful")
+    try:
+        formatter = img.JpgImageFormatter(style="colorful")
+    except img.FontNotFound:
+        await context.edit(lang('caption_error'))
+        return
     result = syntax_highlight(message, lexer, formatter, outfile=None)
     await context.edit(lang('highlight_uploading'))
     await context.client.send_file(

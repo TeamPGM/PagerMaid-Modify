@@ -64,9 +64,12 @@ async def update(context):
         repo.create_remote('upstream', repo_url)
     except BaseException:
         pass
-
-    upstream_remote = repo.remote('upstream')
-    upstream_remote.fetch(active_branch)
+    try:
+        upstream_remote = repo.remote('upstream')
+        upstream_remote.fetch(active_branch)
+    except GitCommandError:
+        await context.edit(lang('update_failed'))
+        return
     try:
         changelog = await changelog_gen(repo, f'HEAD..upstream/{active_branch}')
     except:

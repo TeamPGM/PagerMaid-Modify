@@ -3,7 +3,7 @@
 from os import remove
 from telethon.errors import ImageProcessFailedError, PhotoCropSizeSmallError
 from telethon.errors.rpcerrorlist import PhotoExtInvalidError, UsernameOccupiedError, AboutTooLongError, \
-    FirstNameInvalidError, UsernameInvalidError
+    FirstNameInvalidError, UsernameInvalidError, UsernameNotModifiedError
 from telethon.tl.functions.account import UpdateProfileRequest, UpdateUsernameRequest
 from telethon.tl.functions.photos import DeletePhotosRequest, GetUserPhotosRequest, UploadProfilePhotoRequest
 from telethon.tl.functions.users import GetFullUserRequest
@@ -29,10 +29,13 @@ async def username(context):
     try:
         await bot(UpdateUsernameRequest(result))
     except UsernameOccupiedError:
-        await context.edit(f"{lang('error_prefix')}")
+        await context.edit(f"{lang('error_prefix')}{lang('username_exist')}")
         return
     except UsernameInvalidError:
         await context.edit(f"{lang('error_prefix')}{lang('username_vaild')}")
+        return
+    except UsernameNotModifiedError:
+        await context.edit(f"{lang('error_prefix')}{lang('username_exist')}")
         return
     await context.edit(lang('username_set'))
     if result == "":
@@ -76,27 +79,34 @@ async def pfp(context):
     reply = await context.get_reply_message()
     photo = None
     await context.edit(lang('pfp_process'))
-    if reply.media:
-        if isinstance(reply.media, MessageMediaPhoto):
-            photo = await bot.download_media(message=reply.photo)
-        elif "image" in reply.media.document.mime_type.split('/'):
-            photo = await bot.download_file(reply.media.document)
-        else:
-            await context.edit(f"{lang('error_prefix')}{lang('pfp_e_notp')}")
+    if reply:
+        if reply.media:
+            if isinstance(reply.media, MessageMediaPhoto):
+                photo = await bot.download_media(message=reply.photo)
+            elif "image" in reply.media.document.mime_type.split('/'):
+                photo = await bot.download_file(reply.media.document)
+            else:
+                await context.edit(f"{lang('error_prefix')}{lang('pfp_e_notp')}")
 
     if photo:
         try:
             await bot(UploadProfilePhotoRequest(
                 await bot.upload_file(photo)
             ))
-            remove(photo)
+            try:
+                remove(photo)
+            except:
+                pass
             await context.edit("头像修改成功啦 ~")
+            return
         except PhotoCropSizeSmallError:
             await context.edit(f"{lang('error_prefix')}{lang('pfp_e_size')}")
         except ImageProcessFailedError:
             await context.edit(f"{lang('error_prefix')}{lang('pfp_e_img')}")
         except PhotoExtInvalidError:
             await context.edit(f"{lang('error_prefix')}{lang('pfp_e_notp')}")
+    await context.edit(f"{lang('error_prefix')}{lang('pfp_e_notp')}")
+    return
 
 
 @listener(is_plugin=False, outgoing=True, command=alias_command('bio'),
@@ -273,7 +283,7 @@ async def block_user(context):
     await context.edit(lang('block_process'))
     if context.reply_to_msg_id:
         reply_message = await context.get_reply_message()
-        user = reply_message.from_id.user_id
+        user = reply_message.sender_id
     else:
         if len(context.parameter) == 1:
             user = context.parameter[0]

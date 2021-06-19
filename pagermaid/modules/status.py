@@ -6,7 +6,7 @@ from requests import get
 from os import remove, popen
 from datetime import datetime
 from speedtest import distance, Speedtest, ShareResultsConnectFailure, ShareResultsSubmitFailure, NoMatchedServers, \
-    SpeedtestBestServerFailure
+    SpeedtestBestServerFailure, SpeedtestHTTPError
 from telethon import functions
 from platform import python_version, uname
 from wordcloud import WordCloud
@@ -102,7 +102,11 @@ async def status(context):
           description=lang('speedtest_des'))
 async def speedtest(context):
     """ Tests internet speed using speedtest. """
-    test = Speedtest()
+    try:
+        test = Speedtest()
+    except SpeedtestHTTPError:
+        await context.edit(lang('speedtest_ConnectFailure'))
+        return
     server, server_json = [], False
     if len(context.parameter) == 1:
         try:

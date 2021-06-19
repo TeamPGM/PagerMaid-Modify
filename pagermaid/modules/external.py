@@ -37,10 +37,13 @@ async def translate(context):
     except ValueError:
         await context.edit(lang('translate_ValueError'))
         return
-
-    source_lang = result.src
-    source_text = result.origin
-    trans_lang = result.dest
+    try:
+        source_lang = result.src
+        source_text = result.origin
+        trans_lang = result.dest
+    except AttributeError:
+        await context.edit(lang('google_connection_error'))
+        return
     result = f"**{lang('translate_hits')}**\n{lang('translate_original_lang')}: {source_lang}\n{source_text} -> {result.text}"
 
     if len(result) > 4096:
@@ -83,7 +86,11 @@ async def tts(context):
         await context.edit(lang('tts_RuntimeError'))
         return
     google_tts = gTTS(message, lang=ap_lang)
-    google_tts.save("vocals.mp3")
+    try:
+        google_tts.save("vocals.mp3")
+    except AssertionError:
+        await context.edit(lang('tts_AssertionError'))
+        return
     with open("vocals.mp3", "rb") as audio:
         line_list = list(audio)
         line_count = len(line_list)
@@ -91,8 +98,11 @@ async def tts(context):
         google_tts = gTTS(message, lang=ap_lang)
         google_tts.save("vocals.mp3")
     with open("vocals.mp3", "r"):
-        await context.client.send_file(context.chat_id, "vocals.mp3", voice_note=True)
-        remove("vocals.mp3")
+        try:
+            await context.client.send_file(context.chat_id, "vocals.mp3", voice_note=True)
+            remove("vocals.mp3")
+        except:
+            pass
         if len(message) <= 4096:
             await log(f"{lang('tts_success')}: `{message}`.")
         else:
