@@ -4,6 +4,7 @@ import sentry_sdk
 
 from sentry_sdk.integrations.redis import RedisIntegration
 from concurrent.futures import CancelledError
+from asyncio.exceptions import CancelledError as CancelError
 from subprocess import run, PIPE
 from time import time
 from os import getcwd, makedirs
@@ -21,6 +22,7 @@ from telethon.errors.rpcerrorlist import MessageNotModifiedError, MessageIdInval
     ChatSendMediaForbiddenError, YouBlockedUserError, FloodWaitError, ChatWriteForbiddenError
 from telethon.errors.common import AlreadyInConversationError
 from requests.exceptions import ChunkedEncodingError
+from requests.exceptions import ConnectionError as ConnectedError
 from sqlite3 import OperationalError
 from http.client import RemoteDisconnected
 from urllib.error import URLError
@@ -206,6 +208,10 @@ def before_send(event, hint):
         return None
     elif exc_info and isinstance(exc_info[1], AlreadyInConversationError):
         return None
+    elif exc_info and isinstance(exc_info[1], CancelError):
+        return None
+    elif exc_info and isinstance(exc_info[1], ConnectedError):
+        return None
     if time() <= report_time + 30:
         report_time = time()
         return None
@@ -217,7 +223,7 @@ def before_send(event, hint):
 report_time = time()
 git_hash = run("git rev-parse HEAD", stdout=PIPE, shell=True).stdout.decode()
 sentry_sdk.init(
-    "https://77fbfe3e22a24652894aaec0e6074c7b@o416616.ingest.sentry.io/5312335",
+    "https://86690706c3f94854ae105fffb74362ae@o416616.ingest.sentry.io/5312335",
     traces_sample_rate=1.0,
     release=git_hash,
     before_send=before_send,

@@ -26,7 +26,10 @@ async def animate(context):
     while count != len(words):
         await sleep(interval)
         buffer = f"{buffer} {words[count]}"
-        await context.edit(buffer)
+        try:
+            await context.edit(buffer)
+        except:
+            pass
         count += 1
 
 
