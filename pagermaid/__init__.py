@@ -228,6 +228,8 @@ def before_send(event, hint):
         return None
     elif exc_info and isinstance(exc_info[1], ConnectedError):
         return None
+    elif exc_info and isinstance(exc_info[1], KeyboardInterrupt):
+        return None
     if not python36:
         if exc_info and isinstance(exc_info[1], CancelError):
             return None

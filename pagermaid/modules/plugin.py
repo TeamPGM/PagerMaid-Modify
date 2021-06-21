@@ -7,10 +7,16 @@ from os import remove, rename, chdir, path
 from os.path import exists
 from shutil import copyfile, move
 from glob import glob
-from pagermaid import log, working_dir
+from pagermaid import log, working_dir, config
 from pagermaid.listener import listener
 from pagermaid.utils import upload_attachment, lang, alias_command
 from pagermaid.modules import plugin_list as active_plugins, __list_plugins
+
+
+try:
+    git_source = config['git_source']
+except:
+    git_source = "https://raw.githubusercontent.com/Xtao-Labs/PagerMaid_Plugins/master/"
 
 
 def get_html(url):
@@ -31,7 +37,7 @@ def remove_plugin(name):
 
 
 def download(name):
-    status, html = get_html(f'https://raw.githubusercontent.com/Xtao-Labs/PagerMaid_Plugins/master/{name}.py')
+    status, html = get_html(f'{git_source}{name}.py')
     with open(f'plugins/{name}.py', mode='wb') as f:
         f.write(html)
     return f'plugins/{name}.py'
@@ -94,8 +100,7 @@ async def plugin(context):
             success_list = []
             failed_list = []
             noneed_list = []
-            temp, plugin_list = get_html("https://raw.githubusercontent.com/Xtao-Labs/PagerMaid_Plugins/master"
-                                         "/list.json")
+            temp, plugin_list = get_html(f"{git_source}list.json")
             plugin_list = json.loads(plugin_list)['list']
             for i in process_list:
                 if exists(f"{plugin_directory}version.json"):
@@ -261,8 +266,7 @@ async def plugin(context):
             return
         with open(f"{plugin_directory}version.json", 'r', encoding="utf-8") as f:
             version_json = json.load(f)
-        temp, plugin_list = get_html("https://raw.githubusercontent.com/Xtao-Labs/PagerMaid_Plugins/master/list"
-                                     ".json")
+        temp, plugin_list = get_html(f"{git_source}list.json")
         plugin_online = json.loads(plugin_list)['list']
         for key, value in version_json.items():
             if value == "0.0":
@@ -306,8 +310,7 @@ async def plugin(context):
         elif len(context.parameter) == 2:
             search_result = []
             plugin_name = context.parameter[1]
-            temp, plugin_list = get_html(
-                "https://raw.githubusercontent.com/Xtao-Labs/PagerMaid_Plugins/master/list.json")
+            temp, plugin_list = get_html(f"{git_source}list.json")
             plugin_online = json.loads(plugin_list)['list']
             for i in plugin_online:
                 if search(plugin_name, i['name'], I):
@@ -324,8 +327,7 @@ async def plugin(context):
         elif len(context.parameter) == 2:
             search_result = ''
             plugin_name = context.parameter[1]
-            temp, plugin_list = get_html(
-                "https://raw.githubusercontent.com/Xtao-Labs/PagerMaid_Plugins/master/list.json")
+            temp, plugin_list = get_html(f"{git_source}list.json")
             plugin_online = json.loads(plugin_list)['list']
             for i in plugin_online:
                 if plugin_name == i['name']:

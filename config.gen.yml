@@ -51,7 +51,7 @@ height: "1080"
 background: "#101010"
 margin: "20"
 
-#socks5 or http or MTProto
+# socks5 or http or MTProto
 proxy_addr: ""
 proxy_port: ""
 http_addr: ""
@@ -59,3 +59,6 @@ http_port: ""
 mtp_addr: ""
 mtp_port: ""
 mtp_secret: ""
+
+# Apt Git source
+git_source: "https://raw.githubusercontent.com/Xtao-Labs/PagerMaid_Plugins/master/"
