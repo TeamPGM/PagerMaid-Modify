@@ -1,6 +1,6 @@
 <!-- _coverpage.md -->
 
-![logo](circle-cropped.png)
+![logo](pagermaid-logo.png)
 
 # PagerMaid-Modify <small>1.0</small>
 
