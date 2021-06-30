@@ -11,6 +11,7 @@ from telethon import functions
 from platform import python_version, uname
 from wordcloud import WordCloud
 from telethon import version as telethon_version
+from telethon.tl.types import User, Chat, Channel
 from sys import platform
 from re import sub, findall
 from pathlib import Path
@@ -92,9 +93,39 @@ async def status(context):
             f"{lang('status_db')}: `{database}`"
             )
     await context.edit(text)
-    dialogs = await context.client.get_dialogs()
-    dialogs = len(dialogs)
-    text += f"\n{lang('status_dialogs')}: `{dialogs}`"
+
+
+@listener(is_plugin=False, outgoing=True, command=alias_command("stats"),
+          description=lang('stats_des'))
+async def stats(context):
+    await context.edit(lang('stats_loading'))
+    u, g, s, c, b = 0, 0, 0, 0, 0
+    dialogs = await context.client.get_dialogs(
+        limit=None,
+        ignore_migrated=True
+    )
+    for d in dialogs:
+        current_entity = d.entity
+        if type(current_entity) is User:
+            if current_entity.bot:
+                b += 1
+            else:
+                u += 1
+        elif type(current_entity) is Chat:
+            g += 1
+        elif type(current_entity) is Channel:
+            if current_entity.broadcast:
+                c += 1
+            else:
+                s += 1
+    text = (f"**{lang('stats_hint')}** \n"
+            f"{lang('stats_dialogs')}: `{len(dialogs)}` \n"
+            f"{lang('stats_private')}: `{u}` \n"
+            f"{lang('stats_group')}: `{g}` \n"
+            f"{lang('stats_supergroup')}: `{s}` \n"
+            f"{lang('stats_channel')}: `{c}` \n"
+            f"{lang('stats_bot')}: `{b}`"
+            )
     await context.edit(text)
 
 

@@ -382,7 +382,16 @@ status_release: Kernel 版本
 status_python: Python 版本
 status_telethon: Telethon 版本
 status_db: 数据库状态
-status_dialogs: 对话总数
+## stats
+stats_des: 查看我的对话统计信息。
+stats_loading: 加载中 . . .
+stats_hint: 对话统计
+stats_dialogs: 对话总数
+stats_private: 您拥有的私聊数为
+stats_group: 您拥有的普通群组数为
+stats_supergroup: 您拥有的超级群组数为
+stats_channel: 您拥有的频道数为
+stats_bot: 您激活的机器人数为
 ## speedtest
 speedtest_des: 执行 speedtest 脚本并发送结果。
 speedtest_processing: 执行测试脚本 . . .

@@ -363,6 +363,16 @@ status_python: Python版本
 status_telethon: Telethon版本
 status_db: 數據庫狀態
 status_dialogs: 聊天總數
+# stats
+stats_des: 查看我的對話統計信息。
+stats_loading: 加載中 . . .
+stats_hint: 對話統計
+stats_dialogs: 對話總數
+stats_private: 您擁有的私聊數為
+stats_group: 您擁有的普通群組數為
+stats_supergroup: 您擁有的超級群組數為
+stats_channel: 您擁有的頻道數為
+stats_bot: 您激活的機器人數為
 # speedtest
 speedtest_des: 執行Speedtest腳本然後發送結果
 speedtest_processing: 執行腳本

@@ -368,6 +368,16 @@ status_python: Python version
 status_telethon: Telethon version
 status_db: database status
 status_dialogs: total number of conversations
+# stats
+stats_des: View conversation statistics.
+stats_loading: Loading...
+stats_hint: Conversations Status
+stats_dialogs: Total
+stats_private: PM
+stats_group: Group
+stats_supergroup: SuperGroup
+stats_channel: Channel
+stats_bot: Bot
 # speedtest
 speedtest_des: Execute the speedtest script and send the result.
 speedtest_processing: Execute test scripts...
