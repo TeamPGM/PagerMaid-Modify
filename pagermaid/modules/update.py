@@ -4,9 +4,9 @@ import platform
 from subprocess import run, PIPE
 from datetime import datetime
 from os import remove
-from os.path import exists
 from git import Repo
 from git.exc import GitCommandError, InvalidGitRepositoryError, NoSuchPathError
+from sys import executable
 from pagermaid import log
 from pagermaid.listener import listener
 from pagermaid.utils import execute, lang, alias_command
@@ -127,12 +127,8 @@ async def update(context):
             await execute("""cd ../for-update/ && find -H . -type f | awk '{print "cp " $1 " ../PagerMaid-Modify/" 
             $1}' | sh && cd ../PagerMaid-Modify""")
             await execute("rm -rf ../for-update/")
-        if not exists('install.lock'):
-            await execute("python3 -m pip install -r requirements.txt --upgrade")
-            await execute("python3 -m pip install -r requirements.txt")
-        else:
-            await execute("/pagermaid/workdir/venv/bin/python -m pip install -r requirements.txt --upgrade")
-            await execute("/pagermaid/workdir/venv/bin/python -m pip install -r requirements.txt")
+        await execute(f"{executable} -m pip install -r requirements.txt --upgrade")
+        await execute(f"{executable} -m pip install -r requirements.txt")
         await log(f"PagerMaid-Modify {lang('update_is_updated')}")
         await context.edit(lang('update_success') + lang('apt_reboot'))
         await context.client.disconnect()

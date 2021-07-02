@@ -301,11 +301,15 @@ async def topcloud(context):
     background = config['background']
     margin = int(config['margin'])
 
-    cloud = WordCloud(
-        background_color=background,
-        width=width - 2 * int(margin),
-        height=height - 2 * int(margin)
-    ).generate_from_frequencies(resource_dict)
+    try:
+        cloud = WordCloud(
+            background_color=background,
+            width=width - 2 * int(margin),
+            height=height - 2 * int(margin)
+        ).generate_from_frequencies(resource_dict)
+    except ValueError:
+        await context.edit(lang('run_error'))
+        return
 
     cloud.to_file("cloud.png")
     await context.edit(lang('highlight_uploading'))

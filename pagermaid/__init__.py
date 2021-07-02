@@ -230,6 +230,8 @@ def before_send(event, hint):
         return None
     elif exc_info and isinstance(exc_info[1], KeyboardInterrupt):
         return None
+    elif exc_info and isinstance(exc_info[1], OSError):
+        return None
     if not python36:
         if exc_info and isinstance(exc_info[1], CancelError):
             return None
@@ -244,7 +246,7 @@ def before_send(event, hint):
 report_time = time()
 git_hash = run("git rev-parse HEAD", stdout=PIPE, shell=True).stdout.decode()
 sentry_sdk.init(
-    "https://86690706c3f94854ae105fffb74362ae@o416616.ingest.sentry.io/5312335",
+    "https://a0e1ef3c67ca48f4b1ecfc5538528ef3@o416616.ingest.sentry.io/5312335",
     traces_sample_rate=1.0,
     release=git_hash,
     before_send=before_send,

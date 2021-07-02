@@ -238,6 +238,9 @@ async def asciiart(context):
         await context.edit(lang('arg_error'))
         return
     result = await execute(f"figlet -f {module_dir}/assets/graffiti.flf '{message}'")
+    if not result:
+        await context.edit(lang('convert_error'))
+        return
     await context.edit(f"```\n{result}\n```")
 
 
@@ -355,6 +358,9 @@ async def edit_reply(result, context):
     reply = await context.get_reply_message()
     await context.edit(result)
     if reply:
-        if reply.sender.is_self:
-            await reply.edit(result)
-            await context.delete()
+        try:
+            if reply.sender.is_self:
+                await reply.edit(result)
+                await context.delete()
+        except AttributeError:
+            pass

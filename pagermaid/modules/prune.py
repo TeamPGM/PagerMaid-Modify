@@ -125,6 +125,9 @@ async def delete(context):
     target = await context.get_reply_message()
     if context.reply_to_msg_id:
         try:
+            if target is None:
+                await context.delete()
+                return
             await target.delete()
             await context.delete()
             await log(lang('del_notification'))
