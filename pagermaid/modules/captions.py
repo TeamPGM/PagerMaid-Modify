@@ -83,7 +83,7 @@ async def caption(context):
         await handle_failure(context, target_file_path)
         return
     if not await upload_attachment(result_file, context.chat_id, reply_id):
-        await context.edit(lang('capiton_error'))
+        await context.edit(lang('caption_error'))
         remove(target_file_path)
         return
     await context.delete()
