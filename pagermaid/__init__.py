@@ -121,7 +121,7 @@ try:
     mtp_addr = config['mtp_addr'].strip()
     mtp_port = config['mtp_port'].strip()
     mtp_secret = config['mtp_secret'].strip()
-except:
+except KeyError:
     proxy_addr = ''
     proxy_port = ''
     http_addr = ''
@@ -141,6 +141,13 @@ try:
     redis_db = config['redis']['db']
 except KeyError:
     redis_db = 14
+try:
+    if strtobool(config['ipv6']):
+        use_ipv6 = True
+    else:
+        use_ipv6 = False
+except KeyError:
+    use_ipv6 = False
 if api_key is None or api_hash is None:
     logs.info(
         lang('config_error')
@@ -151,26 +158,36 @@ if not proxy_addr == '' and not proxy_port == '':
     try:
         import python_socks
 
-        bot = TelegramClient("pagermaid", api_key, api_hash, auto_reconnect=True,
-                             proxy=(python_socks.ProxyType.SOCKS5, proxy_addr, int(proxy_port)))
+        bot = TelegramClient("pagermaid", api_key, api_hash,
+                             auto_reconnect=True,
+                             proxy=(python_socks.ProxyType.SOCKS5, proxy_addr, int(proxy_port)),
+                             use_ipv6=use_ipv6)
     except:
-        bot = TelegramClient("pagermaid", api_key, api_hash, auto_reconnect=True)
+        bot = TelegramClient("pagermaid", api_key, api_hash,
+                             auto_reconnect=True,
+                             use_ipv6=use_ipv6)
 elif not http_addr == '' and not http_port == '':
     try:
         import python_socks
 
-        bot = TelegramClient("pagermaid", api_key, api_hash, auto_reconnect=True,
-                             proxy=(python_socks.ProxyType.HTTP, http_addr, int(http_port)))
+        bot = TelegramClient("pagermaid", api_key, api_hash,
+                             auto_reconnect=True,
+                             proxy=(python_socks.ProxyType.HTTP, http_addr, int(http_port)),
+                             use_ipv6=use_ipv6)
     except:
-        bot = TelegramClient("pagermaid", api_key, api_hash, auto_reconnect=True)
+        bot = TelegramClient("pagermaid", api_key, api_hash,
+                             auto_reconnect=True,
+                             use_ipv6=use_ipv6)
 elif not mtp_addr == '' and not mtp_port == '' and not mtp_secret == '':
     from telethon import connection
 
-    bot = TelegramClient("pagermaid", api_key, api_hash, auto_reconnect=True,
+    bot = TelegramClient("pagermaid", api_key, api_hash,
+                         auto_reconnect=True,
                          connection=connection.ConnectionTcpMTProxyRandomizedIntermediate,
-                         proxy=(mtp_addr, int(mtp_port), mtp_secret))
+                         proxy=(mtp_addr, int(mtp_port), mtp_secret),
+                         use_ipv6=use_ipv6)
 else:
-    bot = TelegramClient("pagermaid", api_key, api_hash, auto_reconnect=True)
+    bot = TelegramClient("pagermaid", api_key, api_hash, auto_reconnect=True, use_ipv6=use_ipv6)
 redis = StrictRedis(host=redis_host, port=redis_port, db=redis_db)
 
 
