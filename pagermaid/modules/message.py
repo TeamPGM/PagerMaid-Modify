@@ -2,9 +2,10 @@
 
 import requests
 import json
+
 from telethon.tl.functions.messages import DeleteChatUserRequest
-from telethon.tl.functions.channels import LeaveChannelRequest, GetParticipantsRequest
-from telethon.tl.types import ChannelParticipantsAdmins
+from telethon.tl.functions.channels import LeaveChannelRequest
+from telethon.errors import ForbiddenError
 from telethon.errors.rpcerrorlist import ChatIdInvalidError
 from distutils2.util import strtobool
 from pagermaid import bot, log, config
@@ -148,7 +149,10 @@ async def re(context):
                 return True
         await context.delete()
         for nums in range(0, num):
-            await reply.forward_to(int(context.chat_id))
+            try:
+                await reply.forward_to(int(context.chat_id))
+            except ForbiddenError:
+                return
     else:
         await context.edit(lang('not_reply'))
 
@@ -202,7 +206,7 @@ async def hitokoto(context):
     hitokoto_while = 1
     try:
         hitokoto_json = json.loads(requests.get("https://v1.hitokoto.cn/?charset=utf-8").content.decode("utf-8"))
-    except (ValueError):
+    except ValueError:
         while hitokoto_while < 10:
             hitokoto_while += 1
             try:

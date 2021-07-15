@@ -41,7 +41,10 @@ async def sh(context):
             f"\n> `$` {command}"
         )
 
-    result = await execute(command)
+    try:
+        result = await execute(command)
+    except UnicodeDecodeError as e:
+        result = str(e)
 
     if result:
         if len(result) > 4096:

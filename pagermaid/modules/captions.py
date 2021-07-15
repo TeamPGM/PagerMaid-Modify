@@ -101,10 +101,12 @@ async def caption(context):
 async def ocr(context):
     """ Extracts texts from images. """
     args = context.parameter
-    try:
-        psm = args[0]
-    except:
-        psm = '3'
+    psm = 3
+    if len(context.parameter) >= 1:
+        try:
+            psm = int(args[0])
+        except ValueError:
+            pass
     if not 0 <= int(psm) <= 13:
         await context.edit(lang('ocr_psm_len_error'))
         return
