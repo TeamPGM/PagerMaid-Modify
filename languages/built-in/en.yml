@@ -143,7 +143,7 @@ ocr_des: Extract text from the reply image
 ocr_psm_len_error: Oh, something went wrong...psm value is 0-13
 ocr_processing: The picture is being processed, please wait...
 ocr_no_file: Something went wrong. There is no attachment in the reply message.
-ocr_no_result: Something went wrong ~ Please report this problem to the original author.
+ocr_no_result: Did not identify any text.
 ocr_result_hint: The following is the extracted text
 # highlight
 highlight_des: Generate a picture with syntax highlighting.

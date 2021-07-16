@@ -1,15 +1,81 @@
 """ Pulls in the new version of PagerMaid from the git server. """
 
-import platform
+import platform, json, time
+import urllib.request
+from distutils2.util import strtobool
+from json import JSONDecodeError
 from subprocess import run, PIPE
 from datetime import datetime
 from os import remove
 from git import Repo
 from git.exc import GitCommandError, InvalidGitRepositoryError, NoSuchPathError
 from sys import executable
-from pagermaid import log
+from pagermaid import log, config
 from pagermaid.listener import listener
 from pagermaid.utils import execute, lang, alias_command
+
+
+try:
+    git_api = config['git_api']
+except KeyError:
+    git_api = "https://api.github.com/repos/Xtao-Labs/PagerMaid-Modify/commits/master"
+try:
+    git_ssh = config['git_ssh']
+except KeyError:
+    git_ssh = 'https://github.com/Xtao-Labs/PagerMaid-Modify.git'
+
+
+def update_get():
+    with urllib.request.urlopen(git_api) as response:
+        result = response.read()
+        try:
+            data = json.loads(result)
+        except JSONDecodeError as e:
+            raise e
+    return data
+
+
+update_get_time = 0
+
+
+@listener(incoming=True, ignore_edited=True)
+async def update_refresher(context):
+    global update_get_time
+    try:
+        need_update_check = strtobool(config['update_check'])
+    except KeyError:
+        need_update_check = True
+    if not need_update_check:
+        return
+    if time.time() - update_get_time > 3600:
+        update_get_time = time.time()
+        changelog = None
+        try:
+            repo = Repo()
+            active_branch = repo.active_branch.name
+            if not await branch_check(active_branch):
+                return
+            repo.create_remote('upstream', git_ssh)
+            upstream_remote = repo.remote('upstream')
+            upstream_remote.fetch(active_branch)
+            changelog = await changelog_gen(repo, f'HEAD..upstream/{active_branch}')
+            if not changelog:
+                return
+            else:
+                myself = await context.client.get_me(input_peer=True)
+                await context.client.send_message(myself, f'**{lang("update_found_update_in_branch")} {active_branch}.\n\n'
+                                                          f'{lang("update_change_log")}:**\n`{changelog}`')
+        except:
+            try:
+                data = update_get()
+                git_hash = run("git rev-parse HEAD", stdout=PIPE, shell=True).stdout.decode().strip()
+                if not data['sha'] == git_hash:
+                    myself = await context.client.get_me(input_peer=True)
+                    changelog = data['commit']['message']
+                    await context.client.send_message(myself, f'**{lang("update_found_update_in_branch")} master.\n\n'
+                                                              f'{lang("update_change_log")}:**\n`{changelog}`')
+            except Exception as e:
+                await log(f"Warning: plugin rate failed to refresh rates data. {e}")
 
 
 @listener(is_plugin=False, outgoing=True, command=alias_command("update"),
@@ -24,7 +90,6 @@ async def update(context):
     changelog = None
     if len(context.parameter) == 1:
         parameter = context.parameter[0]
-    repo_url = 'https://github.com/Xtao-Labs/PagerMaid-Modify.git'
 
     if parameter:
         if parameter == "debug":
@@ -38,7 +103,13 @@ async def update(context):
             git_hash = run("git rev-parse --short HEAD", stdout=PIPE, shell=True).stdout.decode().strip()
             get_hash_link = f"https://github.com/xtaodada/PagerMaid-Modify/commit/{git_hash}"
             # Generate the text
-            text = f"{lang('status_platform')}: {str(platform.platform())}\n{lang('update_platform_version')}: {str(platform.version())}\n {lang('status_python')}: {str(platform.python_version())}\n {lang('update_git_version')}: {git_version}\n {lang('update_local_git_change')}: {git_change}\n {lang('update_hash')}: [{git_hash}]({get_hash_link})\n {lang('update_date')}: {git_date} "
+            text = f"{lang('status_platform')}: {str(platform.platform())}\n" \
+                   f"{lang('update_platform_version')}: {str(platform.version())}\n" \
+                   f"{lang('status_python')}: {str(platform.python_version())}\n" \
+                   f"{lang('update_git_version')}: {git_version}\n" \
+                   f"{lang('update_local_git_change')}: {git_change}\n" \
+                   f"{lang('update_hash')}: [{git_hash}]({get_hash_link})\n" \
+                   f"{lang('update_date')}: {git_date} "
             await context.edit(text)
             return
 
@@ -61,7 +132,7 @@ async def update(context):
         return
 
     try:
-        repo.create_remote('upstream', repo_url)
+        repo.create_remote('upstream', git_ssh)
     except BaseException:
         pass
     try:

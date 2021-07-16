@@ -151,7 +151,7 @@ ocr_des: 从回复的图片中提取文本
 ocr_psm_len_error: 呜呜呜出错了...psm 取值为 0-13
 ocr_processing: 正在处理图片，请稍候 . . .
 ocr_no_file: 出错了呜呜呜 ~ 回复的消息中没有附件。
-ocr_no_result: 出错了呜呜呜 ~ 请向原作者报告此问题。
+ocr_no_result: 没有提取到任何文字。
 ocr_result_hint: 以下是提取到的文字
 ## highlight
 highlight_des: 生成有语法高亮显示的图片。

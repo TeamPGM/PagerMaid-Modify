@@ -138,7 +138,7 @@ ocr_des: 從回覆的圖片中提取文字
 ocr_psm_len_error: Error！psm取值為0-13
 ocr_processing: 正在處理圖片，等下…
 ocr_no_file: Error！回覆的訊息沒有附件。
-ocr_no_result: Error！請向作者報告這個問題。
+ocr_no_result: 沒有提取到任何文字。
 ocr_result_hint: 以下是提取到的文字
 # highlight
 highlight_des: 生成有文法Highlight的圖片
