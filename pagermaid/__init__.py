@@ -1,12 +1,14 @@
 """ PagerMaid initialization. """
 
-import sentry_sdk
-
-from sentry_sdk.integrations.redis import RedisIntegration
 from concurrent.futures import CancelledError
+
+import sentry_sdk
+from sentry_sdk.integrations.redis import RedisIntegration
+
 python36 = True
 try:
     from asyncio.exceptions import CancelledError as CancelError
+
     python36 = False
 except:
     pass
@@ -24,7 +26,8 @@ from distutils2.util import strtobool
 from coloredlogs import ColoredFormatter
 from telethon import TelegramClient
 from telethon.errors.rpcerrorlist import MessageNotModifiedError, MessageIdInvalidError, ChannelPrivateError, \
-    ChatSendMediaForbiddenError, YouBlockedUserError, FloodWaitError, ChatWriteForbiddenError
+    ChatSendMediaForbiddenError, YouBlockedUserError, FloodWaitError, ChatWriteForbiddenError, \
+    AuthKeyDuplicatedError
 from telethon.errors.common import AlreadyInConversationError
 from requests.exceptions import ChunkedEncodingError
 from requests.exceptions import ConnectionError as ConnectedError
@@ -65,7 +68,6 @@ except Exception as e:
     print("Reading language YAML file failed")
     print(e)
     exit(1)
-
 
 # alias
 alias_dict: dict = {}
@@ -248,6 +250,8 @@ def before_send(event, hint):
     elif exc_info and isinstance(exc_info[1], KeyboardInterrupt):
         return None
     elif exc_info and isinstance(exc_info[1], OSError):
+        return None
+    elif exc_info and isinstance(exc_info[1], AuthKeyDuplicatedError):
         return None
     if not python36:
         if exc_info and isinstance(exc_info[1], CancelError):

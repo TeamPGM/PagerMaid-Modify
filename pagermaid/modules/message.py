@@ -153,6 +153,8 @@ async def re(context):
                 await reply.forward_to(int(context.chat_id))
             except ForbiddenError:
                 return
+            except ValueError:
+                return
     else:
         await context.edit(lang('not_reply'))
 

@@ -505,3 +505,17 @@ update_failed: 更新失败
 update_auto_upgrade_git_failed_ubuntu: 检测到您的系统是Ubuntu或Debain，尝试自动升级git但失败,请手动升级.
 update_auto_upgrade_git_failed_cent: 检测到您的系统是CentOS，尝试自动升级git但失败,请手动升级.
 update_auto_upgrade_git_hint: 您的git版本过低,已尝试为您自动升级. 如再次提醒此错误,请手动升级.
+
+# sb
+sb_des: 在自己拥有管理员权限的共同群组中封禁一位用户。
+sb_des_auto: 管理自动封禁列表。
+sb_pause: 暂停
+sb_no: 没有在任何群封禁用户
+sb_per: 在
+sb_in: 个群封禁了用户
+sb_pro: 受影响的群组
+sb_no_per: 没有封禁用户权限。
+sb_set: 已被添加到自动封禁列表中。
+sb_remove: 已被移除自动封禁列表。
+sb_exist: 此群组存在于自动封禁列表中。
+sb_no_exist: 此群组不存在于自动封禁列表中。

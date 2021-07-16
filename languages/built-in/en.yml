@@ -489,3 +489,17 @@ update_failed: update failed
 update_auto_upgrade_git_failed_ubuntu: It is detected that your system is Ubuntu or Debain. Try to upgrade git automatically but failed. Please upgrade manually.
 update_auto_upgrade_git_failed_cent: It is detected that your system is CentOS, try to upgrade git automatically but failed, please upgrade manually.
 update_auto_upgrade_git_hint: Your git version is too low and has tried to automatically upgrade for you. If you are reminded of this error again, please upgrade manually.
+
+# sb
+sb_des: Ban a user in the common group of administrator privileges.
+sb_des_auto: Manage the automatic banned list.
+sb_pause: Pause
+sb_no: Not ban user
+sb_per: In
+sb_in: groups banned user
+sb_pro: 'Groups:'
+sb_no_per: There is no ban user permission.
+sb_set: This group has been added to the automatic banned list.
+sb_remove: The automatic banned list has been removed this group.
+sb_exist: This group exists in the automatic banned list.
+sb_no_exist: This group does't exist in the automatic banned list.
