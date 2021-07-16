@@ -47,7 +47,7 @@ async def update_refresher(context):
         need_update_check = True
     if not need_update_check:
         return
-    if time.time() - update_get_time > 3600:
+    if time.time() - update_get_time > 86400:
         update_get_time = time.time()
         changelog = None
         try:

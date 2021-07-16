@@ -74,6 +74,7 @@ yum_python_check() {
         echo "Python3.6 未安装在此系统上，正在进行安装"
         yum install python3 -y >>/dev/null 2>&1
         update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 >>/dev/null 2>&1
+        PYV=$(which python3.6)
     fi
     if command -v pip3 >>/dev/null 2>&1; then
         echo 'pip 存在 . . .'
@@ -150,6 +151,7 @@ apt_python_check() {
         apt-get update >>/dev/null 2>&1
         apt-get install python3.6 -y >>/dev/null 2>&1
         update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 >>/dev/null 2>&1
+        PYV=$(which python3.6)
     fi
     if command -v pip3 >>/dev/null 2>&1; then
         echo 'pip 存在 . . .'
@@ -186,8 +188,8 @@ debian_python_check() {
                 make && make install >>/dev/null 2>&1
                 cd .. >>/dev/null 2>&1
                 rm -rf Python-3.6.5 Python-3.6.5.tar.gz >>/dev/null 2>&1
-                PYP=$(which python3.6)
-                update-alternatives --install $PYP python3 $PYV 1 >>/dev/null 2>&1
+                PYV=$(which python3.6)
+                update-alternatives --install /usr/bin/python3 python3 $PYV 1 >>/dev/null 2>&1
             fi
         fi
     else
@@ -202,8 +204,8 @@ debian_python_check() {
         make && make install >>/dev/null 2>&1
         cd .. >>/dev/null 2>&1
         rm -rf Python-3.6.5 Python-3.6.5.tar.gz >>/dev/null 2>&1
-        PYP=$(which python3)
-        update-alternatives --install $PYP python3 $PYV 1 >>/dev/null 2>&1
+        PYV=$(which python3)
+        update-alternatives --install /usr/bin/python3 python3 $PYV 1 >>/dev/null 2>&1
     fi
     echo "正在检查 pip3 安装情况 . . ."
     if command -v pip3 >>/dev/null 2>&1; then
@@ -356,6 +358,8 @@ login_screen() {
         screen -x -S userbot -p 0 -X stuff "$phonenum"
         screen -x -S userbot -p 0 -X stuff $'\n'
 
+        sleep 2
+        
         if [ "$(ps -def | grep [p]agermaid | grep -v grep)" == "" ]; then
             echo "手机号输入错误！请确认您是否带了区号（中国号码为 +86 如 +8618888888888）"
             screen -x -S userbot -p 0 -X stuff "cd /var/lib/pagermaid && $PYV -m pagermaid"
