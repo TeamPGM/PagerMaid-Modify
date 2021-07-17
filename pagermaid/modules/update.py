@@ -14,15 +14,28 @@ from pagermaid import log, config
 from pagermaid.listener import listener
 from pagermaid.utils import execute, lang, alias_command
 
-
 try:
     git_api = config['git_api']
+    git_ssh = config['git_ssh']
+    need_update_check = strtobool(config['update_check'])
+    update_time = config['update_time']
+    update_username = config['update_username']
+    update_delete = strtobool(config['update_delete'])
 except KeyError:
     git_api = "https://api.github.com/repos/Xtao-Labs/PagerMaid-Modify/commits/master"
-try:
-    git_ssh = config['git_ssh']
-except KeyError:
     git_ssh = 'https://github.com/Xtao-Labs/PagerMaid-Modify.git'
+    need_update_check = True
+    update_time = 86400
+    update_username = 'self'
+    update_delete = True
+try:
+    update_time = int(update_time)
+except ValueError:
+    update_time = 86400
+try:
+    update_username = int(update_username)
+except ValueError:
+    pass
 
 
 def update_get():
@@ -36,18 +49,15 @@ def update_get():
 
 
 update_get_time = 0
+update_id = 0
 
 
 @listener(incoming=True, ignore_edited=True)
 async def update_refresher(context):
-    global update_get_time
-    try:
-        need_update_check = strtobool(config['update_check'])
-    except KeyError:
-        need_update_check = True
+    global update_get_time, update_id
     if not need_update_check:
         return
-    if time.time() - update_get_time > 86400:
+    if time.time() - update_get_time > update_time:
         update_get_time = time.time()
         changelog = None
         try:
@@ -62,20 +72,53 @@ async def update_refresher(context):
             if not changelog:
                 return
             else:
-                myself = await context.client.get_me(input_peer=True)
-                await context.client.send_message(myself, f'**{lang("update_found_update_in_branch")} {active_branch}.\n\n'
-                                                          f'{lang("update_change_log")}:**\n`{changelog}`')
+                if update_username == 'self':
+                    user = await context.client.get_me(input_peer=True)
+                else:
+                    try:
+                        user = await context.client.get_input_entity(update_username)
+                    except ValueError:
+                        user = await context.client.get_me(input_peer=True)
+                if not update_id == 0 and update_delete:
+                    try:
+                        await context.client.delete_messages(user, update_id)
+                    except:
+                        pass
+                try:
+                    msg = await context.client.send_message(user,
+                                                            f'**{lang("update_found_update_in_branch")} '
+                                                            f'{active_branch}.\n\n'
+                                                            f'{lang("update_change_log")}:**\n`{changelog}`')
+                    update_id = msg.id
+                except:
+                    pass
         except:
             try:
                 data = update_get()
                 git_hash = run("git rev-parse HEAD", stdout=PIPE, shell=True).stdout.decode().strip()
                 if not data['sha'] == git_hash:
-                    myself = await context.client.get_me(input_peer=True)
+                    if update_username == 'self':
+                        user = await context.client.get_me(input_peer=True)
+                    else:
+                        try:
+                            user = await context.client.get_input_entity(update_username)
+                        except ValueError:
+                            user = await context.client.get_me(input_peer=True)
                     changelog = data['commit']['message']
-                    await context.client.send_message(myself, f'**{lang("update_found_update_in_branch")} master.\n\n'
-                                                              f'{lang("update_change_log")}:**\n`{changelog}`')
+                    if not update_id == 0 and update_delete:
+                        try:
+                            await context.client.delete_messages(user, update_id)
+                        except:
+                            pass
+                    try:
+                        msg = await context.client.send_message(user, f'**{lang("update_found_update_in_branch")} '
+                                                                      f'master.\n\n'
+                                                                      f'{lang("update_change_log")}:**\n`{changelog}`')
+                        update_id = msg.id
+                    except:
+                        pass
             except Exception as e:
-                await log(f"Warning: plugin rate failed to refresh rates data. {e}")
+                await log(f"Warning: module update failed to refresh git commit data.\n{e}")
 
 
 @listener(is_plugin=False, outgoing=True, command=alias_command("update"),
@@ -219,7 +262,7 @@ async def changelog_gen(repo, diff):
 
 
 async def branch_check(branch):
-    official = ['master', 'staging']
+    official = ['master', 'dev']
     for k in official:
         if k == branch:
             return 1

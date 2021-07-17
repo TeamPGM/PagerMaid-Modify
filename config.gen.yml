@@ -64,7 +64,12 @@ mtp_secret: ""
 git_source: "https://raw.githubusercontent.com/Xtao-Labs/PagerMaid_Plugins/master/"
 git_api: "https://api.github.com/repos/Xtao-Labs/PagerMaid-Modify/commits/master"
 git_ssh: "https://github.com/Xtao-Labs/PagerMaid-Modify.git"
+
+# Update Notice
 update_check: "True"
+update_time: "86400"
+update_username: "self"
+update_delete: "True"
 
 # ipv6
 ipv6: "False"
