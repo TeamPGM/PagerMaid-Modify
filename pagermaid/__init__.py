@@ -2,8 +2,10 @@
 
 from concurrent.futures import CancelledError
 
+# Analytics
 import sentry_sdk
 from sentry_sdk.integrations.redis import RedisIntegration
+from mixpanel import Mixpanel
 
 python36 = True
 try:
@@ -41,6 +43,7 @@ module_dir = __path__[0]
 working_dir = getcwd()
 config = None
 help_messages = {}
+mp = Mixpanel("7be1833326f803740214fe276f5a5a3d")
 logs = getLogger(__name__)
 logging_format = "%(levelname)s [%(asctime)s] [%(name)s] %(message)s"
 logging_handler = StreamHandler()
@@ -190,16 +193,21 @@ elif not mtp_addr == '' and not mtp_port == '' and not mtp_secret == '':
                          use_ipv6=use_ipv6)
 else:
     bot = TelegramClient("pagermaid", api_key, api_hash, auto_reconnect=True, use_ipv6=use_ipv6)
+user_id = 0
 redis = StrictRedis(host=redis_host, port=redis_port, db=redis_db)
 
 
 async def save_id():
+    global user_id
     me = await bot.get_me()
+    user_id = me.id
     if me.username is not None:
-        sentry_sdk.set_user({"id": me.id, "name": me.first_name, "username": me.username, "ip_address": "{{auto}}"})
+        sentry_sdk.set_user({"id": user_id, "name": me.first_name, "username": me.username, "ip_address": "{{auto}}"})
+        mp.people_set(str(user_id), {'$first_name': me.first_name, "username": me.username})
     else:
-        sentry_sdk.set_user({"id": me.id, "name": me.first_name, "ip_address": "{{auto}}"})
-    logs.info(f"{lang('save_id')} {me.first_name}({me.id})")
+        sentry_sdk.set_user({"id": user_id, "name": me.first_name, "ip_address": "{{auto}}"})
+        mp.people_set(str(user_id), {'$first_name': me.first_name})
+    logs.info(f"{lang('save_id')} {me.first_name}({user_id})")
 
 
 with bot:

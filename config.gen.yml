@@ -73,3 +73,6 @@ update_delete: "True"
 
 # ipv6
 ipv6: "False"
+
+# Analytics
+allow_analytics: "True"

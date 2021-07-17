@@ -8,8 +8,15 @@ from distutils2.util import strtobool
 from traceback import format_exc
 from time import gmtime, strftime, time
 from telethon.events import StopPropagation
-from pagermaid import bot, config, help_messages, logs
+from pagermaid import bot, config, help_messages, logs, mp, user_id
 from pagermaid.utils import attach_report, lang
+
+try:
+    allow_analytics = strtobool(config['allow_analytics'])
+except KeyError:
+    allow_analytics = True
+except ValueError:
+    allow_analytics = True
 
 
 def noop(*args, **kw):
@@ -50,6 +57,7 @@ def listener(**args):
 
         async def handler(context):
             try:
+                analytics = True
                 try:
                     parameter = context.pattern_match.group(1).split(' ')
                     if parameter == ['']:
@@ -57,9 +65,25 @@ def listener(**args):
                     context.parameter = parameter
                     context.arguments = context.pattern_match.group(1)
                 except BaseException:
+                    analytics = False
                     context.parameter = None
                     context.arguments = None
                 await function(context)
+                if analytics:
+                    try:
+                        upload_command = context.text.split()[0].replace('-', '')
+                        if context.sender_id:
+                            if context.sender_id > 0:
+                                mp.track(str(context.sender_id), f'Function {upload_command}',
+                                         {'command': upload_command})
+                            else:
+                                mp.track(str(user_id), f'Function {upload_command}',
+                                         {'command': upload_command})
+                        else:
+                            mp.track(str(user_id), f'Function {upload_command}',
+                                         {'command': upload_command})
+                    except Exception as e:
+                        logs.info(f"Analytics Error ~ {e}")
             except StopPropagation:
                 raise StopPropagation
             except MessageTooLongError:
