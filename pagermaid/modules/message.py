@@ -6,7 +6,7 @@ import json
 from telethon.tl.functions.messages import DeleteChatUserRequest
 from telethon.tl.functions.channels import LeaveChannelRequest
 from telethon.errors import ForbiddenError
-from telethon.errors.rpcerrorlist import ChatIdInvalidError
+from telethon.errors.rpcerrorlist import ChatIdInvalidError, FloodWaitError
 from distutils2.util import strtobool
 from pagermaid import bot, log, config
 from pagermaid.listener import listener
@@ -148,13 +148,15 @@ async def re(context):
                 await context.edit(lang('re_arg_error'))
                 return True
         await context.delete()
-        for nums in range(0, num):
-            try:
+        try:
+            for nums in range(0, num):
                 await reply.forward_to(int(context.chat_id))
-            except ForbiddenError:
-                return
-            except ValueError:
-                return
+        except ForbiddenError:
+            return
+        except FloodWaitError:
+            return
+        except ValueError:
+            return
     else:
         await context.edit(lang('not_reply'))
 
@@ -206,39 +208,24 @@ async def feet2meter(context):
 async def hitokoto(context):
     """ Get hitokoto.cn """
     hitokoto_while = 1
+    hitokoto_json = None
     try:
         hitokoto_json = json.loads(requests.get("https://v1.hitokoto.cn/?charset=utf-8").content.decode("utf-8"))
     except ValueError:
         while hitokoto_while < 10:
             hitokoto_while += 1
             try:
-                hitokoto_json = json.loads(requests.get("https://v1.hitokoto.cn/?charset=utf-8").content.decode("utf-8"))
+                hitokoto_json = json.loads(
+                    requests.get("https://v1.hitokoto.cn/?charset=utf-8").content.decode("utf-8"))
                 break
             except:
                 continue
-    hitokoto_type = ''
-    if hitokoto_json['type'] == 'a':
-        hitokoto_type = lang('hitokoto_type_anime')
-    elif hitokoto_json['type'] == 'b':
-        hitokoto_type = lang('hitokoto_type_manga')
-    elif hitokoto_json['type'] == 'c':
-        hitokoto_type = lang('hitokoto_type_game')
-    elif hitokoto_json['type'] == 'd':
-        hitokoto_type = lang('hitokoto_type_article')
-    elif hitokoto_json['type'] == 'e':
-        hitokoto_type = lang('hitokoto_type_original')
-    elif hitokoto_json['type'] == 'f':
-        hitokoto_type = lang('hitokoto_type_web')
-    elif hitokoto_json['type'] == 'g':
-        hitokoto_type = lang('hitokoto_type_other')
-    elif hitokoto_json['type'] == 'h':
-        hitokoto_type = lang('hitokoto_type_movie')
-    elif hitokoto_json['type'] == 'i':
-        hitokoto_type = lang('hitokoto_type_poem')
-    elif hitokoto_json['type'] == 'j':
-        hitokoto_type = lang('hitokoto_type_netease_music')
-    elif hitokoto_json['type'] == 'k':
-        hitokoto_type = lang('hitokoto_type_philosophy')
-    elif hitokoto_json['type'] == 'l':
-        hitokoto_type = lang('hitokoto_type_meme')
-    await context.edit(f"{hitokoto_json['hitokoto']} - {hitokoto_json['from']}（{str(hitokoto_type)}）")
+        if not hitokoto_json:
+            return
+    hitokoto_type = {'a': lang('hitokoto_type_anime'), 'b': lang('hitokoto_type_manga'),
+                     'c': lang('hitokoto_type_game'),  'd': lang('hitokoto_type_article'),
+                     'e': lang('hitokoto_type_original'), 'f': lang('hitokoto_type_web'),
+                     'g': lang('hitokoto_type_other'), 'h': lang('hitokoto_type_movie'),
+                     'i': lang('hitokoto_type_poem'), 'j': lang('hitokoto_type_netease_music'),
+                     'k': lang('hitokoto_type_philosophy'), 'l': lang('hitokoto_type_meme')}
+    await context.edit(f"{hitokoto_json['hitokoto']} - {hitokoto_json['from']}（{hitokoto_type[hitokoto_json['type']]}）")

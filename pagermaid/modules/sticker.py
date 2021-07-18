@@ -2,6 +2,8 @@
 
 import certifi
 import ssl
+import requests
+from bs4 import BeautifulSoup
 from asyncio import sleep
 from os import remove
 from urllib import request
@@ -512,3 +514,31 @@ def isEmoji(content):
         return True
     else:
         return False
+
+
+@listener(is_plugin=False, outgoing=True, command=alias_command("sticker"),
+          description=lang('sticker_search_des'),
+          parameters="<query>")
+async def sticker_search(context):
+    if len(context.parameter) == 0:
+        await context.edit(lang('arg_error'))
+        return
+    await context.edit(lang('google_processing'))
+    query = context.parameter[0]
+    try:
+        html = requests.get("https://combot.org/telegram/stickers?q=" + query).text
+    except:
+        return await context.edit(lang('sticker_telegram_server_error'))
+    xml = BeautifulSoup(html, "lxml")
+    titles = xml.find_all("div", "sticker-pack__title")
+    links = xml.find_all("a", target="_blank")
+    if not links:
+        return await context.edit(lang('sticker_search_no'))
+    text = f"{lang('sticker_search_result')}\n"
+    for title, link in zip(titles, links):
+        temp = title.get_text()
+        temp1 = link["href"]
+        temp2 = f"\n[{temp}]({temp1})"
+        if temp2 not in text:
+            text += temp2
+    await context.edit(text)

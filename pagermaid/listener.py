@@ -9,7 +9,7 @@ from traceback import format_exc
 from time import gmtime, strftime, time
 from telethon.events import StopPropagation
 from pagermaid import bot, config, help_messages, logs, mp, user_id
-from pagermaid.utils import attach_report, lang
+from pagermaid.utils import attach_report, lang, alias_command
 
 try:
     allow_analytics = strtobool(config['allow_analytics'])
@@ -69,9 +69,10 @@ def listener(**args):
                     context.parameter = None
                     context.arguments = None
                 await function(context)
-                if analytics:
+                if analytics and allow_analytics:
                     try:
                         upload_command = context.text.split()[0].replace('-', '')
+                        upload_command = alias_command(upload_command)
                         if context.sender_id:
                             if context.sender_id > 0:
                                 mp.track(str(context.sender_id), f'Function {upload_command}',

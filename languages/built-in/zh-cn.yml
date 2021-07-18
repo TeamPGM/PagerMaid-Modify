@@ -447,6 +447,10 @@ merge_processing_left: 正在处理第【
 merge_processing_right: 】条消息。
 merge_total_processed_left: 共处理了【
 merge_total_processed_right: 】张贴纸。
+## search
+sticker_search_des: 通过关键词查找 Sticker 包。
+sticker_search_no: 没有找到任何 Sticker 包。
+sticker_search_result: 以下是查找到的 Sticker 包：
 
 # system
 ## sh

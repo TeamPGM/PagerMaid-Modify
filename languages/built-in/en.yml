@@ -432,6 +432,10 @@ merge_processing_left: Processing the 【
 merge_processing_right: 】st message.
 merge_total_processed_left: A total of 【
 merge_total_processed_right: 】 stickers were processed.
+## search
+sticker_search_des: Find a Sticker set by keyword.
+sticker_search_no: Did not find any sticker set.
+sticker_search_result: "The following are the sticker sets we found:"
 
 # system
 # sh
