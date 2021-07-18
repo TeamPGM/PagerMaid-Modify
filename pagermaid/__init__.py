@@ -43,7 +43,6 @@ module_dir = __path__[0]
 working_dir = getcwd()
 config = None
 help_messages = {}
-mp = Mixpanel("7be1833326f803740214fe276f5a5a3d")
 logs = getLogger(__name__)
 logging_format = "%(levelname)s [%(asctime)s] [%(name)s] %(message)s"
 logging_handler = StreamHandler()
@@ -91,6 +90,10 @@ def lang(text: str) -> str:
     return result
 
 
+if strtobool(config['allow_analytics']):
+    mp = Mixpanel("7be1833326f803740214fe276f5a5a3d")
+else:
+    mp = None
 if strtobool(config['debug']):
     logs.setLevel(DEBUG)
 else:
@@ -203,10 +206,12 @@ async def save_id():
     user_id = me.id
     if me.username is not None:
         sentry_sdk.set_user({"id": user_id, "name": me.first_name, "username": me.username, "ip_address": "{{auto}}"})
-        mp.people_set(str(user_id), {'$first_name': me.first_name, "username": me.username})
+        if strtobool(config['allow_analytics']):
+            mp.people_set(str(user_id), {'$first_name': me.first_name, "username": me.username})
     else:
         sentry_sdk.set_user({"id": user_id, "name": me.first_name, "ip_address": "{{auto}}"})
-        mp.people_set(str(user_id), {'$first_name': me.first_name})
+        if strtobool(config['allow_analytics']):
+            mp.people_set(str(user_id), {'$first_name': me.first_name})
     logs.info(f"{lang('save_id')} {me.first_name}({user_id})")
 
 
