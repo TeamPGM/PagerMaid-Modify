@@ -90,7 +90,13 @@ def lang(text: str) -> str:
     return result
 
 
-if strtobool(config['allow_analytics']):
+try:
+    allow_analytics = strtobool(config['allow_analytics'])
+except KeyError:
+    allow_analytics = True
+except ValueError:
+    allow_analytics = True
+if allow_analytics:
     mp = Mixpanel("7be1833326f803740214fe276f5a5a3d")
 else:
     mp = None
@@ -206,11 +212,11 @@ async def save_id():
     user_id = me.id
     if me.username is not None:
         sentry_sdk.set_user({"id": user_id, "name": me.first_name, "username": me.username, "ip_address": "{{auto}}"})
-        if strtobool(config['allow_analytics']):
+        if allow_analytics:
             mp.people_set(str(user_id), {'$first_name': me.first_name, "username": me.username})
     else:
         sentry_sdk.set_user({"id": user_id, "name": me.first_name, "ip_address": "{{auto}}"})
-        if strtobool(config['allow_analytics']):
+        if allow_analytics:
             mp.people_set(str(user_id), {'$first_name': me.first_name})
     logs.info(f"{lang('save_id')} {me.first_name}({user_id})")
 
