@@ -75,4 +75,4 @@ update_delete: "True"
 ipv6: "False"
 
 # Analytics
-allow_analytics: "True"
+allow_analytic: "True"
