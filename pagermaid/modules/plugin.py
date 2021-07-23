@@ -348,5 +348,26 @@ async def plugin(context):
                 await context.edit(lang('apt_search_not_found'))
             else:
                 await context.edit(search_result)
+    elif context.parameter[0] == "export":
+        if not exists(f"{plugin_directory}version.json"):
+            await context.edit(lang('apt_why_not_install_a_plugin'))
+            return
+        await context.edit(lang('stats_loading'))
+        list_plugin = []
+        with open(f"{plugin_directory}version.json", 'r', encoding="utf-8") as f:
+            version_json = json.load(f)
+        temp, plugin_list = get_html(f"{git_source}list.json")
+        plugin_online = json.loads(plugin_list)['list']
+        for key, value in version_json.items():
+            if value == "0.0":
+                continue
+            for i in plugin_online:
+                if key == i['name']:
+                    list_plugin.append(key)
+                    break
+        if len(list_plugin) == 0:
+            await context.edit(lang('apt_why_not_install_a_plugin'))
+        else:
+            await context.edit('-apt install ' + ' '.join(list_plugin))
     else:
         await context.edit(lang('arg_error'))

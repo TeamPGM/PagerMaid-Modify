@@ -282,7 +282,7 @@ hitokoto_type_meme: trembling
 # plugin
 # apt
 apt_des: Used to manage plugins installed to PagerMaid-Modify.
-apt_parameters: "{update|search|show|status|install|remove|enable|disable|upload} <plugin name/file>"
+apt_parameters: "{update|search|show|status|install|remove|enable|disable|upload|export} <plugin name/file>"
 apt_processing: Installing plugins...
 apt_no_py: Something went wrong ~ Failed to get the plug-in file from the attachment.
 apt_plugin: plugin
