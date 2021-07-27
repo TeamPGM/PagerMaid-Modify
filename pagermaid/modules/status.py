@@ -134,6 +134,60 @@ async def stats(context):
 async def speedtest(context):
     """ Tests internet speed using speedtest. """
     try:
+        speed_test_path = config['speed_test_path']
+    except KeyError:
+        speed_test_path = ''
+    if not speed_test_path == '':
+        server = None
+        if len(context.parameter) == 1:
+            try:
+                server = int(context.parameter[0])
+            except ValueError:
+                await context.edit(lang('arg_error'))
+                return
+        speed_test_path += ' -f json'
+        if server:
+            speed_test_path += f' -s {server}'
+        await context.edit(lang('speedtest_processing'))
+        result = await execute(f'{speed_test_path}')
+        result = loads(result)
+        if result['type'] == 'log':
+            await context.edit(f"{result['level'].upper()}:{result['message']}")
+        elif result['type'] == 'result':
+            des = (
+                f"**Speedtest** \n"
+                f"Server: `{result['server']['name']} - "
+                f"{result['server']['location']}` \n"
+                f"Host: `{result['server']['host']}` \n"
+                f"Upload: `{unit_convert(result['upload']['bandwidth'] * 8)}` \n"
+                f"Download: `{unit_convert(result['download']['bandwidth'] * 8)}` \n"
+                f"Latency: `{result['ping']['latency']}` \n"
+                f"Jitter: `{result['ping']['jitter']}` \n"
+                f"Timestamp: `{result['timestamp']}`"
+            )
+            # 开始处理图片
+            data = get(f"{result['result']['url']}.png").content
+            with open('speedtest.png', mode='wb') as f:
+                f.write(data)
+            try:
+                img = Image.open('speedtest.png')
+                c = img.crop((17, 11, 727, 389))
+                c.save('speedtest.png')
+            except:
+                pass
+            try:
+                await context.client.send_file(context.chat_id, 'speedtest.png', caption=des)
+            except:
+                pass
+            try:
+                remove('speedtest.png')
+            except:
+                pass
+            await context.delete()
+        else:
+            await context.edit(result)
+        return
+    try:
         test = Speedtest()
     except SpeedtestHTTPError:
         await context.edit(lang('speedtest_ConnectFailure'))

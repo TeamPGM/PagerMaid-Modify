@@ -76,3 +76,6 @@ ipv6: "False"
 
 # Analytics
 allow_analytic: "True"
+
+# speed_test
+speed_test_path: ""
