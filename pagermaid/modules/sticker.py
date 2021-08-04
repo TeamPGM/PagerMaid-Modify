@@ -184,9 +184,9 @@ async def single_sticker(animated, context, custom_emoji, emoji, message, pic_ro
             if (DocumentAttributeFilename(file_name='sticker.webp') in
                     message.media.document.attributes):
                 emoji = message.media.document.attributes[1].alt
+                custom_emoji = True
                 if not emoji:
                     custom_emoji = False
-                custom_emoji = True
         elif (DocumentAttributeFilename(file_name='AnimatedSticker.tgs') in
               message.media.document.attributes):
             photo = BytesIO()
