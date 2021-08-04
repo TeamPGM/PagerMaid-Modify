@@ -171,13 +171,6 @@ async def single_sticker(animated, context, custom_emoji, emoji, message, pic_ro
     except:
         pass
     if message and message.media:
-        try:
-            temp = message.media.document.mime_type.split('/')
-        except AttributeError:
-            try:
-                await context.edit(lang('sticker_type_not_support'))
-            except:
-                pass
         if isinstance(message.media, MessageMediaPhoto):
             photo = BytesIO()
             photo = await bot.download_media(message.photo, photo)
@@ -191,6 +184,8 @@ async def single_sticker(animated, context, custom_emoji, emoji, message, pic_ro
             if (DocumentAttributeFilename(file_name='sticker.webp') in
                     message.media.document.attributes):
                 emoji = message.media.document.attributes[1].alt
+                if not emoji:
+                    custom_emoji = False
                 custom_emoji = True
         elif (DocumentAttributeFilename(file_name='AnimatedSticker.tgs') in
               message.media.document.attributes):
