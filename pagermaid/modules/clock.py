@@ -12,8 +12,6 @@ from pagermaid.utils import lang, alias_command
           parameters=lang('time_parameters'))
 async def time(context):
     """ For querying time. """
-    if len(context.parameter) > 1:
-        context.edit()
     if len(context.parameter) == 1:
         country = context.parameter[0].title()
     else:
@@ -23,7 +21,7 @@ async def time(context):
     if not country:
         time_zone = await get_timezone(config['application_region'])
         await context.edit(
-            f"**Time in {config['application_region']}**\n"
+            f"**{config['application_region']} {lang('time_time')}：**\n"
             f"`{datetime.now(time_zone).strftime(date_form)} "
             f"{datetime.now(time_zone).strftime(time_form)}`"
         )
@@ -31,13 +29,28 @@ async def time(context):
 
     time_zone = await get_timezone(country)
     if not time_zone:
-        await context.edit(lang('arg_error'))
-        return
-
-    try:
-        country_name = country_names[country]
-    except KeyError:
-        country_name = country
+        try:
+            time_num, utc_num = int(context.parameter[0]), int(context.parameter[0])
+            if time_num == 0:
+                time_num, utc_num = '', ''
+            elif 0 < time_num < 13:
+                time_num, utc_num = f'-{time_num}', f'+{time_num}'
+            elif -13 < time_num < 0:
+                time_num, utc_num = f'+{-time_num}', f'{time_num}'
+            elif time_num < -12:
+                time_num, utc_num = '+12', '-12'
+            elif time_num > 12:
+                time_num, utc_num = '-12', '+12'
+            time_zone = timezone(f'Etc/GMT{time_num}')
+            country_name = f'UTC{utc_num}'
+        except ValueError:
+            await context.edit(lang('arg_error'))
+            return
+    else:
+        try:
+            country_name = country_names[country]
+        except KeyError:
+            country_name = country
 
     await context.edit(f"**{country_name} {lang('time_time')}：**\n"
                        f"`{datetime.now(time_zone).strftime(date_form)} "
