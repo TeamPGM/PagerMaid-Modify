@@ -106,7 +106,9 @@ help_des: 顯示指令列表或者單一指令的用途。
 help_list: 指令列表
 help_send: 發送
 help_see: 以查看特定指令的幫助
-help_source: 原始碼
+help_source: 🖥 原始碼
+help_plugin: 🔅 插件列表
+help_module: 💠 內置模塊
 # qr
 # genqr
 genqr_des: 生成 QR 扣。

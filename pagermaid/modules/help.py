@@ -1,7 +1,6 @@
 """ The help module. """
 
 from os import listdir
-from os.path import exists
 from json import dump as json_dump
 from pagermaid import help_messages, alias_dict
 from pagermaid.utils import lang, alias_command
@@ -11,8 +10,50 @@ from pagermaid.listener import listener, config
 @listener(is_plugin=False, outgoing=True, command=alias_command("help"),
           description=lang('help_des'),
           parameters=f"<{lang('command')}>")
-async def help(context):
-    """ The help command,"""
+async def help_command(context):
+    """ The help new command,"""
+    support_commands = ['username', 'name', 'pfp', 'bio', 'rmpfp',
+                        'profile', 'block', 'unblock', 'ghost', 'deny', 'convert',
+                        'caption', 'ocr', 'highlight', 'time', 'translate',
+                        'tts', 'google', 'animate',
+                        'teletype', 'widen', 'owo', 'flip',
+                        'rng', 'aaa', 'tuxsay', 'coin', 'help',
+                        'lang', 'alias', 'id', 'uslog', 'log',
+                        're', 'leave', 'hitokoto', 'apt', 'prune', 'selfprune',
+                        'yourprune', 'del', 'genqr', 'parseqr',
+                        'sb', 'sysinfo', 'status',
+                        'stats', 'speedtest', 'connection',
+                        'pingdc', 'ping', 'topcloud',
+                        's', 'sticker', 'sh', 'restart',
+                        'trace', 'chat', 'update']
+    if context.arguments:
+        if context.arguments in help_messages:
+            await context.edit(str(help_messages[context.arguments]))
+        else:
+            await context.edit(lang('arg_error'))
+    else:
+        result = f"**{lang('help_list')}: \n**"
+        for command in sorted(help_messages, reverse=False):
+            if str(command) in support_commands:
+                continue
+            result += "`" + str(command)
+            result += "`, "
+        if result == f"**{lang('help_list')}: \n**":
+            """ The help raw command,"""
+            for command in sorted(help_messages, reverse=False):
+                result += "`" + str(command)
+                result += "`, "
+        await context.edit(result[:-2] + f"\n**{lang('help_send')} \"-help <{lang('command')}>\" {lang('help_see')}**\n"
+                                         f"[{lang('help_source')}](https://t.me/PagerMaid_Modify) "
+                                         f"[{lang('help_plugin')}](https://index.xtaolabs.com/) "
+                                         f"[{lang('help_module')}](https://wiki.xtaolabs.com/)")
+
+
+@listener(is_plugin=False, outgoing=True, command=alias_command("help_raw"),
+          description=lang('help_des'),
+          parameters=f"<{lang('command')}>")
+async def help_raw_command(context):
+    """ The help raw command,"""
     if context.arguments:
         if context.arguments in help_messages:
             await context.edit(str(help_messages[context.arguments]))
@@ -45,7 +86,8 @@ async def lang_change(context):
         await context.edit(f"{lang('lang_change_to')} {to_lang}, {lang('lang_reboot')}")
         await context.client.disconnect()
     else:
-        await context.edit(f'{lang("lang_current_lang")} {config["application_language"]}\n\n{lang("lang_all_lang")}{"，".join(ldir)}')
+        await context.edit(
+            f'{lang("lang_current_lang")} {config["application_language"]}\n\n{lang("lang_all_lang")}{"，".join(ldir)}')
 
 
 @listener(is_plugin=False, outgoing=True, command="alias",
