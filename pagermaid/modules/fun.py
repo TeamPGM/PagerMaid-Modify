@@ -74,13 +74,16 @@ async def mock(context):
     reply = await context.get_reply_message()
     await context.edit(result)
     if reply:
-        if reply.sender.is_self:
-            try:
-                await reply.edit(result)
-            except MessageNotModifiedError:
-                await context.edit("A rare event of two mocking messages being the same just occurred.")
-                return
-            await context.delete()
+        try:
+            if reply.sender.is_self:
+                try:
+                    await reply.edit(result)
+                except MessageNotModifiedError:
+                    await context.edit("A rare event of two mocking messages being the same just occurred.")
+                    return
+                await context.delete()
+        except AttributeError:
+            pass
 
 
 @listener(is_plugin=False, outgoing=True, command=alias_command("widen"),

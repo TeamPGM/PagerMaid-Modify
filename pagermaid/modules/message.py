@@ -147,7 +147,10 @@ async def re(context):
             except:
                 await context.edit(lang('re_arg_error'))
                 return True
-        await context.delete()
+        try:
+            await context.delete()
+        except ValueError:
+            pass
         try:
             for nums in range(0, num):
                 await reply.forward_to(int(context.chat_id))

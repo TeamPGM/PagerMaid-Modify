@@ -81,7 +81,10 @@ async def selfprune(context):
     if msgs:
         await context.client.delete_messages(context.chat_id, msgs)
     await log(f"{lang('prune_hint1')}{lang('sp_hint')} {str(count_buffer)} / {str(count)} {lang('prune_hint2')}")
-    notification = await send_prune_notify(context, count_buffer, count)
+    try:
+        notification = await send_prune_notify(context, count_buffer, count)
+    except ValueError:
+        pass
     await sleep(1)
     await notification.delete()
 
