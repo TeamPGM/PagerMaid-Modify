@@ -1,7 +1,7 @@
 """ PagerMaid web interface utility. """
 
 from threading import Thread
-from distutils2.util import strtobool
+from distutils.util import strtobool
 from importlib import import_module
 from cheroot.wsgi import Server as WSGIServer, PathInfoDispatcher
 from flask import Flask

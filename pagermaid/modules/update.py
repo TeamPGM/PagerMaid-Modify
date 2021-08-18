@@ -2,7 +2,7 @@
 
 import platform, json, time
 import urllib.request
-from distutils2.util import strtobool
+from distutils.util import strtobool
 from json import JSONDecodeError
 from subprocess import run, PIPE
 from datetime import datetime

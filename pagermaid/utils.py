@@ -18,7 +18,7 @@ def lang(text: str) -> str:
     return result
 
 
-def alias_command(command):
+def alias_command(command: str) -> str:
     """ alias """
     try:
         command = alias_dict[command]
@@ -108,7 +108,7 @@ async def attach_report(plaintext, file_name, reply_id=None, caption=None):
     remove(file_name)
 
 
-async def obtain_message(context):
+async def obtain_message(context) -> str:
     """ Obtains a message from either the reply message or command arguments. """
     reply = await context.get_reply_message()
     message = context.arguments
@@ -149,7 +149,7 @@ async def fetch_youtube_audio(url, chat_id, reply_id, string_2):
     return True
 
 
-def owoify(text):
+def owoify(text: str) -> str:
     """ Converts your text to OwO """
     smileys = [';;w;;', '^w^', '>w<', 'UwU', '(・`ω´・)', '(´・ω・`)']
     with open(f"{module_dir}/assets/replacements.json") as fp:
@@ -179,6 +179,6 @@ def owoify(text):
     return text
 
 
-def clear_emojis(target):
+def clear_emojis(target: str) -> str:
     """ Removes all Emojis from provided string """
     return get_emoji_regexp().sub(u'', target)

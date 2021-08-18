@@ -4,7 +4,7 @@ import sys, sentry_sdk, re
 
 from telethon import events
 from telethon.errors import MessageTooLongError
-from distutils2.util import strtobool
+from distutils.util import strtobool
 from traceback import format_exc
 from time import gmtime, strftime, time
 from telethon.events import StopPropagation

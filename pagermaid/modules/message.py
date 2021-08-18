@@ -7,7 +7,7 @@ from telethon.tl.functions.messages import DeleteChatUserRequest
 from telethon.tl.functions.channels import LeaveChannelRequest
 from telethon.errors import ForbiddenError
 from telethon.errors.rpcerrorlist import ChatIdInvalidError, FloodWaitError
-from distutils2.util import strtobool
+from distutils.util import strtobool
 from pagermaid import bot, log, config
 from pagermaid.listener import listener
 from pagermaid.utils import lang, alias_command

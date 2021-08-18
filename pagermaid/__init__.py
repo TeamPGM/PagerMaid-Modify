@@ -23,9 +23,11 @@ from json import load as load_json
 from shutil import copyfile
 from redis import StrictRedis
 from logging import getLogger, INFO, DEBUG, ERROR, StreamHandler, basicConfig
-from distutils2.util import strtobool
+from distutils.util import strtobool
 from coloredlogs import ColoredFormatter
 from telethon import TelegramClient
+
+# Errors
 from telethon.errors.rpcerrorlist import MessageNotModifiedError, MessageIdInvalidError, ChannelPrivateError, \
     ChatSendMediaForbiddenError, YouBlockedUserError, FloodWaitError, ChatWriteForbiddenError, \
     AuthKeyDuplicatedError
