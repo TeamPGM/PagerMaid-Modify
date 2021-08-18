@@ -257,10 +257,10 @@ configure() {
     config_file=config.yml
     echo "生成配置文件中 . . ."
     cp config.gen.yml config.yml
-    echo "api_key、api_hash 申请地址： https://my.telegram.org/"
-    printf "请输入应用程序 api_key："
-    read -r api_key <&1
-    sed -i "s/ID_HERE/$api_key/" $config_file
+    echo "api_id、api_hash 申请地址： https://my.telegram.org/"
+    printf "请输入应用程序 api_id："
+    read -r api_id <&1
+    sed -i "s/ID_HERE/$api_id/" $config_file
     printf "请输入应用程序 api_hash："
     read -r api_hash <&1
     sed -i "s/HASH_HERE/$api_hash/" $config_file
@@ -369,7 +369,7 @@ login_screen() {
 
         sleep 1
         if [ "$(ps -def | grep [p]agermaid | grep -v grep)" == "" ]; then
-            echo "PagerMaid 运行时发生错误，可能是因为发送验证码失败，请检查您的 API_KEY 和 API_HASH"
+            echo "PagerMaid 运行时发生错误，可能是因为发送验证码失败，请检查您的 API_ID 和 API_HASH"
             exit 1
         fi
 
