@@ -8,7 +8,7 @@ from telethon.tl.functions.account import UpdateProfileRequest, UpdateUsernameRe
 from telethon.tl.functions.photos import DeletePhotosRequest, GetUserPhotosRequest, UploadProfilePhotoRequest
 from telethon.tl.functions.users import GetFullUserRequest
 from telethon.tl.functions.contacts import BlockRequest, UnblockRequest
-from telethon.tl.types import InputPhoto, MessageMediaPhoto, MessageEntityMentionName
+from telethon.tl.types import InputPhoto, MessageMediaPhoto, MessageEntityMentionName, MessageEntityPhone
 from struct import error as StructError
 from pagermaid import bot, log
 from pagermaid.utils import lang, alias_command
@@ -182,6 +182,8 @@ async def profile(context):
         if context.message.entities is not None:
             if isinstance(context.message.entities[0], MessageEntityMentionName):
                 user = context.message.entities[0].user_id
+            elif isinstance(context.message.entities[0], MessageEntityPhone):
+                user = int(context.parameter[0])
             else:
                 await context.edit(f"{lang('error_prefix')}{lang('arg_error')}")
                 return
@@ -275,7 +277,6 @@ async def profile(context):
           parameters="<username/uid/reply>")
 async def block_user(context):
     """ Block an user. """
-    user = None
     if len(context.parameter) > 1:
         await context.edit(f"{lang('error_prefix')}{lang('arg_error')}")
         return
@@ -317,7 +318,6 @@ async def block_user(context):
           parameters="<username/uid/reply>")
 async def unblock_user(context):
     """ Unblock an user. """
-    user = None
     if len(context.parameter) > 1:
         await context.edit(f"{lang('error_prefix')}{lang('arg_error')}")
         return
