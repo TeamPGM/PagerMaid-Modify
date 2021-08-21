@@ -71,6 +71,16 @@ except Exception as e:
     print("Reading language YAML file failed")
     print(e)
     exit(1)
+# Customization
+try:
+    with open(f"languages/custom.yml", "r", encoding="utf-8") as f:
+        lang_temp = safe_load(f)
+    for key, value in lang_temp.items():
+        lang_dict[key] = value
+except FileNotFoundError:
+    pass
+except Exception as e:
+    logs.fatal("Reading custom YAML file failed")
 
 # alias
 alias_dict: dict = {}
@@ -100,6 +110,7 @@ except ValueError:
     allow_analytics = True
 if allow_analytics:
     import analytics
+
     analytics.write_key = 'EI5EyxFl8huwAvv932Au7XoRSdZ63wC4'
     analytics = analytics
 if strtobool(config['debug']):

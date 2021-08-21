@@ -8,7 +8,7 @@ from asyncio import sleep
 from os import remove
 from urllib import request
 from io import BytesIO
-from telethon.tl.types import DocumentAttributeFilename, MessageMediaPhoto
+from telethon.tl.types import DocumentAttributeFilename, MessageMediaPhoto, MessageMediaWebPage
 from telethon.tl.functions.contacts import UnblockRequest
 from telethon.errors.common import AlreadyInConversationError
 from PIL import Image, ImageOps
@@ -174,6 +174,12 @@ async def single_sticker(animated, context, custom_emoji, emoji, message, pic_ro
         if isinstance(message.media, MessageMediaPhoto):
             photo = BytesIO()
             photo = await bot.download_media(message.photo, photo)
+        elif isinstance(message.media, MessageMediaWebPage):
+            try:
+                await context.edit(lang('sticker_type_not_support'))
+            except:
+                pass
+            return
         elif "image" in message.media.document.mime_type.split('/'):
             photo = BytesIO()
             try:
@@ -335,7 +341,14 @@ A pack can't have more than 120 stickers at the moment.":
                                 except:
                                     pass
                                 return
-                        await upload_sticker(animated, message, context, file, conversation)
+                        try:
+                            await upload_sticker(animated, message, context, file, conversation)
+                        except ValueError:
+                            try:
+                                await context.edit(lang('sticker_reply_not_sticker'))
+                            except:
+                                pass
+                            return
                         await conversation.get_response()
                         await conversation.send_message(emoji)
                         await bot.send_read_acknowledge(conversation.chat_id)
@@ -388,7 +401,14 @@ async def add_sticker(conversation, command, pack_title, pack_name, animated, me
     await conversation.send_message(pack_title)
     await conversation.get_response()
     await bot.send_read_acknowledge(conversation.chat_id)
-    await upload_sticker(animated, message, context, file, conversation)
+    try:
+        await upload_sticker(animated, message, context, file, conversation)
+    except ValueError:
+        try:
+            await context.edit(lang('sticker_reply_not_sticker'))
+        except:
+            pass
+        return
     await conversation.get_response()
     await conversation.send_message(emoji)
     await bot.send_read_acknowledge(conversation.chat_id)

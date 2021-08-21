@@ -126,6 +126,7 @@ pagermaid.egg-info/
 dump.rdb
 keyword.list
 requirements2.txt
+languages/custom.yml
 
 # Spyder project settings
 .spyderproject
