@@ -120,10 +120,19 @@ async def sticker(context):
     # 是否添加到指定贴纸包
     if context.parameter[0] == "to":
         if len(context.parameter) == 2:
-            to_sticker_set = True
+            to_sticker_set = context.parameter[1]
+            if redis_status():
+                redis.set("sticker.to", to_sticker_set)
         else:
-            await context.edit(lang("sticker_to_no"))
-            return
+            if redis_status():
+                if redis.get("sticker.to"):
+                    to_sticker_set = redis.get("sticker.to").decode()
+                else:
+                    await context.edit(lang("sticker_to_no"))
+                    return
+            else:
+                await context.edit(lang("sticker_to_no"))
+                return
 
     user = await bot.get_me()
     if not user.username:
@@ -274,7 +283,7 @@ async def single_sticker(animated, context, custom_emoji, emoji, message, pic_ro
             pack_name = f"{user.username}_{package_name}_{pack}"
             pack_title = f"@{user.username} {lang('sticker_pack_title')} ({package_name}) ({pack})"
         elif to_sticker_set:
-            pack_name = context.parameter[1]
+            pack_name = to_sticker_set
             pack_title = f"@{user.username} {lang('sticker_pack_title')} ({package_name}) ({pack})"
         else:
             pack_name = f"{user.username}_{pack}"
