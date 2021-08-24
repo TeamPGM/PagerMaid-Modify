@@ -31,6 +31,7 @@ async def sticker(context):
         pass
     pic_round = False
     is_batch = False
+    to_sticker_set = False
     package_name = ""
     if redis_status():
         if redis.get("sticker.round"):
@@ -83,6 +84,8 @@ async def sticker(context):
                             pass
                         return
 
+            elif context.parameter[0] == "to":
+                pass
             # s <png | number> | error
             else:
                 if context.parameter[0] == "set_round":
@@ -114,6 +117,14 @@ async def sticker(context):
                         pass
                     return
 
+    # 是否添加到指定贴纸包
+    if context.parameter[0] == "to":
+        if len(context.parameter) == 2:
+            to_sticker_set = True
+        else:
+            await context.edit(lang("sticker_to_no"))
+            return
+
     user = await bot.get_me()
     if not user.username:
         user.username = user.first_name
@@ -135,7 +146,7 @@ async def sticker(context):
         if context.parameter[0] == "m":
             message = await context.get_reply_message()
             await single_sticker(animated, context, custom_emoji, emoji, message, pic_round, user,
-                                 package_name)
+                                 package_name, to_sticker_set)
         else:
             async for message in context.client.iter_messages(input_chat, min_id=context.reply_to_msg_id):
                 count += 1
@@ -147,11 +158,12 @@ async def sticker(context):
                     except:
                         pass
                     result = await single_sticker(animated, context, custom_emoji, emoji, message, pic_round, user,
-                                                  package_name)
+                                                  package_name, to_sticker_set)
                     await sleep(.5)
             try:
                 await context.edit(f"{result}\n"
-                                   f"{lang('merge_total_processed_left')}{scount}{lang('merge_total_processed_right')}", parse_mode='md')
+                                   f"{lang('merge_total_processed_left')}{scount}{lang('merge_total_processed_right')}",
+                                   parse_mode='md')
             except:
                 pass
         await sleep(5)
@@ -162,10 +174,14 @@ async def sticker(context):
     else:
         # 单张收集图片
         message = await context.get_reply_message()
-        await single_sticker(animated, context, custom_emoji, emoji, message, pic_round, user, "")
+        try:
+            await single_sticker(animated, context, custom_emoji, emoji, message, pic_round, user, "", to_sticker_set)
+        except FileExistsError:
+            await context.edit(lang("sticker_to_full"))
 
 
-async def single_sticker(animated, context, custom_emoji, emoji, message, pic_round, user, package_name):
+async def single_sticker(animated, context, custom_emoji, emoji, message, pic_round, user, package_name,
+                         to_sticker_set):
     try:
         await context.edit(lang('sticker_processing'))
     except:
@@ -225,7 +241,10 @@ async def single_sticker(animated, context, custom_emoji, emoji, message, pic_ro
             emoji = "👀"
         pack = 1
         sticker_already = False
-        if package_name:
+        if to_sticker_set:
+            # 指定贴纸包对 emoji 不处理
+            pass
+        elif package_name:
             # 批量处理贴纸无法指定emoji，只获取第几个pack
             # s merge png <package_name> <number>
             if len(split_strings) == 5:
@@ -254,6 +273,9 @@ async def single_sticker(animated, context, custom_emoji, emoji, message, pic_ro
             # merge指定package_name
             pack_name = f"{user.username}_{package_name}_{pack}"
             pack_title = f"@{user.username} {lang('sticker_pack_title')} ({package_name}) ({pack})"
+        elif to_sticker_set:
+            pack_name = context.parameter[1]
+            pack_title = f"@{user.username} {lang('sticker_pack_title')} ({package_name}) ({pack})"
         else:
             pack_name = f"{user.username}_{pack}"
             pack_title = f"@{user.username} {lang('sticker_pack_title')} ({pack})"
@@ -275,9 +297,10 @@ async def single_sticker(animated, context, custom_emoji, emoji, message, pic_ro
             file.name = "sticker.png"
             image.save(file, "PNG")
         else:
-            pack_name += "_animated"
-            pack_title += " (animated)"
-            command = '/newanimated'
+            if not to_sticker_set:
+                pack_name += "_animated"
+                pack_title += " (animated)"
+                command = '/newanimated'
 
         try:
             response = request.urlopen(
@@ -303,6 +326,7 @@ async def single_sticker(animated, context, custom_emoji, emoji, message, pic_ro
             for _ in range(20):  # 最多重试20次
                 try:
                     async with bot.conversation('Stickers') as conversation:
+                        await conversation.send_message('/cancel')
                         await conversation.send_message('/addsticker')
                         await conversation.get_response()
                         await bot.send_read_acknowledge(conversation.chat_id)
@@ -312,6 +336,9 @@ async def single_sticker(animated, context, custom_emoji, emoji, message, pic_ro
 A pack can't have more than 120 stickers at the moment.":
                             pack += 1
 
+                            # 指定贴纸包已满时直接报错
+                            if to_sticker_set:
+                                raise FileExistsError
                             if package_name:
                                 # merge指定package_name
                                 pack_name = f"{user.username}_{package_name}_{pack}"
@@ -395,6 +422,7 @@ A pack can't have more than 120 stickers at the moment.":
 
 
 async def add_sticker(conversation, command, pack_title, pack_name, animated, message, context, file, emoji):
+    await conversation.send_message("/cancel")
     await conversation.send_message(command)
     await conversation.get_response()
     await bot.send_read_acknowledge(conversation.chat_id)

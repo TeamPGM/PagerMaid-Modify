@@ -436,6 +436,8 @@ sticker_this: 这个
 sticker_pack: 贴纸包
 sticker_another_running: 另一个命令正在添加贴纸, 重新尝试中
 sticker_no_pack_exist_creating: 贴纸包不存在，正在创建 . . .
+sticker_to_no: 出错了呜呜呜 ~ 没有指定贴纸包
+sticker_to_full: 出错了呜呜呜 ~ 这个贴纸包已满
 ## upload_sticker
 us_animated_uploading: 上传动图中 . . .
 us_static_uploading: 上传图片中 . . .
