@@ -118,21 +118,22 @@ async def sticker(context):
                     return
 
     # 是否添加到指定贴纸包
-    if context.parameter[0] == "to":
-        if len(context.parameter) == 2:
-            to_sticker_set = context.parameter[1]
-            if redis_status():
-                redis.set("sticker.to", to_sticker_set)
-        else:
-            if redis_status():
-                if redis.get("sticker.to"):
-                    to_sticker_set = redis.get("sticker.to").decode()
+    if len(context.parameter) >= 1:
+        if context.parameter[0] == "to":
+            if len(context.parameter) == 2:
+                to_sticker_set = context.parameter[1]
+                if redis_status():
+                    redis.set("sticker.to", to_sticker_set)
+            else:
+                if redis_status():
+                    if redis.get("sticker.to"):
+                        to_sticker_set = redis.get("sticker.to").decode()
+                    else:
+                        await context.edit(lang("sticker_to_no"))
+                        return
                 else:
                     await context.edit(lang("sticker_to_no"))
                     return
-            else:
-                await context.edit(lang("sticker_to_no"))
-                return
 
     user = await bot.get_me()
     if not user.username:
