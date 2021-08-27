@@ -7,7 +7,7 @@ from os import remove, rename, chdir, path
 from os.path import exists
 from shutil import copyfile, move
 from glob import glob
-from pagermaid import log, working_dir, config
+from pagermaid import log, working_dir, config, proxies
 from pagermaid.listener import listener
 from pagermaid.utils import upload_attachment, lang, alias_command
 from pagermaid.modules import plugin_list as active_plugins, __list_plugins
@@ -20,7 +20,7 @@ except:
 
 
 def get_html(url):
-    data = get(url)
+    data = get(url, proxies=proxies)
     return data.status_code, data.content
 
 

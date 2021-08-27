@@ -181,15 +181,22 @@ if api_key is None or api_hash is None:
     )
     exit(1)
 
+# 开始检查代理配置
+proxies = {}
 if not proxy_addr == '' and not proxy_port == '':
     try:
         import python_socks
 
+        proxies = {
+            "http": f"socks5://{proxy_addr}:{proxy_port}",
+            "https": f"socks5://{proxy_addr}:{proxy_port}"
+        }
         bot = TelegramClient("pagermaid", api_key, api_hash,
                              auto_reconnect=True,
                              proxy=(python_socks.ProxyType.SOCKS5, proxy_addr, int(proxy_port)),
                              use_ipv6=use_ipv6)
     except:
+        proxies = {}
         bot = TelegramClient("pagermaid", api_key, api_hash,
                              auto_reconnect=True,
                              use_ipv6=use_ipv6)
@@ -197,6 +204,10 @@ elif not http_addr == '' and not http_port == '':
     try:
         import python_socks
 
+        proxies = {
+            "http": f"http://{http_addr}:{http_port}",
+            "https": f"http://{http_addr}:{http_port}"
+        }
         bot = TelegramClient("pagermaid", api_key, api_hash,
                              auto_reconnect=True,
                              proxy=(python_socks.ProxyType.HTTP, http_addr, int(http_port)),

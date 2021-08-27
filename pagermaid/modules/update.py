@@ -1,16 +1,19 @@
 """ Pulls in the new version of PagerMaid from the git server. """
 
-import platform, json, time
-import urllib.request
+import platform
+import requests
+import time
+from datetime import datetime
 from distutils.util import strtobool
 from json import JSONDecodeError
-from subprocess import run, PIPE
-from datetime import datetime
 from os import remove
+from subprocess import run, PIPE
+from sys import executable
+
 from git import Repo
 from git.exc import GitCommandError, InvalidGitRepositoryError, NoSuchPathError
-from sys import executable
-from pagermaid import log, config
+
+from pagermaid import log, config, proxies
 from pagermaid.listener import listener
 from pagermaid.utils import execute, lang, alias_command
 
@@ -39,12 +42,10 @@ except ValueError:
 
 
 def update_get():
-    with urllib.request.urlopen(git_api) as response:
-        result = response.read()
-        try:
-            data = json.loads(result)
-        except JSONDecodeError as e:
-            raise e
+    try:
+        data = requests.get(git_api, proxies=proxies).json()
+    except JSONDecodeError as e:
+        raise e
     return data
 
 

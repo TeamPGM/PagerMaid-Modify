@@ -1,19 +1,16 @@
 """ PagerMaid module to handle sticker collection. """
 
-import certifi
-import ssl
 import requests
 from bs4 import BeautifulSoup
 from asyncio import sleep
 from os import remove
-from urllib import request
 from io import BytesIO
 from telethon.tl.types import DocumentAttributeFilename, MessageMediaPhoto, MessageMediaWebPage
 from telethon.tl.functions.contacts import UnblockRequest
 from telethon.errors.common import AlreadyInConversationError
 from PIL import Image, ImageOps
 from math import floor
-from pagermaid import bot, redis, redis_status
+from pagermaid import bot, redis, redis_status, proxies
 from pagermaid.listener import listener
 from pagermaid.utils import lang, alias_command
 from pagermaid import log
@@ -313,23 +310,19 @@ async def single_sticker(animated, context, custom_emoji, emoji, message, pic_ro
                 command = '/newanimated'
 
         try:
-            response = request.urlopen(
-                request.Request(f'http://t.me/addstickers/{pack_name}'),
-                context=ssl.create_default_context(cafile=certifi.where()))
+            response = requests.get(f'http://t.me/addstickers/{pack_name}', proxies=proxies)
         except UnicodeEncodeError:
             pack_name = 's' + hex(context.sender_id)[2:]
             if animated:
                 pack_name = 's' + hex(context.sender_id)[2:] + '_animated'
-            response = request.urlopen(
-                request.Request(f'http://t.me/addstickers/{pack_name}'),
-                context=ssl.create_default_context(cafile=certifi.where()))
-        if not response.status == 200:
+            response = requests.get(f'http://t.me/addstickers/{pack_name}', proxies=proxies)
+        if not response.status_code == 200:
             try:
                 await context.edit(lang('sticker_telegram_server_error'))
             except:
                 pass
             return
-        http_response = response.read().decode("utf8").split('\n')
+        http_response = response.text.split('\n')
 
         if "  A <strong>Telegram</strong> user has created the <strong>Sticker&nbsp;Set</strong>." not in \
                 http_response:
@@ -337,6 +330,8 @@ async def single_sticker(animated, context, custom_emoji, emoji, message, pic_ro
                 try:
                     async with bot.conversation('Stickers') as conversation:
                         await conversation.send_message('/cancel')
+                        await conversation.get_response()
+                        await bot.send_read_acknowledge(conversation.chat_id)
                         await conversation.send_message('/addsticker')
                         await conversation.get_response()
                         await bot.send_read_acknowledge(conversation.chat_id)
@@ -433,6 +428,8 @@ A pack can't have more than 120 stickers at the moment.":
 
 async def add_sticker(conversation, command, pack_title, pack_name, animated, message, context, file, emoji):
     await conversation.send_message("/cancel")
+    await conversation.get_response()
+    await bot.send_read_acknowledge(conversation.chat_id)
     await conversation.send_message(command)
     await conversation.get_response()
     await bot.send_read_acknowledge(conversation.chat_id)
@@ -579,7 +576,7 @@ async def sticker_search(context):
     await context.edit(lang('google_processing'))
     query = context.parameter[0]
     try:
-        html = requests.get("https://combot.org/telegram/stickers?q=" + query).text
+        html = requests.get("https://combot.org/telegram/stickers?q=" + query, proxies=proxies).text
     except:
         return await context.edit(lang('sticker_telegram_server_error'))
     xml = BeautifulSoup(html, "lxml")

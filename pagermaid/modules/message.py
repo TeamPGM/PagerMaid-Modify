@@ -8,7 +8,7 @@ from telethon.tl.functions.channels import LeaveChannelRequest
 from telethon.errors import ForbiddenError
 from telethon.errors.rpcerrorlist import ChatIdInvalidError, FloodWaitError
 from distutils.util import strtobool
-from pagermaid import bot, log, config
+from pagermaid import bot, log, config, proxies
 from pagermaid.listener import listener
 from pagermaid.utils import lang, alias_command
 
@@ -213,13 +213,13 @@ async def hitokoto(context):
     hitokoto_while = 1
     hitokoto_json = None
     try:
-        hitokoto_json = json.loads(requests.get("https://v1.hitokoto.cn/?charset=utf-8").content.decode("utf-8"))
+        hitokoto_json = json.loads(requests.get("https://v1.hitokoto.cn/?charset=utf-8", proxies=proxies).content.decode("utf-8"))
     except ValueError:
         while hitokoto_while < 10:
             hitokoto_while += 1
             try:
                 hitokoto_json = json.loads(
-                    requests.get("https://v1.hitokoto.cn/?charset=utf-8").content.decode("utf-8"))
+                    requests.get("https://v1.hitokoto.cn/?charset=utf-8", proxies=proxies).content.decode("utf-8"))
                 break
             except:
                 continue
