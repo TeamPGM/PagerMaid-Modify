@@ -11,7 +11,10 @@ from random import uniform
 
 
 def mention_user(user):
-    first_name = user.first_name.replace("\u2060", "")
+    try:
+        first_name = user.first_name.replace("\u2060", "")
+    except AttributeError:
+        first_name = '×'
     return f'[{first_name}](tg://user?id={user.id})'
 
 
@@ -35,7 +38,15 @@ def mention_group(chat):
 async def span_ban(context):
     if context.reply_to_msg_id:
         reply_message = await context.get_reply_message()
-        user = reply_message.from_id
+        if reply_message:
+            try:
+                user = reply_message.from_id
+            except AttributeError:
+                await context.edit(lang('arg_error'))
+                return
+        else:
+            await context.edit(lang('arg_error'))
+            return
         target_user = await context.client(GetFullUserRequest(user))
     else:
         if len(context.parameter) == 1:

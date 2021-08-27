@@ -91,6 +91,9 @@ async def tts(context):
     except AssertionError:
         await context.edit(lang('tts_AssertionError'))
         return
+    except ConnectionError:
+        await context.edit(lang('tts_RuntimeError'))
+        return
     with open("vocals.mp3", "rb") as audio:
         line_list = list(audio)
         line_count = len(line_list)

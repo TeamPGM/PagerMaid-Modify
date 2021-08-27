@@ -223,11 +223,11 @@ async def speedtest(context):
     except (SpeedtestBestServerFailure, NoMatchedServers) as e:
         await context.edit(lang('speedtest_ServerFailure'))
         return
-    test.download()
-    test.upload()
     try:
+        test.download()
+        test.upload()
         test.results.share()
-    except (ShareResultsConnectFailure, ShareResultsSubmitFailure) as e:
+    except (ShareResultsConnectFailure, ShareResultsSubmitFailure, RuntimeError) as e:
         await context.edit(lang('speedtest_ConnectFailure'))
         return
     result = test.results.dict()

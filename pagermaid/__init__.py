@@ -30,7 +30,7 @@ from telethon import TelegramClient
 # Errors
 from telethon.errors.rpcerrorlist import MessageNotModifiedError, MessageIdInvalidError, ChannelPrivateError, \
     ChatSendMediaForbiddenError, YouBlockedUserError, FloodWaitError, ChatWriteForbiddenError, \
-    AuthKeyDuplicatedError
+    AuthKeyDuplicatedError, ChatSendStickersForbiddenError
 from telethon.errors.common import AlreadyInConversationError
 from requests.exceptions import ChunkedEncodingError
 from requests.exceptions import ConnectionError as ConnectedError
@@ -38,6 +38,7 @@ from sqlite3 import OperationalError
 from http.client import RemoteDisconnected
 from urllib.error import URLError
 from concurrent.futures._base import TimeoutError
+from redis.exceptions import ResponseError
 
 persistent_vars = {}
 module_dir = __path__[0]
@@ -291,6 +292,8 @@ def before_send(event, hint):
         return None
     elif exc_info and isinstance(exc_info[1], ChatWriteForbiddenError):
         return None
+    elif exc_info and isinstance(exc_info[1], ChatSendStickersForbiddenError):
+        return None
     elif exc_info and isinstance(exc_info[1], AlreadyInConversationError):
         return None
     elif exc_info and isinstance(exc_info[1], ConnectedError):
@@ -300,6 +303,8 @@ def before_send(event, hint):
     elif exc_info and isinstance(exc_info[1], OSError):
         return None
     elif exc_info and isinstance(exc_info[1], AuthKeyDuplicatedError):
+        return None
+    elif exc_info and isinstance(exc_info[1], ResponseError):
         return None
     if not python36:
         if exc_info and isinstance(exc_info[1], CancelError):
