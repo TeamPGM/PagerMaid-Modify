@@ -13,7 +13,7 @@ sudo apt-get install --only-upgrade git -y
 从仓库拉取项目
 
 ```bash
-cd /var/lib && git clone https://github.com/xtaodada/PagerMaid-Modify.git pagermaid && cd pagermaid
+cd /var/lib && git clone https://github.com/Xtao-Labs/PagerMaid-Modify.git pagermaid && cd pagermaid
 ```
 
 # 安装软件包
