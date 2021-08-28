@@ -16,8 +16,14 @@ async def time(context):
         country = context.parameter[0].title()
     else:
         country = config['application_region']
-    time_form = "%I:%M %p"
-    date_form = "%A %d/%m/%y"
+    try:
+        time_form = config['time_form']
+        date_form = config['date_form']
+        datetime.now().strftime(time_form)
+        datetime.now().strftime(date_form)
+    except (ValueError, KeyError):
+        time_form = "%H:%M"
+        date_form = "%A %y/%m/%d"
     if not country:
         time_zone = await get_timezone(config['application_region'])
         await context.edit(
