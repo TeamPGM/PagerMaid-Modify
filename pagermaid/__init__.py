@@ -15,7 +15,7 @@ except:
     pass
 from subprocess import run, PIPE
 from time import time
-from os import getcwd, makedirs
+from os import getcwd, makedirs, environ
 from os.path import exists
 from sys import version_info, platform
 from yaml import load, FullLoader, safe_load
@@ -26,11 +26,13 @@ from logging import getLogger, INFO, DEBUG, ERROR, StreamHandler, basicConfig
 from distutils.util import strtobool
 from coloredlogs import ColoredFormatter
 from telethon import TelegramClient
+from telethon.sessions import StringSession
 
 # Errors
 from telethon.errors.rpcerrorlist import MessageNotModifiedError, MessageIdInvalidError, ChannelPrivateError, \
     ChatSendMediaForbiddenError, YouBlockedUserError, FloodWaitError, ChatWriteForbiddenError, \
-    AuthKeyDuplicatedError, ChatSendStickersForbiddenError
+    AuthKeyDuplicatedError, ChatSendStickersForbiddenError, SlowModeWaitError, MessageEditTimeExpiredError, \
+    PeerIdInvalidError
 from telethon.errors.common import AlreadyInConversationError
 from requests.exceptions import ChunkedEncodingError
 from requests.exceptions import ConnectionError as ConnectedError
@@ -141,6 +143,25 @@ if not exists(f"{getcwd()}/data"):
 
 api_key = config['api_key']
 api_hash = config['api_hash']
+session_string = "pagermaid"
+# environ
+if environ.get('api_key'):
+    api_key = environ.get('api_key')
+if environ.get('api_hash'):
+    api_hash = environ.get('api_hash')
+if environ.get('session'):
+    string_session = environ.get('session')
+    session_string = StringSession(string_session)
+# api type
+try:
+    api_key = int(api_key)
+except ValueError:
+    logs.info(
+        lang('config_error')
+    )
+    exit(1)
+except:
+    pass
 try:
     proxy_addr = config['proxy_addr'].strip()
     proxy_port = config['proxy_port'].strip()
@@ -192,13 +213,13 @@ if not proxy_addr == '' and not proxy_port == '':
             "http": f"socks5://{proxy_addr}:{proxy_port}",
             "https": f"socks5://{proxy_addr}:{proxy_port}"
         }
-        bot = TelegramClient("pagermaid", api_key, api_hash,
+        bot = TelegramClient(session_string, api_key, api_hash,
                              auto_reconnect=True,
                              proxy=(python_socks.ProxyType.SOCKS5, proxy_addr, int(proxy_port)),
                              use_ipv6=use_ipv6)
     except:
         proxies = {}
-        bot = TelegramClient("pagermaid", api_key, api_hash,
+        bot = TelegramClient(session_string, api_key, api_hash,
                              auto_reconnect=True,
                              use_ipv6=use_ipv6)
 elif not http_addr == '' and not http_port == '':
@@ -209,24 +230,24 @@ elif not http_addr == '' and not http_port == '':
             "http": f"http://{http_addr}:{http_port}",
             "https": f"http://{http_addr}:{http_port}"
         }
-        bot = TelegramClient("pagermaid", api_key, api_hash,
+        bot = TelegramClient(session_string, api_key, api_hash,
                              auto_reconnect=True,
                              proxy=(python_socks.ProxyType.HTTP, http_addr, int(http_port)),
                              use_ipv6=use_ipv6)
     except:
-        bot = TelegramClient("pagermaid", api_key, api_hash,
+        bot = TelegramClient(session_string, api_key, api_hash,
                              auto_reconnect=True,
                              use_ipv6=use_ipv6)
 elif not mtp_addr == '' and not mtp_port == '' and not mtp_secret == '':
     from telethon import connection
 
-    bot = TelegramClient("pagermaid", api_key, api_hash,
+    bot = TelegramClient(session_string, api_key, api_hash,
                          auto_reconnect=True,
                          connection=connection.ConnectionTcpMTProxyRandomizedIntermediate,
                          proxy=(mtp_addr, int(mtp_port), mtp_secret),
                          use_ipv6=use_ipv6)
 else:
-    bot = TelegramClient("pagermaid", api_key, api_hash, auto_reconnect=True, use_ipv6=use_ipv6)
+    bot = TelegramClient(session_string, api_key, api_hash, auto_reconnect=True, use_ipv6=use_ipv6)
 user_id = 0
 redis = StrictRedis(host=redis_host, port=redis_port, db=redis_db)
 
@@ -259,59 +280,65 @@ def before_send(event, hint):
     global report_time
     exc_info = hint.get("exc_info")
     if exc_info and isinstance(exc_info[1], ConnectionError):
-        return None
+        return
     elif exc_info and isinstance(exc_info[1], CancelledError):
-        return None
+        return
     elif exc_info and isinstance(exc_info[1], MessageNotModifiedError):
-        return None
+        return
     elif exc_info and isinstance(exc_info[1], MessageIdInvalidError):
-        return None
+        return
     elif exc_info and isinstance(exc_info[1], OperationalError):
-        return None
+        return
     elif exc_info and isinstance(exc_info[1], ChannelPrivateError):
-        return None
+        return
     elif exc_info and isinstance(exc_info[1], BufferError):
-        return None
+        return
     elif exc_info and isinstance(exc_info[1], RemoteDisconnected):
-        return None
+        return
     elif exc_info and isinstance(exc_info[1], ChatSendMediaForbiddenError):
-        return None
+        return
     elif exc_info and isinstance(exc_info[1], TypeError):
-        return None
+        return
     elif exc_info and isinstance(exc_info[1], URLError):
-        return None
+        return
     elif exc_info and isinstance(exc_info[1], YouBlockedUserError):
-        return None
+        return
     elif exc_info and isinstance(exc_info[1], FloodWaitError):
-        return None
+        return
     elif exc_info and isinstance(exc_info[1], ChunkedEncodingError):
-        return None
+        return
     elif exc_info and isinstance(exc_info[1], TimeoutError):
-        return None
+        return
     elif exc_info and isinstance(exc_info[1], UnicodeEncodeError):
-        return None
+        return
     elif exc_info and isinstance(exc_info[1], ChatWriteForbiddenError):
-        return None
+        return
     elif exc_info and isinstance(exc_info[1], ChatSendStickersForbiddenError):
-        return None
+        return
     elif exc_info and isinstance(exc_info[1], AlreadyInConversationError):
-        return None
+        return
     elif exc_info and isinstance(exc_info[1], ConnectedError):
-        return None
+        return
     elif exc_info and isinstance(exc_info[1], KeyboardInterrupt):
-        return None
+        return
     elif exc_info and isinstance(exc_info[1], OSError):
-        return None
+        return
     elif exc_info and isinstance(exc_info[1], AuthKeyDuplicatedError):
-        return None
+        return
     elif exc_info and isinstance(exc_info[1], ResponseError):
-        return None
+        return
+    elif exc_info and isinstance(exc_info[1], SlowModeWaitError):
+        return
+    elif exc_info and isinstance(exc_info[1], MessageEditTimeExpiredError):
+        return
+    elif exc_info and isinstance(exc_info[1], PeerIdInvalidError):
+        return
     if not python36:
         if exc_info and isinstance(exc_info[1], CancelError):
-            return None
+            return
     if time() <= report_time + 30:
         report_time = time()
-        return None
+        return
     else:
         report_time = time()
         return event
@@ -320,7 +347,7 @@ def before_send(event, hint):
 report_time = time()
 git_hash = run("git rev-parse HEAD", stdout=PIPE, shell=True).stdout.decode()
 sentry_sdk.init(
-    "https://a0e1ef3c67ca48f4b1ecfc5538528ef3@o416616.ingest.sentry.io/5312335",
+    "https://935d04099b7d4bd889e7ffac488579fc@o416616.ingest.sentry.io/5312335",
     traces_sample_rate=1.0,
     release=git_hash,
     before_send=before_send,

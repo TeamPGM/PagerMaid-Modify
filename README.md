@@ -8,7 +8,9 @@
 <img alt="star" src="https://img.shields.io/github/stars/xtaodada/PagerMaid-Modify.svg"/>
 <img alt="fork" src="https://img.shields.io/github/forks/xtaodada/PagerMaid-Modify.svg"/>
 <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/xtaodada/PagerMaid-Modify.svg?label=commits">
+<img alt="size" src="https://img.shields.io/github/repo-size/Xtao-Labs/PagerMaid-Modify?color=pink"/>
 <img alt="issues" src="https://img.shields.io/github/issues/xtaodada/PagerMaid-Modify.svg"/>
+<img alt="docker" src="https://img.shields.io/docker/pulls/mrwangzhe/pagermaid_modify"/>
 <a href="https://github.com/xtaodada/PagerMaid-Modify/blob/master/LICENSE"><img alt="license" src="https://img.shields.io/github/license/xtaodada/PagerMaid-Modify.svg"/></a>
 <img alt="telethon" src="https://img.shields.io/badge/telethon-blue.svg"/>
 </p>
@@ -28,6 +30,25 @@ Pagermaid 是一个用在 Telegram 的实用工具。
 [一键脚本](https://t.me/PagerMaid_Modify/58)
 
 [Docker安装](utils/docker.md)
+
+## 云部署
+
+### 必须变量
+
+- `API_ID` - 到 [my.telegram.org](https://my.telegram.org/) 申请获得的值
+- `API_HASH` - 到 [my.telegram.org](https://my.telegram.org/) 申请获得的值
+- `SESSION` - 账户授权字符，您需要[到这里](#Session)获取
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https%3A%2F%2Fgithub.com%2FXtao-Labs%2FPagerMaid-Modify%2Ftree%2Fmaster&envs=session%2Capi_key%2Capi_hash&sessionDesc=Your+telethon+session+string.&api_keyDesc=api_id%2C+from+my.telegram.org&api_hashDesc=api_hash%2C+from+my.telegram.org&referralCode=xtaolabs)
+
+# Session
+
+> 这是您账户的授权文件，请妥善保管
+
+获得 `API_ID` 和 `API_HASH` 后，你可以通过下面两种方式获取 `SESSION`：
+
+* 在线获取：[![Repl.it](https://replit.com/badge/github/Xtao-Labs/PagerMaid-Modify)](https://replit.com/@mrwangzhe/gensession)
+* 本地获取：`cd utils && python3 -m pip install telethon && python3 gensession.py`
 
 # 对存在使用本项目用户群组的提醒
 

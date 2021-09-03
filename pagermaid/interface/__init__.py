@@ -1,5 +1,6 @@
 """ PagerMaid web interface utility. """
 
+from os import environ
 from threading import Thread
 from distutils.util import strtobool
 from importlib import import_module
@@ -36,12 +37,23 @@ import_module('pagermaid.interface.views')
 import_module('pagermaid.interface.modals')
 
 dispatcher = PathInfoDispatcher({'/': app})
-server = WSGIServer((config['web_interface']['host'], int(config['web_interface']['port'])), dispatcher)
+web_host = config['web_interface']['host']
+try:
+    web_port = int(config['web_interface']['port'])
+except ValueError:
+    web_port = 3333
+if environ.get('PORT'):
+    web_host = '0.0.0.0'
+    try:
+        web_port = int(environ.get('PORT'))
+    except ValueError:
+        web_port = 3333
+server = WSGIServer((web_host, web_port), dispatcher)
 
 
 def start():
-    if strtobool(config['web_interface']['enable']):
-        logs.info(f"已经启动Web界面 {config['web_interface']['host']}:{config['web_interface']['port']}")
+    if strtobool(config['web_interface']['enable']) or environ.get('PORT'):
+        logs.info(f"已经启动Web界面 {web_host}:{web_port}")
         app.logger.removeHandler(default_handler)
         app.logger.addHandler(logging_handler)
         try:

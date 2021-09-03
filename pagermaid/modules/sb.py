@@ -104,6 +104,8 @@ async def span_ban(context):
             pass
         except ChatAdminRequiredError:
             pass
+        except ValueError:
+            pass
     if redis_status():
         sb_groups = redis.get('sb_groups')
         if sb_groups:

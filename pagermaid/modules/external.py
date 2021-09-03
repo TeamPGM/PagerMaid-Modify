@@ -4,6 +4,7 @@ from pygoogletranslation import Translator
 from os import remove
 from magic_google import MagicGoogle
 from gtts import gTTS
+from gtts.tts import gTTSError
 from re import compile as regex_compile
 from pagermaid import log
 from pagermaid.listener import listener, config
@@ -92,6 +93,9 @@ async def tts(context):
         await context.edit(lang('tts_AssertionError'))
         return
     except ConnectionError:
+        await context.edit(lang('tts_RuntimeError'))
+        return
+    except gTTSError:
         await context.edit(lang('tts_RuntimeError'))
         return
     with open("vocals.mp3", "rb") as audio:
