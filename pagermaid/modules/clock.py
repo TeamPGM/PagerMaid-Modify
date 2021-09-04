@@ -36,7 +36,7 @@ async def time(context):
     time_zone = await get_timezone(country)
     if not time_zone:
         if len(context.parameter) < 1:
-            await context.edit('出错了呜呜呜 ~ 配置文件填写错误')
+            await context.edit(lang('time_config'))
             return
         try:
             time_num, utc_num = int(context.parameter[0]), int(context.parameter[0])

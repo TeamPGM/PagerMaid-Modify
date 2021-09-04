@@ -14,6 +14,7 @@ try:
 except:
     pass
 from subprocess import run, PIPE
+from datetime import datetime
 from time import time
 from os import getcwd, makedirs, environ
 from os.path import exists
@@ -345,6 +346,7 @@ def before_send(event, hint):
 
 
 report_time = time()
+start_time = datetime.utcnow()
 git_hash = run("git rev-parse HEAD", stdout=PIPE, shell=True).stdout.decode()
 sentry_sdk.init(
     "https://935d04099b7d4bd889e7ffac488579fc@o416616.ingest.sentry.io/5312335",

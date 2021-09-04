@@ -159,6 +159,7 @@ handle_failure_error: Something went wrong oh woo woo ~ Please report this probl
 time_des: Display the time in a specific area. If the parameter is empty, the configuration value will be displayed by default.
 time_parameters: <area>
 time_time: time
+time_config: Something went wrong oh woo woo ~ Please check your config file.
 # external
 # translate
 translate_des: Translate the target message into the specified language through Google Translate. (Support reply)
@@ -363,13 +364,13 @@ status_des: Output the running status of PagerMaid-Modify.
 status_online: online
 status_offline: offline
 status_hint: PagerMaid-Modify running status
-status_name: host name
-status_platform: host platform
+status_name: Host name
+status_platform: Host platform
 status_release: Kernel version
 status_python: Python version
 status_telethon: Telethon version
-status_db: database status
-status_dialogs: total number of conversations
+status_db: Database status
+status_uptime: Uptime
 # stats
 stats_des: View conversation statistics.
 stats_loading: Loading...

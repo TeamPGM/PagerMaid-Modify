@@ -167,6 +167,7 @@ handle_failure_error: 出错了呜呜呜 ~ 请报告此问题。
 time_des: 显示特定区域的时间，如果参数为空，则默认显示配置值。
 time_parameters: <地区>
 time_time: 时间
+time_config: 出错了呜呜呜 ~ 配置文件填写错误
 
 # external
 ## translate
@@ -383,6 +384,7 @@ status_release: Kernel 版本
 status_python: Python 版本
 status_telethon: Telethon 版本
 status_db: 数据库状态
+status_uptime: 运行时间
 ## stats
 stats_des: 查看我的对话统计信息。
 stats_loading: 加载中 . . .

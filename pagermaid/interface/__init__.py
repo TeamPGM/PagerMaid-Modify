@@ -55,7 +55,7 @@ def start():
     if strtobool(config['web_interface']['enable']) or environ.get('PORT'):
         logs.info(f"已经启动Web界面 {web_host}:{web_port}")
         app.logger.removeHandler(default_handler)
-        app.logger.addHandler(logging_handler)
+        # app.logger.addHandler(logging_handler)
         try:
             server.start()
         except OSError:

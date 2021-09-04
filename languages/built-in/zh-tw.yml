@@ -154,6 +154,7 @@ handle_failure_error: Error！請報告此問題。
 time_des: 顯示特定區域的時間。
 time_parameters: <地區>
 time_time: 時間
+time_config: 出錯了嗚嗚嗚 ~ 配置文件填寫錯誤
 # external
 # translate
 translate_des: 透過Google翻譯把目標訊息翻譯成指定的語言。（支援回覆）
@@ -364,7 +365,7 @@ status_release: Kernel版本
 status_python: Python版本
 status_telethon: Telethon版本
 status_db: 數據庫狀態
-status_dialogs: 聊天總數
+status_uptime: 運行時間
 # stats
 stats_des: 查看我的對話統計信息。
 stats_loading: 加載中 . . .

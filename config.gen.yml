@@ -84,3 +84,5 @@ speed_test_path: ""
 # 24 default
 time_form: "%H:%M"
 date_form: "%A %y/%m/%d"
+# only support %m %d %H %M %S
+start_form: "%m/%d %H:%M"
