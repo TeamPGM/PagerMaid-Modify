@@ -102,13 +102,14 @@ async def widen(context):
     reply = await context.get_reply_message()
     await context.edit(result)
     if reply:
-        if reply.sender.is_self:
-            try:
-                await reply.edit(result)
-            except MessageNotModifiedError:
-                await context.edit(lang('widen_already'))
-                return
-            await context.delete()
+        if reply.sender:
+            if reply.sender.is_self:
+                try:
+                    await reply.edit(result)
+                except MessageNotModifiedError:
+                    await context.edit(lang('widen_already'))
+                    return
+                await context.delete()
 
 
 @listener(is_plugin=False, outgoing=True, command=alias_command("fox"),

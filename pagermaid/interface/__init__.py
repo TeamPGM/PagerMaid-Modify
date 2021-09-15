@@ -20,6 +20,9 @@ except ModuleNotFoundError:
 app = Flask("pagermaid")
 app.config['CSRF_ENABLED'] = True
 app.config['SECRET_KEY'] = config['web_interface']['secret_key']
+# Fix no secret key was set
+if not app.config['SECRET_KEY']:
+    app.config['SECRET_KEY'] = 'NO_SECRET_KEY'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{working_dir}/data/web_interface.db"
 db = SQLAlchemy(app)

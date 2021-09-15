@@ -8,6 +8,9 @@ from telethon.tl.functions.channels import LeaveChannelRequest
 from telethon.errors import ForbiddenError
 from telethon.errors.rpcerrorlist import ChatIdInvalidError, FloodWaitError
 from distutils.util import strtobool
+
+from telethon.tl.types import ChannelForbidden
+
 from pagermaid import bot, log, config, proxies
 from pagermaid.listener import listener
 from pagermaid.utils import lang, alias_command
@@ -62,12 +65,13 @@ async def userid(context):
             if str(message.forward.chat_id).startswith('-100'):
                 text += "\n\n**Forward From Channel**\nid: `" + str(
                     message.forward.chat_id) + "`\ntitle: `" + message.forward.chat.title + "`"
-                if message.forward.chat.username:
-                    text += "\nusername: @" + message.forward.chat.username
-                text += "\nmessage_id: `" + str(message.forward.channel_post) + "`"
-                if message.forward.post_author:
-                    text += "\npost_author: `" + message.forward.post_author + "`"
-                text += "\ndate: `" + str(message.forward.date) + "`"
+                if not isinstance(message.forward.chat, ChannelForbidden):
+                    if message.forward.chat.username:
+                        text += "\nusername: @" + message.forward.chat.username
+                    text += "\nmessage_id: `" + str(message.forward.channel_post) + "`"
+                    if message.forward.post_author:
+                        text += "\npost_author: `" + message.forward.post_author + "`"
+                    text += "\ndate: `" + str(message.forward.date) + "`"
             else:
                 if message.forward.sender:
                     text += "\n\n**Forward From User**\nid: `" + str(

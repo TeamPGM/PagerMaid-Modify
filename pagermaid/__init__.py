@@ -16,7 +16,7 @@ except:
 from subprocess import run, PIPE
 from datetime import datetime
 from time import time
-from os import getcwd, makedirs, environ
+from os import getcwd, makedirs, environ, remove
 from os.path import exists
 from sys import version_info, platform
 from yaml import load, FullLoader, safe_load
@@ -33,7 +33,7 @@ from telethon.sessions import StringSession
 from telethon.errors.rpcerrorlist import MessageNotModifiedError, MessageIdInvalidError, ChannelPrivateError, \
     ChatSendMediaForbiddenError, YouBlockedUserError, FloodWaitError, ChatWriteForbiddenError, \
     AuthKeyDuplicatedError, ChatSendStickersForbiddenError, SlowModeWaitError, MessageEditTimeExpiredError, \
-    PeerIdInvalidError
+    PeerIdInvalidError, AuthKeyUnregisteredError, UserBannedInChannelError, UserDeactivatedBanError, PeerFloodError
 from telethon.errors.common import AlreadyInConversationError
 from requests.exceptions import ChunkedEncodingError
 from requests.exceptions import ConnectionError as ConnectedError
@@ -330,10 +330,23 @@ def before_send(event, hint):
         return
     elif exc_info and isinstance(exc_info[1], SlowModeWaitError):
         return
+    elif exc_info and isinstance(exc_info[1], PeerFloodError):
+        return
     elif exc_info and isinstance(exc_info[1], MessageEditTimeExpiredError):
         return
     elif exc_info and isinstance(exc_info[1], PeerIdInvalidError):
         return
+    elif exc_info and isinstance(exc_info[1], AuthKeyUnregisteredError):
+        return
+    elif exc_info and isinstance(exc_info[1], UserBannedInChannelError):
+        return
+    elif exc_info and isinstance(exc_info[1], UserDeactivatedBanError):
+        # The user has been deleted/deactivated
+        try:
+            remove('pagermaid.session')
+        except Exception as exc:
+            print(exc)
+        exit(1)
     if not python36:
         if exc_info and isinstance(exc_info[1], CancelError):
             return
@@ -349,7 +362,7 @@ report_time = time()
 start_time = datetime.utcnow()
 git_hash = run("git rev-parse HEAD", stdout=PIPE, shell=True).stdout.decode()
 sentry_sdk.init(
-    "https://935d04099b7d4bd889e7ffac488579fc@o416616.ingest.sentry.io/5312335",
+    "https://ae2b937dba4a4f948f13ae1c902b30a3@o416616.ingest.sentry.io/5312335",
     traces_sample_rate=1.0,
     release=git_hash,
     before_send=before_send,
