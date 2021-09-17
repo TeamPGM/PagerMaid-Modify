@@ -31,16 +31,6 @@ Pagermaid 是一个用在 Telegram 的实用工具。
 
 [Docker安装](utils/docker.md)
 
-## 云部署
-
-### 必须变量
-
-- `API_ID` - 到 [my.telegram.org](https://my.telegram.org/) 申请获得的值
-- `API_HASH` - 到 [my.telegram.org](https://my.telegram.org/) 申请获得的值
-- `SESSION` - 账户授权字符，您需要[到这里](#Session)获取
-
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https%3A%2F%2Fgithub.com%2FXtao-Labs%2FPagerMaid-Modify%2Ftree%2Fmaster&envs=session%2Capi_key%2Capi_hash&sessionDesc=Your+telethon+session+string.&api_keyDesc=api_id%2C+from+my.telegram.org&api_hashDesc=api_hash%2C+from+my.telegram.org&referralCode=xtaolabs)
-
 # Session
 
 > 这是您账户的授权文件，请妥善保管
