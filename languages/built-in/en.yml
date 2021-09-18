@@ -131,7 +131,8 @@ parseqr_log: Parsed QR Code with content
 convert_des: Reply to an attachment message and convert it to image output
 convert_process: Converting...
 convert_no_file: Something went wrong. There seems to be no attachment in the reply message.
-convert_error: Something went wrong, woooo~ An error occurred during the conversion.
+convert_error: Something went wrong, woooo ~ An error occurred during the conversion.
+convert_invalid: Something went wrong, woooo ~ The photo dimensions are invalid.
 # caption
 caption_des: Add two lines of captions to the reply picture. The captions will be added to the top and bottom respectively. The captions need to be separated by commas.
 caption_process: The image is being rendered...

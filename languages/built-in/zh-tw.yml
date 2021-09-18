@@ -127,6 +127,7 @@ convert_des: 回覆附件訊息並轉換為圖片
 convert_process: 正在轉換……
 convert_no_file: Error！回覆的消息沒有附件。
 convert_error: Error！轉換期間發生錯誤！
+convert_invalid: Error！圖片尺寸無效！
 # caption
 caption_des: 將兩行字幕添加到回覆的照片中，分別位於底部和頂部，請以逗號分割兩句。
 caption_process: 正在渲染照片…

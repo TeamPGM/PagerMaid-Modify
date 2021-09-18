@@ -139,6 +139,7 @@ convert_des: 回复某条附件消息然后转换为图片输出
 convert_process: 正在转换中 . . .
 convert_no_file: 出错了呜呜呜 ~ 回复的消息中好像没有附件。
 convert_error: 出错了呜呜呜 ~ 转换期间发生了错误。
+convert_invalid: 出错了呜呜呜 ~ 图片尺寸无效。
 ## caption
 caption_des: 将两行字幕添加到回复的图片中，字幕将分别添加到顶部和底部，字幕需要以逗号分隔。
 caption_process: 正在渲染图像中 . . .

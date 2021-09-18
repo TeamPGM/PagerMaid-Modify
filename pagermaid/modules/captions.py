@@ -5,6 +5,8 @@ from magic import Magic
 from pygments import highlight as syntax_highlight
 from pygments.formatters import img
 from pygments.lexers import guess_lexer
+from telethon.errors import PhotoInvalidDimensionsError
+
 from pagermaid import log, module_dir
 from pagermaid.listener import listener
 from pagermaid.utils import execute, upload_attachment, lang, alias_command
@@ -33,11 +35,15 @@ async def convert(context):
         await context.edit(lang('convert_error'))
         return
     if not result:
-        await handle_failure(context, target_file_path)
+        await handle_failure(context, target_file_path, 'convert_error')
         return
-    if not await upload_attachment("result.png", context.chat_id, reply_id):
-        await context.edit(lang('convert_error'))
-        remove(target_file_path)
+    try:
+        if not await upload_attachment("result.png", context.chat_id, reply_id):
+            await context.edit(lang('convert_error'))
+            remove(target_file_path)
+            return
+    except PhotoInvalidDimensionsError:
+        await handle_failure(context, target_file_path, 'convert_invalid')
         return
     await context.delete()
     remove(target_file_path)
@@ -80,11 +86,15 @@ async def caption(context):
                                f"\"{str(string_1)}\" \"{str(string_2)}\"")
         result_file = "result.gif"
     if not result:
-        await handle_failure(context, target_file_path)
+        await handle_failure(context, target_file_path, 'convert_error')
         return
-    if not await upload_attachment(result_file, context.chat_id, reply_id):
-        await context.edit(lang('caption_error'))
-        remove(target_file_path)
+    try:
+        if not await upload_attachment(result_file, context.chat_id, reply_id):
+            await context.edit(lang('caption_error'))
+            remove(target_file_path)
+            return
+    except PhotoInvalidDimensionsError:
+        await handle_failure(context, target_file_path, 'convert_invalid')
         return
     await context.delete()
     if string_2 != " ":
@@ -188,8 +198,8 @@ async def highlight(context):
     await context.delete()
 
 
-async def handle_failure(context, target_file_path):
-    await context.edit(lang('handle_failure_error'))
+async def handle_failure(context, target_file_path, name):
+    await context.edit(lang(name))
     try:
         remove("result.png")
         remove(target_file_path)
