@@ -6,7 +6,7 @@ import json
 from telethon.tl.functions.messages import DeleteChatUserRequest
 from telethon.tl.functions.channels import LeaveChannelRequest
 from telethon.errors import ForbiddenError
-from telethon.errors.rpcerrorlist import ChatIdInvalidError, FloodWaitError
+from telethon.errors.rpcerrorlist import ChatIdInvalidError, FloodWaitError, UserNotParticipantError
 from distutils.util import strtobool
 
 from telethon.tl.types import ChannelForbidden
@@ -179,7 +179,10 @@ async def leave(context):
                                             user_id=context.sender_id
                                             ))
         except ChatIdInvalidError:
-            await bot(LeaveChannelRequest(context.chat_id))
+            try:
+                await bot(LeaveChannelRequest(context.chat_id))
+            except UserNotParticipantError:
+                await context.delete()
     else:
         await context.edit(lang('leave_not_group'))
 

@@ -87,7 +87,10 @@ async def set_read_acknowledgement(context):
     if not redis_status():
         return
     if redis.get("ghosted.chat_id." + str(context.chat_id)):
-        await context.client.send_read_acknowledge(context.chat_id)
+        try:
+            await context.client.send_read_acknowledge(context.chat_id)
+        except ValueError:
+            pass
 
 
 @listener(is_plugin=False, incoming=True, ignore_edited=True)

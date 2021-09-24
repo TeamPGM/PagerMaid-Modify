@@ -207,6 +207,9 @@ async def profile(context):
     user_type = "Bot" if target_user.user.bot else lang('profile_user')
     username_system = f"@{target_user.user.username}" if target_user.user.username is not None else (
         lang('profile_noset'))
+    if not target_user.user.first_name:
+        await context.edit(f"{lang('error_prefix')}{lang('profile_e_no')}")
+        return
     first_name = target_user.user.first_name.replace("\u2060", "")
     last_name = target_user.user.last_name.replace("\u2060", "") if target_user.user.last_name is not None else (
         lang('profile_noset')
