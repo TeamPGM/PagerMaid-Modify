@@ -4,6 +4,7 @@ from pagermaid.utils import lang, alias_command
 from struct import error as StructError
 from telethon.tl.functions.messages import GetCommonChatsRequest
 from telethon.tl.functions.users import GetFullUserRequest
+from telethon.tl.functions.channels import DeleteUserHistoryRequest
 from telethon.tl.types import MessageEntityMentionName, ChannelParticipantsAdmins
 from telethon.errors.rpcerrorlist import UserAdminInvalidError, ChatAdminRequiredError, FloodWaitError
 from asyncio import sleep
@@ -34,7 +35,7 @@ def mention_group(chat):
 
 @listener(is_plugin=False, outgoing=True, command=alias_command("sb"),
           description=lang('sb_des'),
-          parameters="<reply|id|username>")
+          parameters="<reply|id|username> <do_not_del_all>")
 async def span_ban(context):
     if context.reply_to_msg_id:
         reply_message = await context.get_reply_message()
@@ -79,6 +80,9 @@ async def span_ban(context):
                 await context.edit(f"{lang('error_prefix')}{lang('profile_e_long')}")
                 return
             raise exception
+    chat = await context.get_chat()
+    if len(context.parameter) == 0:
+        await context.client(DeleteUserHistoryRequest(channel=chat, user_id=target_user))
     myself = await context.client.get_me()
     self_user_id = myself.id
     if target_user.user.id == self_user_id:
@@ -89,6 +93,9 @@ async def span_ban(context):
     groups = []
     for i in result.chats:
         try:
+            chat = await context.client.get_entity(i.id)
+            if len(context.parameter) == 0:
+                await context.client(DeleteUserHistoryRequest(channel=chat, user_id=target_user))
             await context.client.edit_permissions(i.id, target_user, view_messages=False)
             groups.append(mention_group(i))
             count += 1
@@ -120,6 +127,8 @@ async def span_ban(context):
         for i in sb_groups:
             try:
                 chat = await context.client.get_entity(int(i))
+                if len(context.parameter) == 0:
+                    await context.client(DeleteUserHistoryRequest(channel=chat, user_id=target_user))
                 await context.client.edit_permissions(chat, target_user, view_messages=False)
                 groups.append(mention_group(chat))
                 count += 1
