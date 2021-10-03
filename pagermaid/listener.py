@@ -1,15 +1,19 @@
 """ PagerMaid event listener. """
 
-import sys, sentry_sdk, re
+import re
+import sentry_sdk
+import sys
+from distutils.util import strtobool
+from time import gmtime, strftime, time
+from traceback import format_exc
 
 from telethon import events
 from telethon.errors import MessageTooLongError
-from distutils.util import strtobool
-from traceback import format_exc
-from time import gmtime, strftime, time
 from telethon.events import StopPropagation
-from pagermaid import bot, config, help_messages, logs, user_id, analytics
-from pagermaid.utils import attach_report, lang, alias_command
+from telethon.tl.types import PeerUser
+
+from pagermaid import bot, config, help_messages, logs, user_id, analytics, user_bot
+from pagermaid.utils import attach_report, lang, alias_command, admin_check
 
 try:
     allow_analytics = strtobool(config['allow_analytic'])
@@ -32,10 +36,14 @@ def listener(**args):
     diagnostics = args.get('diagnostics', True)
     ignore_edited = args.get('ignore_edited', False)
     is_plugin = args.get('is_plugin', True)
+    owners_only = args.get("owners_only", False)
+    admins_only = args.get("admins_only", False)
     if command is not None:
         if command in help_messages:
             raise ValueError(f"{lang('error_prefix')} {lang('command')} \"{command}\" {lang('has_reg')}")
         pattern = fr"^-{command}(?: |$)([\s\S]*)"
+        if user_bot:
+            pattern = fr"^/{command}(@{user_bot})?(?: |$)([\s\S]*)"
     if pattern is not None and not pattern.startswith('(?i)'):
         args['pattern'] = f"(?i){pattern}"
     else:
@@ -52,18 +60,39 @@ def listener(**args):
         del args['parameters']
     if 'is_plugin' in args:
         del args['is_plugin']
+    if 'owners_only' in args:
+        del args['owners_only']
+    if 'admins_only' in args:
+        del args['admins_only']
 
     def decorator(function):
 
         async def handler(context):
+            # bot admin command
+            if owners_only:
+                if context.sender_id and 'bot_admins' in config:
+                    if config['bot_admins'].count(context.sender_id) == 0:
+                        return
+                else:
+                    return
+            # group admin command
+            if admins_only:
+                if not (await admin_check(context)):
+                    return
             try:
                 analytic = True
                 try:
-                    parameter = context.pattern_match.group(1).split(' ')
+                    if user_bot:
+                        parameter = context.pattern_match.group(2).split(' ')
+                    else:
+                        parameter = context.pattern_match.group(1).split(' ')
                     if parameter == ['']:
                         parameter = []
                     context.parameter = parameter
-                    context.arguments = context.pattern_match.group(1)
+                    if user_bot:
+                        context.arguments = context.pattern_match.group(2)
+                    else:
+                        context.arguments = context.pattern_match.group(1)
                 except BaseException:
                     analytic = False
                     context.parameter = None
@@ -72,7 +101,7 @@ def listener(**args):
                 # analytic
                 if analytic and allow_analytics:
                     try:
-                        upload_command = context.text.split()[0][1:]
+                        upload_command = context.text.split()[0][1:].split("@")[0]
                         upload_command = alias_command(upload_command)
                         if context.sender_id:
                             if context.sender_id > 0:
@@ -94,7 +123,7 @@ def listener(**args):
                 exc_info = sys.exc_info()[1]
                 exc_format = format_exc()
                 try:
-                    await context.edit(lang('run_error'))
+                    await context.reply(lang('run_error'))
                 except BaseException:
                     pass
                 if not diagnostics:

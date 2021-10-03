@@ -16,7 +16,7 @@ from pagermaid.listener import listener
 from pagermaid.utils import lang, alias_command
 
 
-@listener(is_plugin=False, outgoing=True, command=alias_command("id"),
+@listener(is_plugin=False, incoming=True, command=alias_command("id"),
           description=lang('id_des'))
 async def userid(context):
     """ Query the UserID of the sender of the message you replied to. """
@@ -41,7 +41,7 @@ async def userid(context):
             if msg_from.username:
                 text += "username: @" + msg_from.username + "\n"
         except AttributeError:
-            await context.edit(lang('leave_not_group'))
+            await context.reply(lang('leave_not_group'))
             return
         text += "date: `" + str(msg_from.date) + "`\n"
     if message:
@@ -92,10 +92,10 @@ async def userid(context):
                     except AttributeError:
                         pass
                     text += "\ndate: `" + str(message.forward.date) + "`"
-    await context.edit(text)
+    await context.reply(text)
 
 
-@listener(is_plugin=False, outgoing=True, command=alias_command("uslog"),
+@listener(is_plugin=False, incoming=True, owners_only=True, command=alias_command("uslog"),
           description=lang('uslog_des'),
           parameters="<string>")
 async def uslog(context):
@@ -107,14 +107,14 @@ async def uslog(context):
         elif context.arguments:
             await log(context.arguments)
         else:
-            await context.edit(lang('arg_error'))
+            await context.reply(lang('arg_error'))
             return
-        await context.edit(lang('uslog_success'))
+        await context.reply(lang('uslog_success'))
     else:
-        await context.edit(lang('uslog_log_disable'))
+        await context.reply(lang('uslog_log_disable'))
 
 
-@listener(is_plugin=False, outgoing=True, command=alias_command("log"),
+@listener(is_plugin=False, incoming=True, owners_only=True, command=alias_command("log"),
           description=lang('log_des'),
           parameters="<string>")
 async def logging(context):
@@ -126,14 +126,14 @@ async def logging(context):
         elif context.arguments:
             await log(context.arguments)
         else:
-            await context.edit(lang('arg_error'))
+            await context.reply(lang('arg_error'))
             return
         await context.delete()
     else:
-        await context.edit(lang('uslog_log_disable'))
+        await context.reply(lang('uslog_log_disable'))
 
 
-@listener(is_plugin=False, outgoing=True, command=alias_command("re"),
+@listener(is_plugin=False, incoming=True, command=alias_command("re"),
           description=lang('re_des'),
           parameters=lang('re_parameters'))
 async def re(context):
@@ -146,15 +146,11 @@ async def re(context):
             try:
                 num = int(context.arguments)
                 if num > 100:
-                    await context.edit(lang('re_too_big'))
+                    await context.reply(lang('re_too_big'))
                     return True
             except:
-                await context.edit(lang('re_arg_error'))
+                await context.reply(lang('re_arg_error'))
                 return True
-        try:
-            await context.delete()
-        except ValueError:
-            pass
         try:
             for nums in range(0, num):
                 await reply.forward_to(int(context.chat_id))
@@ -165,15 +161,15 @@ async def re(context):
         except ValueError:
             return
     else:
-        await context.edit(lang('not_reply'))
+        await context.reply(lang('not_reply'))
 
 
-@listener(is_plugin=False, outgoing=True, command=alias_command("leave"),
+@listener(is_plugin=False, incoming=True, owners_only=True, command=alias_command("leave"),
           description=lang('leave_res'))
 async def leave(context):
     """ It leaves you from the group. """
     if context.is_group:
-        await context.edit(lang('leave_bye'))
+        await context.reply(lang('leave_bye'))
         try:
             await bot(DeleteChatUserRequest(chat_id=context.chat_id,
                                             user_id=context.sender_id
@@ -182,44 +178,44 @@ async def leave(context):
             try:
                 await bot(LeaveChannelRequest(context.chat_id))
             except UserNotParticipantError:
-                await context.delete()
+                pass
     else:
-        await context.edit(lang('leave_not_group'))
+        await context.reply(lang('leave_not_group'))
 
 
-@listener(is_plugin=False, outgoing=True, command=alias_command("meter2feet"),
+@listener(is_plugin=False, incoming=True, command=alias_command("meter2feet"),
           description=lang('m2f_des'),
           parameters="<meters>")
 async def meter2feet(context):
     """ Convert meter to feet. """
     if not len(context.parameter) == 1:
-        await context.edit(lang('arg_error'))
+        await context.reply(lang('arg_error'))
         return
     try:
         meter = float(context.parameter[0])
     except ValueError:
-        await context.edit(lang('re_arg_error'))
+        await context.reply(lang('re_arg_error'))
         return
     feet = meter / .3048
-    await context.edit(f"{lang('m2f_get')} {str(meter)}{lang('m2f_meter')} {lang('m2f_convert_to')}  "
+    await context.reply(f"{lang('m2f_get')} {str(meter)}{lang('m2f_meter')} {lang('m2f_convert_to')}  "
                        f"{str(feet)} {lang('m2f_feet')}")
 
 
-@listener(is_plugin=False, outgoing=True, command=alias_command("feet2meter"),
+@listener(is_plugin=False, incoming=True, command=alias_command("feet2meter"),
           description=lang('f2m_des'),
           parameters="<feet>")
 async def feet2meter(context):
     """ Convert feet to meter. """
     if not len(context.parameter) == 1:
-        await context.edit(lang('arg_error'))
+        await context.reply(lang('arg_error'))
         return
     feet = float(context.parameter[0])
     meter = feet * .3048
-    await context.edit(f"{lang('m2f_get')} {str(feet)} {lang('m2f_feet')}{lang('m2f_convert_to')} {str(meter)} "
-                       f"{lang('m2f_meter')}")
+    await context.reply(f"{lang('m2f_get')} {str(feet)} {lang('m2f_feet')}{lang('m2f_convert_to')} {str(meter)} "
+                        f"{lang('m2f_meter')}")
 
 
-@listener(is_plugin=False, outgoing=True, command=alias_command("hitokoto"),
+@listener(is_plugin=False, incoming=True, command=alias_command("hitokoto"),
           description=lang('hitokoto_des'))
 async def hitokoto(context):
     """ Get hitokoto.cn """
@@ -244,4 +240,4 @@ async def hitokoto(context):
                      'g': lang('hitokoto_type_other'), 'h': lang('hitokoto_type_movie'),
                      'i': lang('hitokoto_type_poem'), 'j': lang('hitokoto_type_netease_music'),
                      'k': lang('hitokoto_type_philosophy'), 'l': lang('hitokoto_type_meme')}
-    await context.edit(f"{hitokoto_json['hitokoto']} - {hitokoto_json['from']}（{hitokoto_type[hitokoto_json['type']]}）")
+    await context.reply(f"{hitokoto_json['hitokoto']} - {hitokoto_json['from']}（{hitokoto_type[hitokoto_json['type']]}）")

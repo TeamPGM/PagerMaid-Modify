@@ -3,9 +3,13 @@
 from sys import path
 from importlib import import_module
 from telethon.errors.rpcerrorlist import PhoneNumberInvalidError
-from pagermaid import bot, logs, working_dir
+from pagermaid import bot, logs, working_dir, user_bot
 from pagermaid.utils import lang
-from pagermaid.modules import module_list, plugin_list
+if not user_bot:
+    from pagermaid.modules import module_list, plugin_list
+else:
+    from pagermaid.bots import module_list, plugin_list
+
 try:
     from pagermaid.interface import server
 except TypeError:
@@ -25,7 +29,10 @@ except PhoneNumberInvalidError:
     exit(1)
 for module_name in module_list:
     try:
-        import_module("pagermaid.modules." + module_name)
+        if user_bot:
+            import_module("pagermaid.bots." + module_name)
+        else:
+            import_module("pagermaid.modules." + module_name)
     except BaseException as exception:
         logs.info(f"{lang('module')} {module_name} {lang('error')}: {type(exception)}: {exception}")
 for plugin_name in plugin_list:

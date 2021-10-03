@@ -233,6 +233,8 @@ async def single_sticker(animated, context, custom_emoji, emoji, message, pic_ro
                 except:
                     pass
             custom_emoji = True
+            if not emoji:
+                custom_emoji = False
             animated = True
             photo = 1
         else:

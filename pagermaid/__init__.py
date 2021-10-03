@@ -250,26 +250,34 @@ elif not mtp_addr == '' and not mtp_port == '' and not mtp_secret == '':
 else:
     bot = TelegramClient(session_string, api_key, api_hash, auto_reconnect=True, use_ipv6=use_ipv6)
 user_id = 0
+user_bot = False
 redis = StrictRedis(host=redis_host, port=redis_port, db=redis_db)
 
 
 async def save_id():
-    global user_id
+    global user_id, user_bot
     me = await bot.get_me()
     user_id = me.id
+    user_bot = me.bot
     if me.username is not None:
-        sentry_sdk.set_user({"id": user_id, "name": me.first_name, "username": me.username, "ip_address": "{{auto}}"})
+        sentry_sdk.set_user({"id": user_id, "name": me.first_name, "username": me.username, "ip_address": "{{auto}}",
+                             "bot": f"{user_bot}"})
         if allow_analytics:
             analytics.identify(user_id, {
                 'name': me.first_name,
-                'username': me.username
+                'username': me.username,
+                'bot': f"{user_bot}"
             })
     else:
-        sentry_sdk.set_user({"id": user_id, "name": me.first_name, "ip_address": "{{auto}}"})
+        sentry_sdk.set_user({"id": user_id, "name": me.first_name, "ip_address": "{{auto}}",
+                             "bot": f"{user_bot}"})
         if allow_analytics:
             analytics.identify(user_id, {
-                'name': me.first_name
+                'name': me.first_name,
+                'bot': f"{user_bot}"
             })
+    if user_bot:
+        user_bot = me.username
     logs.info(f"{lang('save_id')} {me.first_name}({user_id})")
 
 
@@ -280,65 +288,16 @@ with bot:
 def before_send(event, hint):
     global report_time
     exc_info = hint.get("exc_info")
-    if exc_info and isinstance(exc_info[1], ConnectionError):
-        return
-    elif exc_info and isinstance(exc_info[1], CancelledError):
-        return
-    elif exc_info and isinstance(exc_info[1], MessageNotModifiedError):
-        return
-    elif exc_info and isinstance(exc_info[1], MessageIdInvalidError):
-        return
-    elif exc_info and isinstance(exc_info[1], OperationalError):
-        return
-    elif exc_info and isinstance(exc_info[1], ChannelPrivateError):
-        return
-    elif exc_info and isinstance(exc_info[1], BufferError):
-        return
-    elif exc_info and isinstance(exc_info[1], RemoteDisconnected):
-        return
-    elif exc_info and isinstance(exc_info[1], ChatSendMediaForbiddenError):
-        return
-    elif exc_info and isinstance(exc_info[1], TypeError):
-        return
-    elif exc_info and isinstance(exc_info[1], URLError):
-        return
-    elif exc_info and isinstance(exc_info[1], YouBlockedUserError):
-        return
-    elif exc_info and isinstance(exc_info[1], FloodWaitError):
-        return
-    elif exc_info and isinstance(exc_info[1], ChunkedEncodingError):
-        return
-    elif exc_info and isinstance(exc_info[1], TimeoutError):
-        return
-    elif exc_info and isinstance(exc_info[1], UnicodeEncodeError):
-        return
-    elif exc_info and isinstance(exc_info[1], ChatWriteForbiddenError):
-        return
-    elif exc_info and isinstance(exc_info[1], ChatSendStickersForbiddenError):
-        return
-    elif exc_info and isinstance(exc_info[1], AlreadyInConversationError):
-        return
-    elif exc_info and isinstance(exc_info[1], ConnectedError):
-        return
-    elif exc_info and isinstance(exc_info[1], KeyboardInterrupt):
-        return
-    elif exc_info and isinstance(exc_info[1], OSError):
-        return
-    elif exc_info and isinstance(exc_info[1], AuthKeyDuplicatedError):
-        return
-    elif exc_info and isinstance(exc_info[1], ResponseError):
-        return
-    elif exc_info and isinstance(exc_info[1], SlowModeWaitError):
-        return
-    elif exc_info and isinstance(exc_info[1], PeerFloodError):
-        return
-    elif exc_info and isinstance(exc_info[1], MessageEditTimeExpiredError):
-        return
-    elif exc_info and isinstance(exc_info[1], PeerIdInvalidError):
-        return
-    elif exc_info and isinstance(exc_info[1], AuthKeyUnregisteredError):
-        return
-    elif exc_info and isinstance(exc_info[1], UserBannedInChannelError):
+    if exc_info and isinstance(exc_info[1], (ConnectionError, CancelledError, MessageNotModifiedError,
+                                             MessageIdInvalidError, OperationalError, ChannelPrivateError,
+                                             BufferError, RemoteDisconnected, ChatSendMediaForbiddenError,
+                                             TypeError, URLError, YouBlockedUserError, FloodWaitError,
+                                             ChunkedEncodingError, TimeoutError, UnicodeEncodeError,
+                                             ChatWriteForbiddenError, ChatSendStickersForbiddenError,
+                                             AlreadyInConversationError, ConnectedError, KeyboardInterrupt,
+                                             OSError, AuthKeyDuplicatedError, ResponseError, SlowModeWaitError,
+                                             PeerFloodError, MessageEditTimeExpiredError, PeerIdInvalidError,
+                                             AuthKeyUnregisteredError, UserBannedInChannelError)):
         return
     elif exc_info and isinstance(exc_info[1], UserDeactivatedBanError):
         # The user has been deleted/deactivated

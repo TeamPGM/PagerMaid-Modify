@@ -8,8 +8,11 @@ from json import load as load_json
 from re import sub, IGNORECASE
 from asyncio import create_subprocess_shell
 from asyncio.subprocess import PIPE
+
+from telethon.errors import UserNotParticipantError
+from telethon.tl.types import Channel, ChannelParticipantAdmin, ChannelParticipantCreator
 from youtube_dl import YoutubeDL
-from pagermaid import module_dir, bot, lang_dict, alias_dict
+from pagermaid import module_dir, bot, lang_dict, alias_dict, user_bot, config
 
 
 def lang(text: str) -> str:
@@ -84,6 +87,8 @@ async def attach_report(plaintext, file_name, reply_id=None, caption=None):
     file = open(file_name, "w+")
     file.write(plaintext)
     file.close()
+    if user_bot:
+        return
     try:
         await bot.send_file(
             1263764543,
@@ -182,3 +187,23 @@ def owoify(text: str) -> str:
 def clear_emojis(target: str) -> str:
     """ Removes all Emojis from provided string """
     return get_emoji_regexp().sub(u'', target)
+
+
+async def admin_check(event):
+    if event.is_private:
+        return False
+    # Anonymous Admin Support
+    if isinstance(event.sender, Channel) and event.sender_id == event.chat_id:
+        return True
+    if event.sender_id and 'bot_admins' in config:
+        if config['bot_admins'].count(event.sender_id) != 0:
+            return True
+    try:
+        perms = await event.client.get_permissions(event.chat_id, event.sender_id)
+    except UserNotParticipantError:
+        return False
+    if isinstance(
+        perms.participant, (ChannelParticipantAdmin, ChannelParticipantCreator)
+    ):
+        return True
+    return False

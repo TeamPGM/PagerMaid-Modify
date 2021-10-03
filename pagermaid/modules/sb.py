@@ -82,7 +82,12 @@ async def span_ban(context):
             raise exception
     chat = await context.get_chat()
     if len(context.parameter) == 0:
-        await context.client(DeleteUserHistoryRequest(channel=chat, user_id=target_user))
+        try:
+            await context.client(DeleteUserHistoryRequest(channel=chat, user_id=target_user))
+        except UserAdminInvalidError:
+            pass
+        except ChatAdminRequiredError:
+            pass
     myself = await context.client.get_me()
     self_user_id = myself.id
     if target_user.user.id == self_user_id:
