@@ -285,23 +285,21 @@ async def block_user(context):
         return
 
     await context.edit(lang('block_process'))
+    user = None
     if context.reply_to_msg_id:
         reply_message = await context.get_reply_message()
         user = reply_message.sender_id
     else:
         if len(context.parameter) == 1:
-            user = context.parameter[0]
+            [user] = context.parameter
             if user.isnumeric():
                 user = int(user)
+            elif context.message.entities is not None:
+                if isinstance(context.message.entities[0], MessageEntityMentionName):
+                     user = context.message.entities[0].user_id
         else:
             user_object = await context.client.get_me()
             user = user_object.id
-        if context.message.entities is not None:
-            if isinstance(context.message.entities[0], MessageEntityMentionName):
-                user = context.message.entities[0].user_id
-            else:
-                await context.edit(f"{lang('error_prefix')}{lang('arg_error')}")
-                return
     result = None
     if not user:
         await context.edit(f"{lang('error_prefix')}{lang('arg_error')}")
@@ -326,23 +324,21 @@ async def unblock_user(context):
         return
 
     await context.edit(lang('unblock_process'))
+    user = None
     if context.reply_to_msg_id:
         reply_message = await context.get_reply_message()
         user = reply_message.from_id.user_id
     else:
         if len(context.parameter) == 1:
-            user = context.parameter[0]
+            [user] = context.parameter
             if user.isnumeric():
                 user = int(user)
+            elif context.message.entities is not None:
+                if isinstance(context.message.entities[0], MessageEntityMentionName):
+                     user = context.message.entities[0].user_id
         else:
             user_object = await context.client.get_me()
             user = user_object.id
-        if context.message.entities is not None:
-            if isinstance(context.message.entities[0], MessageEntityMentionName):
-                user = context.message.entities[0].user_id
-            else:
-                await context.edit(f"{lang('error_prefix')}{lang('arg_error')}")
-                return
     result = None
     if not user:
         await context.edit(f"{lang('error_prefix')}{lang('arg_error')}")
