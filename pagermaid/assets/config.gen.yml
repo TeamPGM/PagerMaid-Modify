@@ -68,7 +68,7 @@ git_ssh: "https://github.com/Xtao-Labs/PagerMaid-Modify.git"
 # Update Notice
 update_check: "True"
 update_time: "86400"
-update_username: "self"
+update_username: "PagerMaid_Modify_bot"
 update_delete: "True"
 
 # ipv6

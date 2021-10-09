@@ -84,6 +84,11 @@ block_des: 拉黑一個用戶
 block_process: 正在拉黑中 . . .
 block_success: 成功拉黑
 block_exist: 已存在黑名單中。
+# unblock
+unblock_des: 取消拉黑一個用戶
+unblock_process: 正在取消拉黑中 . . .
+unblock_success: 成功取消拉黑
+unblock_exist: 不存在黑名單中。
 
 # avoid
 # ghost

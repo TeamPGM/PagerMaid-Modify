@@ -29,7 +29,7 @@ except KeyError:
     git_ssh = 'https://github.com/Xtao-Labs/PagerMaid-Modify.git'
     need_update_check = True
     update_time = 86400
-    update_username = 'self'
+    update_username = 'PagerMaid_Modify_bot'
     update_delete = True
 try:
     update_time = int(update_time)

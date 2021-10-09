@@ -1,11 +1,7 @@
 """ Pulls in the new version of PagerMaid from the git server. """
 
 import platform
-import requests
-import time
 from datetime import datetime
-from distutils.util import strtobool
-from json import JSONDecodeError
 from os import remove
 from subprocess import run, PIPE
 from sys import executable
@@ -13,44 +9,9 @@ from sys import executable
 from git import Repo
 from git.exc import GitCommandError, InvalidGitRepositoryError, NoSuchPathError
 
-from pagermaid import log, config, proxies
+from pagermaid import log
 from pagermaid.listener import listener
 from pagermaid.utils import execute, lang, alias_command
-
-try:
-    git_api = config['git_api']
-    git_ssh = config['git_ssh']
-    need_update_check = strtobool(config['update_check'])
-    update_time = config['update_time']
-    update_username = config['update_username']
-    update_delete = strtobool(config['update_delete'])
-except KeyError:
-    git_api = "https://api.github.com/repos/Xtao-Labs/PagerMaid-Modify/commits/master"
-    git_ssh = 'https://github.com/Xtao-Labs/PagerMaid-Modify.git'
-    need_update_check = True
-    update_time = 86400
-    update_username = 'self'
-    update_delete = True
-try:
-    update_time = int(update_time)
-except ValueError:
-    update_time = 86400
-try:
-    update_username = int(update_username)
-except ValueError:
-    pass
-
-
-def update_get():
-    try:
-        data = requests.get(git_api, proxies=proxies).json()
-    except JSONDecodeError as e:
-        raise e
-    return data
-
-
-update_get_time = 0
-update_id = 0
 
 
 @listener(is_plugin=False, incoming=True, owners_only=True, command=alias_command("update"),

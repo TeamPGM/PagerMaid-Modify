@@ -38,6 +38,7 @@ def listener(**args):
     is_plugin = args.get('is_plugin', True)
     owners_only = args.get("owners_only", False)
     admins_only = args.get("admins_only", False)
+    groups_only = args.get("groups_only", False)
     if command is not None:
         if command in help_messages:
             raise ValueError(f"{lang('error_prefix')} {lang('command')} \"{command}\" {lang('has_reg')}")
@@ -64,6 +65,8 @@ def listener(**args):
         del args['owners_only']
     if 'admins_only' in args:
         del args['admins_only']
+    if 'groups_only' in args:
+        del args['groups_only']
 
     def decorator(function):
 
@@ -78,6 +81,10 @@ def listener(**args):
             # group admin command
             if admins_only:
                 if not (await admin_check(context)):
+                    return
+            # groups only
+            if groups_only:
+                if not context.is_group:
                     return
             try:
                 analytic = True

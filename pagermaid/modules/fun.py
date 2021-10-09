@@ -154,7 +154,8 @@ async def flip(context):
     await edit_reply(result, context)
 
 
-@listener(is_plugin=False, outgoing=True, command=alias_command("ship"),
+@listener(is_plugin=False, outgoing=True, groups_only=True,
+          command=alias_command("ship"),
           description=lang('ship_des'),
           parameters="<username> <username>")
 async def ship(context):
