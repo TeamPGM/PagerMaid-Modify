@@ -344,7 +344,10 @@ async def log(message):
     )
     if not strtobool(config['log']):
         return
-    await bot.send_message(
-        int(config['log_chatid']),
-        message
-    )
+    try:
+        await bot.send_message(
+            int(config['log_chatid']),
+            message
+        )
+    except ValueError:
+        pass
