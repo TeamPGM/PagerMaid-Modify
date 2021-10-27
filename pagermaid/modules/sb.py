@@ -5,7 +5,7 @@ from struct import error as StructError
 from telethon.tl.functions.messages import GetCommonChatsRequest
 from telethon.tl.functions.users import GetFullUserRequest
 from telethon.tl.functions.channels import DeleteUserHistoryRequest
-from telethon.tl.types import MessageEntityMentionName, ChannelParticipantsAdmins
+from telethon.tl.types import MessageEntityMentionName, ChannelParticipantsAdmins, MessageEntityPhone
 from telethon.errors.rpcerrorlist import UserAdminInvalidError, ChatAdminRequiredError, FloodWaitError
 from asyncio import sleep
 from random import uniform
@@ -60,6 +60,8 @@ async def span_ban(context):
         if context.message.entities is not None:
             if isinstance(context.message.entities[0], MessageEntityMentionName):
                 user = context.message.entities[0].user_id
+            elif isinstance(context.message.entities[0], MessageEntityPhone):
+                user = int(context.parameter[0])
             else:
                 await context.edit(f"{lang('error_prefix')}{lang('arg_error')}")
                 return
