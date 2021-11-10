@@ -8,7 +8,7 @@ from telethon.tl.functions.account import UpdateProfileRequest, UpdateUsernameRe
 from telethon.tl.functions.photos import DeletePhotosRequest, GetUserPhotosRequest, UploadProfilePhotoRequest
 from telethon.tl.functions.users import GetFullUserRequest
 from telethon.tl.functions.contacts import BlockRequest, UnblockRequest
-from telethon.tl.types import InputPhoto, MessageMediaPhoto, MessageEntityMentionName, MessageEntityPhone
+from telethon.tl.types import InputPhoto, MessageMediaPhoto, MessageEntityMentionName, MessageEntityPhone, User
 from struct import error as StructError
 from pagermaid import bot, log
 from pagermaid.utils import lang, alias_command
@@ -277,41 +277,41 @@ async def profile(context):
 
 @listener(is_plugin=False, outgoing=True, command=alias_command('block'),
           description=lang('block_des'),
-          parameters="<username/uid/reply>")
+          parameters="(username/uid/reply)")
 async def block_user(context):
     """ Block an user. """
+    current_chat = await context.get_chat()
     if len(context.parameter) > 1:
         await context.edit(f"{lang('error_prefix')}{lang('arg_error')}")
         return
 
     await context.edit(lang('block_process'))
     user = None
-    if context.reply_to_msg_id:
+    # Priority: reply > argument > current_chat
+    if context.reply_to_msg_id:  # Reply to a user
         reply_message = await context.get_reply_message()
-        user = reply_message.sender_id
-    else:
-        if len(context.parameter) == 1:
-            [user] = context.parameter
-            if user.isnumeric():
-                user = int(user)
-            elif context.message.entities is not None:
-                if isinstance(context.message.entities[0], MessageEntityMentionName):
-                     user = context.message.entities[0].user_id
-        else:
-            user_object = await context.client.get_me()
-            user = user_object.id
-    result = None
+        if reply_message and reply_message.sender_id is not None:
+            user = reply_message.sender_id
+    if not user and len(context.parameter) == 1:  # Argument provided
+        (raw_user,) = context.parameter
+        if raw_user.isnumeric():
+            user = int(raw_user)
+        elif context.message.entities is not None:
+            if isinstance(context.message.entities[0], MessageEntityMentionName):
+                 user = context.message.entities[0].user_id
+    if not user and isinstance(current_chat, User):
+        user = current_chat.id
     if not user:
         await context.edit(f"{lang('error_prefix')}{lang('arg_error')}")
         return
     try:
-        result = await context.client(BlockRequest(id=user))
-    except Exception:
+        if await context.client(BlockRequest(id=user)):
+            await context.edit(f"{lang('block_success')} `{user}`")
+    except Exception:  # noqa
         pass
-    if result:
-        await context.edit(f"{lang('block_success')} `{user}`")
-    else:
-        await context.edit(f"`{user}` {lang('block_exist')}")
+    await context.edit(f"`{user}` {lang('block_exist')}")
+    if isinstance(current_chat, User) and current_chat.id == user:
+        await context.delete()
 
 
 @listener(is_plugin=False, outgoing=True, command=alias_command('unblock'),
@@ -327,27 +327,21 @@ async def unblock_user(context):
     user = None
     if context.reply_to_msg_id:
         reply_message = await context.get_reply_message()
-        user = reply_message.from_id.user_id
-    else:
-        if len(context.parameter) == 1:
-            [user] = context.parameter
-            if user.isnumeric():
-                user = int(user)
-            elif context.message.entities is not None:
-                if isinstance(context.message.entities[0], MessageEntityMentionName):
-                     user = context.message.entities[0].user_id
-        else:
-            user_object = await context.client.get_me()
-            user = user_object.id
-    result = None
+        if reply_message and reply_message.sender_id is not None:
+            user = reply_message.sender_id
+    if not user and len(context.parameter) == 1:
+        (raw_user,) = context.parameter
+        if raw_user.isnumeric():
+            user = int(raw_user)
+        elif context.message.entities is not None:
+            if isinstance(context.message.entities[0], MessageEntityMentionName):
+                 user = context.message.entities[0].user_id
     if not user:
         await context.edit(f"{lang('error_prefix')}{lang('arg_error')}")
         return
     try:
-        result = await context.client(UnblockRequest(id=user))
+        if await context.client(UnblockRequest(id=user)):
+            await context.edit(f"{lang('unblock_success')} `{user}`")
     except Exception:
         pass
-    if result:
-        await context.edit(f"{lang('unblock_success')} `{user}`")
-    else:
-        await context.edit(f"`{user}` {lang('unblock_exist')}")
+    await context.edit(f"`{user}` {lang('unblock_exist')}")
