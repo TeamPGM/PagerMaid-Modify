@@ -1,6 +1,5 @@
 """ PagerMaid initialization. """
 
-import asyncio
 from concurrent.futures import CancelledError
 
 # Analytics
@@ -283,7 +282,7 @@ async def save_id():
 
 
 with bot:
-    asyncio.ensure_future(save_id())
+    bot.loop.run_until_complete(save_id())
 
 
 def before_send(event, hint):
