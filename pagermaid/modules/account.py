@@ -169,6 +169,8 @@ async def profile(context):
     await context.edit(lang('profile_process'))
     if context.reply_to_msg_id:
         reply_message = await context.get_reply_message()
+        if not reply_message:
+            return await context.edit(f"{lang('error_prefix')}{lang('arg_error')}")
         user = reply_message.from_id
         target_user = await context.client(GetFullUserRequest(user))
     else:

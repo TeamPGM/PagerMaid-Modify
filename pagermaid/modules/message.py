@@ -16,6 +16,14 @@ from pagermaid.listener import listener
 from pagermaid.utils import lang, alias_command
 
 
+def isfloat(value):
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
+
+
 @listener(is_plugin=False, outgoing=True, command=alias_command("id"),
           description=lang('id_des'))
 async def userid(context):
@@ -213,6 +221,8 @@ async def feet2meter(context):
     if not len(context.parameter) == 1:
         await context.edit(lang('arg_error'))
         return
+    if not isfloat(context.parameter[0]):
+        return await context.edit(lang('re_arg_error'))
     feet = float(context.parameter[0])
     meter = feet * .3048
     await context.edit(f"{lang('m2f_get')} {str(feet)} {lang('m2f_feet')}{lang('m2f_convert_to')} {str(meter)} "

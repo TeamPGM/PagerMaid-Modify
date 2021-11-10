@@ -190,11 +190,15 @@ async def highlight(context):
         await context.edit(lang('caption_error'))
         return
     await context.edit(lang('highlight_uploading'))
-    await context.client.send_file(
-        context.chat_id,
-        result,
-        reply_to=reply_id
-    )
+    try:
+        await context.client.send_file(
+            context.chat_id,
+            result,
+            reply_to=reply_id
+        )
+    except PhotoInvalidDimensionsError:
+        await context.edit(lang('caption_error'))
+        return
     await context.delete()
 
 
