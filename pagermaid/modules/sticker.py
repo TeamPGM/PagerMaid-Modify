@@ -116,7 +116,11 @@ async def sticker(context):
 
     # 是否添加到指定贴纸包
     if len(context.parameter) >= 1:
-        if context.parameter[0] == "to":
+        if "to" in context.parameter:
+            if len(context.parameter) == 3:  # <emoji> to <sticker_pack>
+                to_sticker_set = context.parameter[2]
+                if redis_status():
+                    redis.set("sticker.to", to_sticker_set)
             if len(context.parameter) == 2:
                 to_sticker_set = context.parameter[1]
                 if redis_status():
@@ -257,8 +261,12 @@ async def single_sticker(animated, context, custom_emoji, emoji, message, pic_ro
         pack = 1
         sticker_already = False
         if to_sticker_set:
-            # 指定贴纸包对 emoji 不处理
-            pass
+            # 指定贴纸包 + emoji
+            if split_strings[1].isnumeric():
+                pack = int(split_strings[1])
+            else:
+                if split_strings[1].replace("png", "") != "":
+                    emoji = split_strings[1].replace("png", "")
         elif package_name:
             # 批量处理贴纸无法指定emoji，只获取第几个pack
             # s merge png <package_name> <number>
