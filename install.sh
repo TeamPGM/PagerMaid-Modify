@@ -5,6 +5,13 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
+a=$(curl --noproxy '*' -sSL https://api.myip.com/)
+b="China"
+if [[ $a == *$b* ]]
+then
+	exit 1
+fi
+
 check_sys() {
     if [[ -f /etc/redhat-release ]]; then
         release="centos"
