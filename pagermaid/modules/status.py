@@ -196,7 +196,7 @@ async def speedtest(context):
                 f"Timestamp: `{result['timestamp']}`"
             )
             # 开始处理图片
-            data = (await get(f"{result['result']['url']}.png")).content
+            data = (await get(f"{result['result']['url']}.png")).text
             with open('speedtest.png', mode='wb') as f:
                 f.write(data)
             try:
@@ -273,7 +273,7 @@ async def speedtest(context):
         f"Timestamp: `{result['timestamp']}`"
     )
     # 开始处理图片
-    data = (await get(result['share'])).content
+    data = (await get(result['share'])).text
     with open('speedtest.png', mode='wb') as f:
         f.write(data)
     try:

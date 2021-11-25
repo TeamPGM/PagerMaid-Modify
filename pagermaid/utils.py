@@ -25,10 +25,10 @@ class AiohttpResp:
     """
     重写返回类型。
     """
-    def __init__(self, text: str, content: bytes, status_code: int):
+    def __init__(self, text: Any, content: bytes, status_code: int):
         """
         Args:
-            text        (str):   网页内容
+            text        (Any):   网页内容
             content     (bytes): 文件内容
             status_code (int):   网页状态码
         """
@@ -286,7 +286,10 @@ async def request(method: str,
     session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=timeout))
     resp = await session.request(**config_)
     # 返回请求
-    resp_data = await resp.text()
+    try:
+        resp_data = await resp.text()
+    except UnicodeDecodeError:
+        resp_data = await resp.read()
     content = await resp.content.read()
     status_code = resp.status
     await session.close()
