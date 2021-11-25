@@ -30,6 +30,7 @@ from telethon import TelegramClient
 from telethon.sessions import StringSession
 
 # Errors
+from telethon.errors import AuthKeyError
 from telethon.errors.rpcerrorlist import MessageNotModifiedError, MessageIdInvalidError, ChannelPrivateError, \
     ChatSendMediaForbiddenError, YouBlockedUserError, FloodWaitError, ChatWriteForbiddenError, \
     AuthKeyDuplicatedError, ChatSendStickersForbiddenError, SlowModeWaitError, MessageEditTimeExpiredError, \
@@ -107,9 +108,7 @@ def lang(text: str) -> str:
 
 analytics = None
 try:
-    allow_analytics = strtobool(config['allow_analytic'])
-except KeyError:
-    allow_analytics = True
+    allow_analytics = strtobool(config.get('allow_analytic', 'True'))
 except ValueError:
     allow_analytics = True
 if allow_analytics:
@@ -163,41 +162,24 @@ except ValueError:
     exit(1)
 except:
     pass
-try:
-    proxy_addr = config['proxy_addr'].strip()
-    proxy_port = config['proxy_port'].strip()
-    http_addr = config['http_addr'].strip()
-    http_port = config['http_port'].strip()
-    mtp_addr = config['mtp_addr'].strip()
-    mtp_port = config['mtp_port'].strip()
-    mtp_secret = config['mtp_secret'].strip()
-except KeyError:
-    proxy_addr = ''
-    proxy_port = ''
-    http_addr = ''
-    http_port = ''
-    mtp_addr = ''
-    mtp_port = ''
-    mtp_secret = ''
-try:
-    redis_host = config['redis']['host']
-except KeyError:
-    redis_host = 'localhost'
-try:
-    redis_port = config['redis']['port']
-except KeyError:
-    redis_port = 6379
-try:
-    redis_db = config['redis']['db']
-except KeyError:
-    redis_db = 14
-try:
-    if strtobool(config['ipv6']):
-        use_ipv6 = True
-    else:
-        use_ipv6 = False
-except KeyError:
+proxy_addr = config.get('proxy_addr', '').strip()
+proxy_port = config.get('proxy_port', '').strip()
+http_addr = config.get('http_addr', '').strip()
+http_port = config.get('http_port', '').strip()
+mtp_addr = config.get('mtp_addr', '').strip()
+mtp_port = config.get('mtp_port', '').strip()
+mtp_secret = config.get('mtp_secret', '').strip()
+redis_host = config.get('redis').get('host', 'localhost')
+redis_port = config.get('redis').get('port', 6379)
+redis_db = config.get('redis').get('db', 14)
+if strtobool(config.get('ipv6', 'False')):
+    use_ipv6 = True
+else:
     use_ipv6 = False
+if strtobool(config.get('silent', 'True')):
+    silent = True
+else:
+    silent = False
 if api_key is None or api_hash is None:
     logs.info(
         lang('config_error')
@@ -297,7 +279,7 @@ def before_send(event, hint):
                                              AlreadyInConversationError, ConnectedError, KeyboardInterrupt,
                                              OSError, AuthKeyDuplicatedError, ResponseError, SlowModeWaitError,
                                              PeerFloodError, MessageEditTimeExpiredError, PeerIdInvalidError,
-                                             AuthKeyUnregisteredError, UserBannedInChannelError)):
+                                             AuthKeyUnregisteredError, UserBannedInChannelError, AuthKeyError)):
         return
     elif exc_info and isinstance(exc_info[1], UserDeactivatedBanError):
         # The user has been deleted/deactivated

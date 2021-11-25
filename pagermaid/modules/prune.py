@@ -83,10 +83,10 @@ async def selfprune(context):
     await log(f"{lang('prune_hint1')}{lang('sp_hint')} {str(count_buffer)} / {str(count)} {lang('prune_hint2')}")
     try:
         notification = await send_prune_notify(context, count_buffer, count)
+        await sleep(1)
+        await notification.delete()
     except ValueError:
         pass
-    await sleep(1)
-    await notification.delete()
 
 
 @listener(is_plugin=False, outgoing=True, command=alias_command("yourprune"),
@@ -101,6 +101,7 @@ async def yourprune(context):
     if not len(context.parameter) == 1:
         await context.edit(lang('arg_error'))
         return
+    count = 0
     try:
         count = int(context.parameter[0])
         await context.delete()

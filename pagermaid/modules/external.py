@@ -6,7 +6,7 @@ from magic_google import MagicGoogle
 from gtts import gTTS
 from gtts.tts import gTTSError
 from re import compile as regex_compile
-from pagermaid import log
+from pagermaid import log, silent
 from pagermaid.listener import listener, config
 from pagermaid.utils import clear_emojis, attach_log, fetch_youtube_audio, lang, alias_command
 
@@ -29,7 +29,8 @@ async def translate(context):
         return
 
     try:
-        await context.edit(lang('translate_processing'))
+        if not silent:
+            await context.edit(lang('translate_processing'))
         try:
             result = translator.translate(clear_emojis(message), dest=ap_lang)
         except:
@@ -75,7 +76,8 @@ async def tts(context):
         return
 
     try:
-        await context.edit(lang('tts_processing'))
+        if not silent:
+            await context.edit(lang('tts_processing'))
         gTTS(message, lang=ap_lang)
     except AssertionError:
         await context.edit(lang('tts_AssertionError'))
@@ -134,7 +136,8 @@ async def googletest(context):
         return
 
     query = query.replace(' ', '+')
-    await context.edit(lang('google_processing'))
+    if not silent:
+        await context.edit(lang('google_processing'))
     results = ""
     for i in mg.search(query=query, num=int(config['result_length'])):
         try:
@@ -166,7 +169,8 @@ async def fetchaudio(context):
     """ Fetches audio from provided URL. """
     reply = await context.get_reply_message()
     reply_id = None
-    await context.edit(lang('fetchaudio_processing'))
+    if not silent:
+        await context.edit(lang('fetchaudio_processing'))
     if reply:
         reply_id = reply.id
     if url is None:

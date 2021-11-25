@@ -10,7 +10,7 @@ from telethon.tl.functions.users import GetFullUserRequest
 from telethon.tl.functions.contacts import BlockRequest, UnblockRequest
 from telethon.tl.types import InputPhoto, MessageMediaPhoto, MessageEntityMentionName, MessageEntityPhone, User
 from struct import error as StructError
-from pagermaid import bot, log
+from pagermaid import bot, log, silent
 from pagermaid.utils import lang, alias_command
 from pagermaid.listener import listener
 
@@ -78,7 +78,8 @@ async def pfp(context):
     """ Sets your profile picture. """
     reply = await context.get_reply_message()
     photo = None
-    await context.edit(lang('pfp_process'))
+    if not silent:
+        await context.edit(lang('pfp_process'))
     if reply:
         if reply.media:
             if isinstance(reply.media, MessageMediaPhoto):
@@ -165,8 +166,8 @@ async def profile(context):
     if len(context.parameter) > 1:
         await context.edit(f"{lang('error_prefix')}{lang('arg_error')}")
         return
-
-    await context.edit(lang('profile_process'))
+    if not silent:
+        await context.edit(lang('profile_process'))
     if context.reply_to_msg_id:
         reply_message = await context.get_reply_message()
         if not reply_message:
@@ -286,8 +287,8 @@ async def block_user(context):
     if len(context.parameter) > 1:
         await context.edit(f"{lang('error_prefix')}{lang('arg_error')}")
         return
-
-    await context.edit(lang('block_process'))
+    if not silent:
+        await context.edit(lang('block_process'))
     user = None
     # Priority: reply > argument > current_chat
     if context.reply_to_msg_id:  # Reply to a user
@@ -324,8 +325,8 @@ async def unblock_user(context):
     if len(context.parameter) > 1:
         await context.edit(f"{lang('error_prefix')}{lang('arg_error')}")
         return
-
-    await context.edit(lang('unblock_process'))
+    if not silent:
+        await context.edit(lang('unblock_process'))
     user = None
     if context.reply_to_msg_id:
         reply_message = await context.get_reply_message()

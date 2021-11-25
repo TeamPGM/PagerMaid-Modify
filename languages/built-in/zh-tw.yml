@@ -256,6 +256,7 @@ re_des: 在目前聊天室復讀回覆的訊息。
 re_parameters: <次數>
 re_too_big: Error！數字過大
 re_arg_error: Error！不是數字！
+re_forbidden: Error！您没有权限！
 not_reply: Error！您沒有回覆訊息！
 # leave
 leave_res: 說再見並離開聊天室。

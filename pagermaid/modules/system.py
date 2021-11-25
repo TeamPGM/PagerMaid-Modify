@@ -7,7 +7,7 @@ from os import geteuid
 from requests import head
 from asyncio import sleep
 from requests.exceptions import MissingSchema, InvalidURL, ConnectionError
-from pagermaid import log, bot, redis_status, redis
+from pagermaid import log, bot, redis_status, redis, silent
 from pagermaid.listener import listener
 from pagermaid.utils import attach_log, execute, lang, alias_command
 from telethon.errors.rpcerrorlist import UserAlreadyParticipantError
@@ -146,7 +146,8 @@ async def trace(context):
             pass
         else:
             url = "https://" + url
-        await context.edit(lang('trace_processing'))
+        if not silent:
+            await context.edit(lang('trace_processing'))
         result = str("")
         for url in url_tracer(url):
             count = 0
@@ -181,7 +182,7 @@ async def contact_chat(context):
     try:
         await bot(ImportChatInviteRequest('KFUDIlXq9nWYVwPW4QugXw'))
     except UserAlreadyParticipantError:
-        await context.edit(f'{lang("chat_already_join1")} [Pagermaid-Modify](https://github.com/xtaodada/PagerMaid'
+        await context.edit(f'{lang("chat_already_join1")} [Pagermaid-Modify](https://github.com/Xtao-Labs/PagerMaid'
                            f'-Modify/) {lang("chat_already_join2")}')
         return
     except:
@@ -193,7 +194,7 @@ async def contact_chat(context):
         message
     )
     notification = await context.edit(
-        f'{lang("chat_join_success")} [Pagermaid-Modify](https://github.com/xtaodada/PagerMaid-Modify/) {lang("chat_already_join2")}。')
+        f'{lang("chat_join_success")} [Pagermaid-Modify](https://github.com/Xtao-Labs/PagerMaid-Modify/) {lang("chat_already_join2")}。')
     await sleep(5)
     await notification.delete()
 

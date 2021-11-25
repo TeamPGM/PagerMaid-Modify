@@ -7,7 +7,7 @@ from pygments.formatters import img
 from pygments.lexers import guess_lexer
 from telethon.errors import PhotoInvalidDimensionsError
 
-from pagermaid import log, module_dir
+from pagermaid import log, module_dir, silent
 from pagermaid.listener import listener
 from pagermaid.utils import execute, upload_attachment, lang, alias_command
 
@@ -17,7 +17,8 @@ from pagermaid.utils import execute, upload_attachment, lang, alias_command
 async def convert(context):
     """ Converts image to png. """
     reply = await context.get_reply_message()
-    await context.edit(lang('convert_process'))
+    if not silent:
+        await context.edit(lang('convert_process'))
     target_file_path = await context.download_media()
     reply_id = context.reply_to_msg_id
     if reply:
@@ -55,7 +56,8 @@ async def convert(context):
           parameters="<string>,<string> <image>")
 async def caption(context):
     """ Generates images with captions. """
-    await context.edit(lang('caption_process'))
+    if not silent:
+        await context.edit(lang('caption_process'))
     if context.arguments:
         if ',' in context.arguments:
             string_1, string_2 = context.arguments.split(',', 1)
@@ -121,7 +123,8 @@ async def ocr(context):
         await context.edit(lang('ocr_psm_len_error'))
         return
     reply = await context.get_reply_message()
-    await context.edit(lang('ocr_processing'))
+    if not silent:
+        await context.edit(lang('ocr_processing'))
     if reply:
         target_file_path = await context.client.download_media(
             await context.get_reply_message()
@@ -154,7 +157,8 @@ async def highlight(context):
         return
     reply = await context.get_reply_message()
     reply_id = None
-    await context.edit(lang('highlight_processing'))
+    if not silent:
+        await context.edit(lang('highlight_processing'))
     if reply:
         reply_id = reply.id
         target_file_path = await context.client.download_media(
@@ -189,7 +193,8 @@ async def highlight(context):
     except OSError:
         await context.edit(lang('caption_error'))
         return
-    await context.edit(lang('highlight_uploading'))
+    if not silent:
+        await context.edit(lang('highlight_uploading'))
     try:
         await context.client.send_file(
             context.chat_id,

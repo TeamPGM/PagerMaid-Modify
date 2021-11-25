@@ -18,7 +18,7 @@ setup(
     description="A telegram utility daemon and plugin framework.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/xtaodada/PagerMaid-Modify",
+    url="https://github.com/Xtao-Labs/PagerMaid-Modify",
     packages=find_packages(),
     entry_points={
         'console_scripts': [

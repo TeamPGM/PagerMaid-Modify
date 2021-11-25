@@ -2,7 +2,6 @@
 
 from json import loads
 from PIL import Image
-from requests import get
 from os import remove, popen
 from datetime import datetime
 from speedtest import distance, Speedtest, ShareResultsConnectFailure, ShareResultsSubmitFailure, NoMatchedServers, \
@@ -15,10 +14,10 @@ from telethon.tl.types import User, Chat, Channel
 from sys import platform
 from re import sub, findall
 from pathlib import Path
-from pagermaid import log, config, redis_status, start_time
+from pagermaid import log, config, redis_status, start_time, silent
 from pagermaid.utils import execute, upload_attachment
 from pagermaid.listener import listener
-from pagermaid.utils import lang, alias_command
+from pagermaid.utils import lang, alias_command, get
 
 DCs = {
     1: "149.154.175.50",
@@ -33,7 +32,8 @@ DCs = {
           description=lang('sysinfo_des'))
 async def sysinfo(context):
     """ Retrieve system information via neofetch. """
-    await context.edit(lang('sysinfo_loading'))
+    if not silent:
+        await context.edit(lang('sysinfo_loading'))
     result = await execute("neofetch --config none --stdout")
     await context.edit(f"`{result}`")
 
@@ -53,7 +53,8 @@ async def fortune(context):
           description=lang('fbcon_des'))
 async def tty(context):
     """ Screenshots a TTY and prints it. """
-    await context.edit(lang('fbcon_processing'))
+    if not silent:
+        await context.edit(lang('fbcon_processing'))
     reply_id = context.message.reply_to_msg_id
     result = await execute("fbdump | convert - image.png")
     if result == "/bin/sh: fbdump: command not found":
@@ -125,7 +126,8 @@ async def status(context):
 @listener(is_plugin=False, outgoing=True, command=alias_command("stats"),
           description=lang('stats_des'))
 async def stats(context):
-    await context.edit(lang('stats_loading'))
+    if not silent:
+        await context.edit(lang('stats_loading'))
     u, g, s, c, b = 0, 0, 0, 0, 0
     dialogs = await context.client.get_dialogs(
         limit=None,
@@ -175,7 +177,8 @@ async def speedtest(context):
         speed_test_path += ' -f json'
         if server:
             speed_test_path += f' -s {server}'
-        await context.edit(lang('speedtest_processing'))
+        if not silent:
+            await context.edit(lang('speedtest_processing'))
         result = await execute(f'{speed_test_path}')
         result = loads(result)
         if result['type'] == 'log':
@@ -193,7 +196,7 @@ async def speedtest(context):
                 f"Timestamp: `{result['timestamp']}`"
             )
             # 开始处理图片
-            data = get(f"{result['result']['url']}.png").content
+            data = (await get(f"{result['result']['url']}.png")).content
             with open('speedtest.png', mode='wb') as f:
                 f.write(data)
             try:
@@ -238,7 +241,8 @@ async def speedtest(context):
                 return
         except:
             pass
-    await context.edit(lang('speedtest_processing'))
+    if not silent:
+        await context.edit(lang('speedtest_processing'))
     try:
         if len(server) == 0:
             if not server_json:
@@ -269,7 +273,7 @@ async def speedtest(context):
         f"Timestamp: `{result['timestamp']}`"
     )
     # 开始处理图片
-    data = get(result['share']).content
+    data = (await get(result['share'])).content
     with open('speedtest.png', mode='wb') as f:
         f.write(data)
     try:
@@ -334,7 +338,8 @@ async def ping(context):
           description=lang('topcloud_des'))
 async def topcloud(context):
     """ Generates a word cloud of resource-hungry processes. """
-    await context.edit(lang('topcloud_processing'))
+    if not silent:
+        await context.edit(lang('topcloud_processing'))
     command_list = []
     if not Path('/usr/bin/top').is_symlink():
         output = str(await execute("top -b -n 1")).split("\n")[7:]
@@ -393,7 +398,8 @@ async def topcloud(context):
         return
 
     cloud.to_file("cloud.png")
-    await context.edit(lang('highlight_uploading'))
+    if not silent:
+        await context.edit(lang('highlight_uploading'))
     await context.client.send_file(
         context.chat_id,
         "cloud.png",

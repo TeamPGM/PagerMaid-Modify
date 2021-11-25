@@ -2,12 +2,10 @@
 
 from json import loads
 from PIL import Image
-from requests import get
 from os import remove, popen
 from datetime import datetime
 from speedtest import distance, Speedtest, ShareResultsConnectFailure, ShareResultsSubmitFailure, NoMatchedServers, \
     SpeedtestBestServerFailure, SpeedtestHTTPError
-from telethon import functions
 from platform import python_version, uname
 from wordcloud import WordCloud
 from telethon import version as telethon_version
@@ -17,7 +15,7 @@ from pathlib import Path
 from pagermaid import log, config, redis_status, start_time
 from pagermaid.utils import execute
 from pagermaid.listener import listener
-from pagermaid.utils import lang, alias_command
+from pagermaid.utils import lang, alias_command, get
 
 DCs = {
     1: "149.154.175.50",
@@ -116,7 +114,7 @@ async def speedtest(context):
                 f"Timestamp: `{result['timestamp']}`"
             )
             # 开始处理图片
-            data = get(f"{result['result']['url']}.png").content
+            data = (await get(f"{result['result']['url']}.png")).content
             with open('speedtest.png', mode='wb') as f:
                 f.write(data)
             try:
@@ -192,7 +190,7 @@ async def speedtest(context):
         f"Timestamp: `{result['timestamp']}`"
     )
     # 开始处理图片
-    data = get(result['share']).content
+    data = (await get(result['share'])).content
     with open('speedtest.png', mode='wb') as f:
         f.write(data)
     try:

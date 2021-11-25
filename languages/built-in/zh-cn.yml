@@ -267,6 +267,7 @@ re_des: 在当前会话复读回复的消息。（需要回复一条消息）
 re_parameters: <次数>
 re_too_big: 呜呜呜出错了...这个数字太大惹
 re_arg_error: 呜呜呜出错了...可能参数包含了数字以外的符号
+re_forbidden: 呜呜呜出错了...此群组的消息禁止转发
 not_reply: 出错了呜呜呜 ~ 您好像没有回复一条消息。
 ## leave
 leave_res: 说 “再见” 然后离开会话。

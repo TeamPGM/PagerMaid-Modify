@@ -1,6 +1,5 @@
 """ Message related utilities. """
 
-import requests
 import json
 
 from telethon.tl.functions.messages import DeleteChatUserRequest
@@ -13,7 +12,7 @@ from telethon.tl.types import ChannelForbidden
 
 from pagermaid import bot, log, config, proxies
 from pagermaid.listener import listener
-from pagermaid.utils import lang, alias_command
+from pagermaid.utils import lang, alias_command, get
 
 
 @listener(is_plugin=False, incoming=True, command=alias_command("id"),
@@ -222,13 +221,12 @@ async def hitokoto(context):
     hitokoto_while = 1
     hitokoto_json = None
     try:
-        hitokoto_json = json.loads(requests.get("https://v1.hitokoto.cn/?charset=utf-8", proxies=proxies).content.decode("utf-8"))
+        hitokoto_json = (await get("https://v1.hitokoto.cn/?charset=utf-8")).json()
     except ValueError:
         while hitokoto_while < 10:
             hitokoto_while += 1
             try:
-                hitokoto_json = json.loads(
-                    requests.get("https://v1.hitokoto.cn/?charset=utf-8", proxies=proxies).content.decode("utf-8"))
+                hitokoto_json = (await get("https://v1.hitokoto.cn/?charset=utf-8")).json()
                 break
             except:
                 continue

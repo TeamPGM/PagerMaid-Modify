@@ -5,13 +5,13 @@
 > 一个人形自走 bot
 
 <p align="center">
-<img alt="star" src="https://img.shields.io/github/stars/xtaodada/PagerMaid-Modify.svg"/>
-<img alt="fork" src="https://img.shields.io/github/forks/xtaodada/PagerMaid-Modify.svg"/>
-<img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/xtaodada/PagerMaid-Modify.svg?label=commits">
+<img alt="star" src="https://img.shields.io/github/stars/Xtao-Labs/PagerMaid-Modify.svg"/>
+<img alt="fork" src="https://img.shields.io/github/forks/Xtao-Labs/PagerMaid-Modify.svg"/>
+<img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/Xtao-Labs/PagerMaid-Modify.svg?label=commits">
 <img alt="size" src="https://img.shields.io/github/repo-size/Xtao-Labs/PagerMaid-Modify?color=pink"/>
-<img alt="issues" src="https://img.shields.io/github/issues/xtaodada/PagerMaid-Modify.svg"/>
+<img alt="issues" src="https://img.shields.io/github/issues/Xtao-Labs/PagerMaid-Modify.svg"/>
 <img alt="docker" src="https://img.shields.io/docker/pulls/mrwangzhe/pagermaid_modify"/>
-<a href="https://github.com/xtaodada/PagerMaid-Modify/blob/master/LICENSE"><img alt="license" src="https://img.shields.io/github/license/xtaodada/PagerMaid-Modify.svg"/></a>
+<a href="https://github.com/Xtao-Labs/PagerMaid-Modify/blob/master/LICENSE"><img alt="license" src="https://img.shields.io/github/license/Xtao-Labs/PagerMaid-Modify.svg"/></a>
 <img alt="telethon" src="https://img.shields.io/badge/telethon-blue.svg"/>
 </p>
 
@@ -25,7 +25,7 @@ Pagermaid 是一个用在 Telegram 的实用工具。
 
 ## 安装
 
-[Ubuntu 16.04 手动搭建教程](https://github.com/xtaodada/PagerMaid-Modify/wiki/Ubuntu-16.04-%E5%AE%89%E8%A3%85%E8%AF%A6%E8%A7%A3)
+[Ubuntu 16.04 手动搭建教程](https://github.com/Xtao-Labs/PagerMaid-Modify/wiki/Ubuntu-16.04-%E5%AE%89%E8%A3%85%E8%AF%A6%E8%A7%A3)
 
 [一键脚本](https://t.me/PagerMaid_Modify/58)
 

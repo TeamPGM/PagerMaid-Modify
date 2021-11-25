@@ -1,19 +1,16 @@
 """ Message related utilities. """
 
-import requests
-import json
-
 from telethon.tl.functions.messages import DeleteChatUserRequest
 from telethon.tl.functions.channels import LeaveChannelRequest
-from telethon.errors import ForbiddenError
+from telethon.errors import ForbiddenError, AuthKeyError
 from telethon.errors.rpcerrorlist import ChatIdInvalidError, FloodWaitError, UserNotParticipantError
 from distutils.util import strtobool
 
 from telethon.tl.types import ChannelForbidden
 
-from pagermaid import bot, log, config, proxies
+from pagermaid import bot, log, config
 from pagermaid.listener import listener
-from pagermaid.utils import lang, alias_command
+from pagermaid.utils import lang, alias_command, get
 
 
 def isfloat(value):
@@ -172,6 +169,9 @@ async def re(context):
             return
         except ValueError:
             return
+        except AuthKeyError:
+            await context.respond(lang('re_forbidden'))
+            return
     else:
         await context.edit(lang('not_reply'))
 
@@ -236,13 +236,12 @@ async def hitokoto(context):
     hitokoto_while = 1
     hitokoto_json = None
     try:
-        hitokoto_json = json.loads(requests.get("https://v1.hitokoto.cn/?charset=utf-8", proxies=proxies).content.decode("utf-8"))
+        hitokoto_json = (await get("https://v1.hitokoto.cn/?charset=utf-8")).json()
     except ValueError:
         while hitokoto_while < 10:
             hitokoto_while += 1
             try:
-                hitokoto_json = json.loads(
-                    requests.get("https://v1.hitokoto.cn/?charset=utf-8", proxies=proxies).content.decode("utf-8"))
+                hitokoto_json = (await get("https://v1.hitokoto.cn/?charset=utf-8")).json()
                 break
             except:
                 continue

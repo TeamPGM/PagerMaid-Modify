@@ -4,7 +4,7 @@ from os import remove
 from pyqrcode import create
 from pyzbar.pyzbar import decode
 from PIL import Image
-from pagermaid import log
+from pagermaid import log, silent
 from pagermaid.listener import listener
 from pagermaid.utils import obtain_message, upload_attachment, lang, alias_command
 
@@ -20,7 +20,8 @@ async def genqr(context):
     except ValueError:
         await context.edit(lang('error_prefix'))
         return
-    await context.edit(lang('genqr_process'))
+    if not silent:
+        await context.edit(lang('genqr_process'))
     try:
         create(message, error='L', mode='binary').png('qr.webp', scale=6)
     except UnicodeEncodeError:

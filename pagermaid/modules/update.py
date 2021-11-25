@@ -1,7 +1,6 @@
 """ Pulls in the new version of PagerMaid from the git server. """
 
 import platform
-import requests
 import time
 from datetime import datetime
 from distutils.util import strtobool
@@ -13,9 +12,9 @@ from sys import executable
 from git import Repo
 from git.exc import GitCommandError, InvalidGitRepositoryError, NoSuchPathError
 
-from pagermaid import log, config, proxies
+from pagermaid import log, config, silent
 from pagermaid.listener import listener
-from pagermaid.utils import execute, lang, alias_command
+from pagermaid.utils import execute, lang, alias_command, get
 
 try:
     git_api = config['git_api']
@@ -41,9 +40,9 @@ except ValueError:
     pass
 
 
-def update_get():
+async def update_get():
     try:
-        data = requests.get(git_api, proxies=proxies).json()
+        data = (await get(git_api)).json()
     except JSONDecodeError as e:
         raise e
     return data
@@ -95,7 +94,7 @@ async def update_refresher(context):
                     pass
         except:
             try:
-                data = update_get()
+                data = await update_get()
                 git_hash = run("git rev-parse HEAD", stdout=PIPE, shell=True).stdout.decode().strip()
                 if not data['sha'] == git_hash:
                     if update_username == 'self':
@@ -129,7 +128,8 @@ async def update(context):
     if len(context.parameter) > 1:
         await context.edit(lang('arg_error'))
         return
-    await context.edit(lang('update_processing'))
+    if not silent:
+        await context.edit(lang('update_processing'))
     parameter = None
     changelog = None
     if len(context.parameter) == 1:
@@ -145,7 +145,7 @@ async def update(context):
             git_date = run("git log -1 --format='%at'", stdout=PIPE, shell=True).stdout.decode()
             git_date = datetime.utcfromtimestamp(int(git_date)).strftime("%Y/%m/%d %H:%M:%S")
             git_hash = run("git rev-parse --short HEAD", stdout=PIPE, shell=True).stdout.decode().strip()
-            get_hash_link = f"https://github.com/xtaodada/PagerMaid-Modify/commit/{git_hash}"
+            get_hash_link = f"https://github.com/Xtao-Labs/PagerMaid-Modify/commit/{git_hash}"
             # Generate the text
             text = f"{lang('status_platform')}: {str(platform.platform())}\n" \
                    f"{lang('update_platform_version')}: {str(platform.version())}\n" \

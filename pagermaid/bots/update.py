@@ -37,7 +37,7 @@ async def update(context):
             git_date = run("git log -1 --format='%at'", stdout=PIPE, shell=True).stdout.decode()
             git_date = datetime.utcfromtimestamp(int(git_date)).strftime("%Y/%m/%d %H:%M:%S")
             git_hash = run("git rev-parse --short HEAD", stdout=PIPE, shell=True).stdout.decode().strip()
-            get_hash_link = f"https://github.com/xtaodada/PagerMaid-Modify/commit/{git_hash}"
+            get_hash_link = f"https://github.com/Xtao-Labs/PagerMaid-Modify/commit/{git_hash}"
             # Generate the text
             text = f"{lang('status_platform')}: {str(platform.platform())}\n" \
                    f"{lang('update_platform_version')}: {str(platform.version())}\n" \

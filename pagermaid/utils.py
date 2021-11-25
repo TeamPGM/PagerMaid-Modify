@@ -1,10 +1,15 @@
 """ Libraries for python modules. """
+import aiohttp
 
 from os import remove
 from os.path import exists
+from typing import Any
+
 from emoji import get_emoji_regexp
 from random import choice
 from json import load as load_json
+from json import loads as loads_json
+from json import dumps as dumps_json
 from re import sub, IGNORECASE
 from asyncio import create_subprocess_shell
 from asyncio.subprocess import PIPE
@@ -12,7 +17,27 @@ from asyncio.subprocess import PIPE
 from telethon.errors import UserNotParticipantError
 from telethon.tl.types import Channel, ChannelParticipantAdmin, ChannelParticipantCreator
 from youtube_dl import YoutubeDL
-from pagermaid import module_dir, bot, lang_dict, alias_dict, user_bot, config
+from pagermaid import module_dir, bot, lang_dict, alias_dict, user_bot, config, proxy_addr, proxy_port, http_addr, \
+    http_port
+
+
+class AiohttpResp:
+    """
+    重写返回类型。
+    """
+    def __init__(self, text: str, content: bytes, status_code: int):
+        """
+        Args:
+            text        (str):   网页内容
+            content     (bytes): 文件内容
+            status_code (int):   网页状态码
+        """
+        self.text = text
+        self.content = content
+        self.status_code = status_code
+
+    def json(self):
+        return loads_json(self.text)
 
 
 def lang(text: str) -> str:
@@ -203,7 +228,100 @@ async def admin_check(event):
     except UserNotParticipantError:
         return False
     if isinstance(
-        perms.participant, (ChannelParticipantAdmin, ChannelParticipantCreator)
+            perms.participant, (ChannelParticipantAdmin, ChannelParticipantCreator)
     ):
         return True
     return False
+
+
+async def request(method: str,
+                  url: str,
+                  params: dict = None,
+                  data: Any = None,
+                  json_body: bool = False,
+                  timeout: int = 10,
+                  **kwargs) -> AiohttpResp:
+    """
+    原始网络请求封装。
+    Args:
+        method     (str)                 : 请求方法。
+        url        (str)                 : 请求 URL。
+        params     (dict, optional)      : 请求参数。
+        data       (Any, optional)       : 请求载荷。
+        json_body  (bool, optional)      : 载荷是否为 JSON
+        timeout    (int, optional)       : 超时时间
+    Returns:
+        返回 aiohttp 请求对象
+    """
+    method = method.upper()
+
+    # 使用自定义 UA
+    DEFAULT_HEADERS = {
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36"
+    }
+    headers = DEFAULT_HEADERS
+
+    if params is None:
+        params = {}
+
+    # 合并参数
+    config_ = {
+        "method": method,
+        "url": url,
+        "params": params,
+        "data": data,
+        "headers": headers,
+    }
+    # 支持自定义参数
+    config_.update(kwargs)
+
+    if json_body:
+        config_["headers"]["Content-Type"] = "application/json"
+        config_["data"] = dumps_json(config_["data"])
+    # 如果用户提供代理则设置代理
+    if not proxy_addr == '' and not proxy_port == '':
+        config_["proxy"] = f"socks5://{proxy_addr}:{proxy_port}"
+    elif not http_addr == '' and not http_port == '':
+        config_["proxy"] = f"http://{http_addr}:{http_port}"
+    session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=timeout))
+    resp = await session.request(**config_)
+    # 返回请求
+    resp_data = await resp.text()
+    content = await resp.content.read()
+    status_code = resp.status
+    await session.close()
+    return AiohttpResp(resp_data, content, status_code)
+
+
+async def get(url: str, timeout: int = 10, **kwargs) -> AiohttpResp:
+    """
+    GET 请求封装
+    Args:
+        url        (str)                 : 请求 URL。
+        timeout    (int, optional)       : 超时时间
+    Returns:
+        返回 aiohttp 请求对象
+    :rtype :aiohttp.client_reqrep.ClientResponse
+    """
+    return await request("GET", url, timeout=timeout, **kwargs)
+
+
+async def post(url: str,
+               params: dict = None,
+               data: Any = None,
+               json_body: bool = False,
+               timeout: int = 10,
+               **kwargs) -> AiohttpResp:
+    """
+    POST 请求封装
+    Args:
+        url        (str)                 : 请求 URL。
+        params     (dict, optional)      : 请求参数。
+        data       (Any, optional)       : 请求载荷。
+        json_body  (bool, optional)      : 载荷是否为 JSON
+        timeout    (int, optional)       : 超时时间
+    Returns:
+        返回 aiohttp 请求对象
+    :rtype :aiohttp.client_reqrep.ClientResponse
+    """
+    return await request("POST", url, params, data, json_body, timeout, **kwargs)

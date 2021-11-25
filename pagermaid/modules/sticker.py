@@ -1,6 +1,5 @@
 """ PagerMaid module to handle sticker collection. """
 
-import requests
 from bs4 import BeautifulSoup
 from asyncio import sleep
 from os import remove
@@ -10,9 +9,9 @@ from telethon.tl.functions.contacts import UnblockRequest
 from telethon.errors.common import AlreadyInConversationError
 from PIL import Image, ImageOps
 from math import floor
-from pagermaid import bot, redis, redis_status, proxies
+from pagermaid import bot, redis, redis_status, silent
 from pagermaid.listener import listener
-from pagermaid.utils import lang, alias_command
+from pagermaid.utils import lang, alias_command, get
 from pagermaid import log
 
 
@@ -165,7 +164,8 @@ async def sticker(context):
                     scount += 1
                     try:
                         await log(f"{lang('merge_processing_left')}{count}{lang('merge_processing_right')}")
-                        await context.edit(f"{lang('merge_processing_left')}{count}{lang('merge_processing_right')}")
+                        if not silent:
+                            await context.edit(f"{lang('merge_processing_left')}{count}{lang('merge_processing_right')}")
                     except:
                         pass
                     result = await single_sticker(animated, context, custom_emoji, emoji, message, pic_round, user,
@@ -194,7 +194,8 @@ async def sticker(context):
 async def single_sticker(animated, context, custom_emoji, emoji, message, pic_round, user, package_name,
                          to_sticker_set):
     try:
-        await context.edit(lang('sticker_processing'))
+        if not silent:
+            await context.edit(lang('sticker_processing'))
     except:
         pass
     if message and message.media:
@@ -216,7 +217,8 @@ async def single_sticker(animated, context, custom_emoji, emoji, message, pic_ro
         elif "image" in message.media.document.mime_type.split('/'):
             photo = BytesIO()
             try:
-                await context.edit(lang('sticker_downloading'))
+                if not silent:
+                    await context.edit(lang('sticker_downloading'))
             except:
                 pass
             await bot.download_file(message.media.document, photo)
@@ -307,13 +309,15 @@ async def single_sticker(animated, context, custom_emoji, emoji, message, pic_ro
 
         if not animated:
             try:
-                await context.edit(lang('sticker_resizing'))
+                if not silent:
+                    await context.edit(lang('sticker_resizing'))
             except:
                 pass
             image = await resize_image(photo)
             if pic_round:
                 try:
-                    await context.edit(lang('us_static_rounding'))
+                    if not silent:
+                        await context.edit(lang('us_static_rounding'))
                 except:
                     pass
                 image = await rounded_image(image)
@@ -326,12 +330,12 @@ async def single_sticker(animated, context, custom_emoji, emoji, message, pic_ro
                 command = '/newanimated'
 
         try:
-            response = requests.get(f'http://t.me/addstickers/{pack_name}', proxies=proxies)
+            response = await get(f'https://t.me/addstickers/{pack_name}')
         except UnicodeEncodeError:
             pack_name = 's' + hex(context.sender_id)[2:]
             if animated:
                 pack_name = 's' + hex(context.sender_id)[2:] + '_animated'
-            response = requests.get(f'http://t.me/addstickers/{pack_name}', proxies=proxies)
+            response = await get(f'https://t.me/addstickers/{pack_name}')
         if not response.status_code == 200:
             try:
                 await context.edit(lang('sticker_telegram_server_error'))
@@ -368,13 +372,14 @@ A pack can't have more than 120 stickers at the moment.":
                                 pack_name = f"{user.username}_{pack}"
                                 pack_title = f"@{user.username} {lang('sticker_pack_title')} ({pack})"
                             try:
-                                if package_name:
-                                    await context.edit(
-                                        lang('sticker_change_pack_to') + str(package_name) + str(pack) + lang(
-                                            'sticker_last_is_full'))
-                                else:
-                                    await context.edit(
-                                        lang('sticker_change_pack_to') + str(pack) + lang('sticker_last_is_full'))
+                                if not silent:
+                                    if package_name:
+                                        await context.edit(
+                                            lang('sticker_change_pack_to') + str(package_name) + str(pack) + lang(
+                                                'sticker_last_is_full'))
+                                    else:
+                                        await context.edit(
+                                            lang('sticker_change_pack_to') + str(pack) + lang('sticker_last_is_full'))
                             except:
                                 pass
                             await conversation.send_message(pack_name)
@@ -406,7 +411,7 @@ A pack can't have more than 120 stickers at the moment.":
                         await bot.send_read_acknowledge(conversation.chat_id)
                         break
                 except AlreadyInConversationError:
-                    if not sticker_already:
+                    if not sticker_already and not silent:
                         try:
                             await context.edit(lang('sticker_another_running'))
                         except:
@@ -418,10 +423,11 @@ A pack can't have more than 120 stickers at the moment.":
                 except Exception:
                     raise
         else:
-            try:
-                await context.edit(lang('sticker_no_pack_exist_creating'))
-            except:
-                pass
+            if not silent:
+                try:
+                    await context.edit(lang('sticker_no_pack_exist_creating'))
+                except:
+                    pass
             async with bot.conversation('Stickers') as conversation:
                 await add_sticker(conversation, command, pack_title, pack_name, animated, message,
                                   context, file, emoji)
@@ -481,18 +487,20 @@ async def add_sticker(conversation, command, pack_title, pack_name, animated, me
 
 async def upload_sticker(animated, message, context, file, conversation):
     if animated:
-        try:
-            await context.edit(lang('us_animated_uploading'))
-        except:
-            pass
+        if not silent:
+            try:
+                await context.edit(lang('us_animated_uploading'))
+            except:
+                pass
         await conversation.send_file("AnimatedSticker.tgs", force_document=True)
         remove("AnimatedSticker.tgs")
     else:
         file.seek(0)
-        try:
-            await context.edit(lang('us_static_uploading'))
-        except:
-            pass
+        if not silent:
+            try:
+                await context.edit(lang('us_static_uploading'))
+            except:
+                pass
         await conversation.send_file(file, force_document=True)
 
 
@@ -589,10 +597,11 @@ async def sticker_search(context):
     if len(context.parameter) == 0:
         await context.edit(lang('arg_error'))
         return
-    await context.edit(lang('google_processing'))
+    if not silent:
+        await context.edit(lang('google_processing'))
     query = context.parameter[0]
     try:
-        html = requests.get("https://combot.org/telegram/stickers?q=" + query, proxies=proxies).text
+        html = (await get("https://combot.org/telegram/stickers?q=" + query)).text
     except:
         return await context.edit(lang('sticker_telegram_server_error'))
     xml = BeautifulSoup(html, "lxml")

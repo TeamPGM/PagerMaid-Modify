@@ -256,6 +256,7 @@ re_des: Reread the reply message in the current conversation. (Need to reply to 
 re_parameters: <number of times>
 re_too_big: oh oh something went wrong... this number is too big to provoke
 re_arg_error: Oh, something went wrong...maybe the parameter contains symbols other than numbers
+re_forbidden: Oh, something went wrong...you do not have permission to forward messages from this group.
 not_reply: Something went wrong ~ You don't seem to reply to a message.
 # leave
 leave_res: Say "goodbye" and leave the session.

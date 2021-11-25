@@ -4,7 +4,7 @@ from asyncio import sleep
 from random import choice, random, randint, randrange, seed
 from telethon.errors.rpcerrorlist import MessageNotModifiedError
 from cowpy import cow
-from pagermaid import module_dir
+from pagermaid import module_dir, silent
 from pagermaid.listener import listener
 from pagermaid.utils import owoify, execute, random_gen, obtain_message, lang, alias_command
 
@@ -160,7 +160,8 @@ async def flip(context):
           parameters="<username> <username>")
 async def ship(context):
     """ Ship randomly generated members. """
-    await context.edit(lang('ship_processing'))
+    if not silent:
+        await context.edit(lang('ship_processing'))
     if len(context.parameter) == 0:
         users = []
         async for user in context.client.iter_participants(context.chat_id):
@@ -267,19 +268,21 @@ async def tuxsay(context):
           description=lang('coin_des'))
 async def coin(context):
     """ Throws a coin. """
-    await context.edit(lang('coin_processing'))
+    if not silent:
+        await context.edit(lang('coin_processing'))
     await sleep(.5)
     outcomes = ['A'] * 5 + ['B'] * 5 + ['C'] * 1
     result = choice(outcomes)
     count = 0
-    while count <= 3:
-        await context.edit("`.` . .")
-        await sleep(.3)
-        await context.edit(". `.` .")
-        await sleep(.3)
-        await context.edit(". . `.`")
-        await sleep(.3)
-        count += 1
+    if not silent:
+        while count <= 3:
+            await context.edit("`.` . .")
+            await sleep(.3)
+            await context.edit(". `.` .")
+            await sleep(.3)
+            await context.edit(". . `.`")
+            await sleep(.3)
+            count += 1
     if result == "C":
         await context.edit(lang('coin_lost'))
     elif result == "B":

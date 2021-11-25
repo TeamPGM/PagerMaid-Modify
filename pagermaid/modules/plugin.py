@@ -2,14 +2,13 @@
 
 import json
 from re import search, I
-from requests import get
 from os import remove, rename, chdir, path
 from os.path import exists
 from shutil import copyfile, move
 from glob import glob
-from pagermaid import log, working_dir, config, proxies
+from pagermaid import log, working_dir, config
 from pagermaid.listener import listener
-from pagermaid.utils import upload_attachment, lang, alias_command
+from pagermaid.utils import upload_attachment, lang, alias_command, get
 from pagermaid.modules import plugin_list as active_plugins, __list_plugins
 
 
@@ -17,11 +16,6 @@ try:
     git_source = config['git_source']
 except:
     git_source = "https://raw.githubusercontent.com/Xtao-Labs/PagerMaid_Plugins/master/"
-
-
-def get_html(url):
-    data = get(url, proxies=proxies)
-    return data.status_code, data.content
 
 
 def remove_plugin(name):
@@ -36,10 +30,10 @@ def remove_plugin(name):
         pass
 
 
-def download(name):
-    status, html = get_html(f'{git_source}{name}.py')
+async def download(name):
+    html = await get(f'{git_source}{name}.py')
     with open(f'plugins/{name}.py', mode='wb') as f:
-        f.write(html)
+        f.write(html.content)
     return f'plugins/{name}.py'
 
 
@@ -100,8 +94,8 @@ async def plugin(context):
             success_list = []
             failed_list = []
             noneed_list = []
-            temp, plugin_list = get_html(f"{git_source}list.json")
-            plugin_list = json.loads(plugin_list)['list']
+            plugin_list = await get(f"{git_source}list.json")
+            plugin_list = plugin_list.json()['list']
             for i in process_list:
                 if exists(f"{plugin_directory}version.json"):
                     with open(f"{plugin_directory}version.json", 'r', encoding="utf-8") as f:
@@ -124,7 +118,7 @@ async def plugin(context):
                             break
                         else:
                             remove_plugin(i)
-                            download(i)
+                            await download(i)
                             update_version(i, x['version'])
                             success_list.append(i)
                             temp = False
@@ -266,8 +260,8 @@ async def plugin(context):
             return
         with open(f"{plugin_directory}version.json", 'r', encoding="utf-8") as f:
             version_json = json.load(f)
-        temp, plugin_list = get_html(f"{git_source}list.json")
-        plugin_online = json.loads(plugin_list)['list']
+        plugin_list = await get(f"{git_source}list.json")
+        plugin_online = plugin_list.json()['list']
         for key, value in version_json.items():
             if value == "0.0":
                 continue
@@ -294,7 +288,7 @@ async def plugin(context):
                 plugin_directory = f"{working_dir}/plugins/"
                 for i in need_update_list:
                     remove_plugin(i)
-                    download(i)
+                    await download(i)
                     with open(f"{plugin_directory}version.json", 'r', encoding="utf-8") as f:
                         version_json = json.load(f)
                     for m in plugin_online:
@@ -310,8 +304,8 @@ async def plugin(context):
         elif len(context.parameter) == 2:
             search_result = []
             plugin_name = context.parameter[1]
-            temp, plugin_list = get_html(f"{git_source}list.json")
-            plugin_online = json.loads(plugin_list)['list']
+            plugin_list = await get(f"{git_source}list.json")
+            plugin_online = plugin_list.json()['list']
             for i in plugin_online:
                 if search(plugin_name, i['name'], I):
                     search_result.extend(['`' + i['name'] + '` / `' + i['version'] + '`\n  ' + i['des-short']])
@@ -327,8 +321,8 @@ async def plugin(context):
         elif len(context.parameter) == 2:
             search_result = ''
             plugin_name = context.parameter[1]
-            temp, plugin_list = get_html(f"{git_source}list.json")
-            plugin_online = json.loads(plugin_list)['list']
+            plugin_list = await get(f"{git_source}list.json")
+            plugin_online = plugin_list.json()['list']
             for i in plugin_online:
                 if plugin_name == i['name']:
                     if i['supported']:
@@ -356,8 +350,8 @@ async def plugin(context):
         list_plugin = []
         with open(f"{plugin_directory}version.json", 'r', encoding="utf-8") as f:
             version_json = json.load(f)
-        temp, plugin_list = get_html(f"{git_source}list.json")
-        plugin_online = json.loads(plugin_list)['list']
+        plugin_list = await get(f"{git_source}list.json")
+        plugin_online = plugin_list.json()['list']
         for key, value in version_json.items():
             if value == "0.0":
                 continue
