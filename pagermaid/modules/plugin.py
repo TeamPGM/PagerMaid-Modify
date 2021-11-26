@@ -32,8 +32,8 @@ def remove_plugin(name):
 
 async def download(name):
     html = await get(f'{git_source}{name}.py')
-    with open(f'plugins/{name}.py', mode='w') as f:
-        f.write(html.text)
+    with open(f'plugins/{name}.py', mode='wb') as f:
+        f.write(html.text.encode('utf-8'))
     return f'plugins/{name}.py'
 
 
