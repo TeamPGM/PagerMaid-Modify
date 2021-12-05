@@ -194,9 +194,12 @@ async def ship(context):
     else:
         await context.edit(lang('arg_error'))
         return
-    await context.edit(f"**{lang('ship_hint')}（（（**\n"
-                       f"[{target_1.first_name}](tg://user?id={target_1.id}) + "
-                       f"[{target_2.first_name}](tg://user?id={target_2.id}) = ❤️")
+    try:
+        await context.edit(f"**{lang('ship_hint')}（（（**\n"
+                           f"[{target_1.first_name}](tg://user?id={target_1.id}) + "
+                           f"[{target_2.first_name}](tg://user?id={target_2.id}) = ❤️")
+    except AttributeError:
+        await context.edit(lang('ship_BaseException'))
 
 
 @listener(is_plugin=False, outgoing=True, command=alias_command("rng"),
