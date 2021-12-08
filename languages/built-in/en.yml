@@ -514,3 +514,4 @@ sb_set: This group has been added to the automatic banned list.
 sb_remove: The automatic banned list has been removed this group.
 sb_exist: This group exists in the automatic banned list.
 sb_no_exist: This group does't exist in the automatic banned list.
+sb_channel: Successfully blocked this channel in this group.
