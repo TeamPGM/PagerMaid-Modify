@@ -3,7 +3,7 @@
 from telethon.tl.functions.messages import DeleteChatUserRequest
 from telethon.tl.functions.channels import LeaveChannelRequest
 from telethon.errors import ForbiddenError, AuthKeyError
-from telethon.errors.rpcerrorlist import ChatIdInvalidError, FloodWaitError, UserNotParticipantError
+from telethon.errors.rpcerrorlist import ChatIdInvalidError, FloodWaitError, UserNotParticipantError, MessageIdInvalidError
 from distutils.util import strtobool
 
 from telethon.tl.types import ChannelForbidden
@@ -160,18 +160,29 @@ async def re(context):
             await context.delete()
         except ValueError:
             pass
-        try:
-            for nums in range(0, num):
-                await reply.forward_to(int(context.chat_id))
-        except ForbiddenError:
-            return
-        except FloodWaitError:
-            return
-        except ValueError:
-            return
-        except AuthKeyError:
-            await context.respond(lang('re_forbidden'))
-            return
+        forward_allowed = True
+        for nums in range(0, num):
+            try:
+                if forward_allowed:
+                    await reply.forward_to(reply.peer_id)
+                else:
+                    await bot.send_message(reply.peer_id, reply)
+            except MessageIdInvalidError:
+                if forward_allowed:
+                    forward_allowed = False
+                    await bot.send_message(reply.peer_id, reply)
+                else:
+                    await context.respond(lang('re_forbidden'))
+                    return
+            except ForbiddenError:
+                return
+            except FloodWaitError:
+                return
+            except ValueError:
+                return
+            except AuthKeyError:
+                await context.respond(lang('re_forbidden'))
+                return
     else:
         await context.edit(lang('not_reply'))
 
