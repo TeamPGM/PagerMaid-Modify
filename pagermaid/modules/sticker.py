@@ -267,8 +267,8 @@ async def single_sticker(animated, context, custom_emoji, emoji, message, pic_ro
             if split_strings[1].isnumeric():
                 pack = int(split_strings[1])
             else:
-                if split_strings[1].replace("png", "") != "":
-                    emoji = split_strings[1].replace("png", "")
+                if split_strings[1].replace("png", "").replace("to", "") != "":
+                    emoji = split_strings[1].replace("png", "").replace("to", "")
         elif package_name:
             # 批量处理贴纸无法指定emoji，只获取第几个pack
             # s merge png <package_name> <number>
