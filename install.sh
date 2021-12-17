@@ -402,6 +402,8 @@ login_screen() {
             screen -x -S userbot -p 0 -X stuff "$twotimepwd"
             screen -x -S userbot -p 0 -X stuff $'\n'
             break
+        else
+            break
         fi
     done
     sleep 5
