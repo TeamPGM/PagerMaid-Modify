@@ -1,1 +1,7 @@
 .idea/
+config.yml
+downloads/
+pagermaid.session
+pagermaid/
+plugins/
+unknown_errors.txt
