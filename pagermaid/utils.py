@@ -1,9 +1,13 @@
 """ Libraries for python modules. """
 import aiohttp
+import subprocess
+
+from importlib.util import find_spec
+from sys import executable
 
 from os import remove
 from os.path import exists
-from typing import Any
+from typing import Any, Optional
 
 from emoji import get_emoji_regexp
 from random import choice
@@ -212,6 +216,18 @@ def owoify(text: str) -> str:
 def clear_emojis(target: str) -> str:
     """ Removes all Emojis from provided string """
     return get_emoji_regexp().sub(u'', target)
+
+
+def pip_install(package: str, version: Optional[str] = "", alias: Optional[str] = "") -> bool:
+    """ Auto install extra pypi packages """
+    if not alias:
+        # when import name is not provided, use package name
+        alias = package
+    if find_spec(alias) is None:
+        subprocess.call([executable, "-m", "pip", "install", f"{package}{version}"])
+        if find_spec(package) is None:
+            return False
+    return True
 
 
 async def admin_check(event):

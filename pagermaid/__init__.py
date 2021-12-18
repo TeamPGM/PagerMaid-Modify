@@ -6,13 +6,7 @@ from concurrent.futures import CancelledError
 import sentry_sdk
 from sentry_sdk.integrations.redis import RedisIntegration
 
-python36 = True
-try:
-    from asyncio.exceptions import CancelledError as CancelError
-
-    python36 = False
-except:
-    pass
+from asyncio import CancelledError as CancelError
 from subprocess import run, PIPE
 from datetime import datetime
 from time import time
@@ -279,7 +273,8 @@ def before_send(event, hint):
                                              AlreadyInConversationError, ConnectedError, KeyboardInterrupt,
                                              OSError, AuthKeyDuplicatedError, ResponseError, SlowModeWaitError,
                                              PeerFloodError, MessageEditTimeExpiredError, PeerIdInvalidError,
-                                             AuthKeyUnregisteredError, UserBannedInChannelError, AuthKeyError)):
+                                             AuthKeyUnregisteredError, UserBannedInChannelError, AuthKeyError,
+                                             CancelError)):
         return
     elif exc_info and isinstance(exc_info[1], UserDeactivatedBanError):
         # The user has been deleted/deactivated
@@ -288,9 +283,6 @@ def before_send(event, hint):
         except Exception as exc:
             print(exc)
         exit(1)
-    if not python36:
-        if exc_info and isinstance(exc_info[1], CancelError):
-            return
     if time() <= report_time + 30:
         report_time = time()
         return
@@ -303,7 +295,7 @@ report_time = time()
 start_time = datetime.utcnow()
 git_hash = run("git rev-parse HEAD", stdout=PIPE, shell=True).stdout.decode()
 sentry_sdk.init(
-    "https://ae2b937dba4a4f948f13ae1c902b30a3@o416616.ingest.sentry.io/5312335",
+    "https://88b676b38216473db3eb3dd5e1da0133@o416616.ingest.sentry.io/5312335",
     traces_sample_rate=1.0,
     release=git_hash,
     before_send=before_send,
