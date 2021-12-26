@@ -4,7 +4,8 @@ from bs4 import BeautifulSoup
 from asyncio import sleep
 from os import remove
 from io import BytesIO
-from telethon.tl.types import DocumentAttributeFilename, MessageMediaPhoto, MessageMediaWebPage, MessageMediaDice
+from telethon.tl.types import DocumentAttributeFilename, MessageMediaPhoto, MessageMediaWebPage, MessageMediaDice, \
+    MessageMediaUnsupported
 from telethon.tl.functions.contacts import UnblockRequest
 from telethon.errors.common import AlreadyInConversationError
 from PIL import Image, ImageOps
@@ -209,6 +210,12 @@ async def single_sticker(animated, context, custom_emoji, emoji, message, pic_ro
                 pass
             return
         elif isinstance(message.media, MessageMediaDice):
+            try:
+                await context.edit(lang('sticker_type_not_support'))
+            except:
+                pass
+            return
+        elif isinstance(message.media, MessageMediaUnsupported):
             try:
                 await context.edit(lang('sticker_type_not_support'))
             except:
