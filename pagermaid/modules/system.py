@@ -1,9 +1,10 @@
 """ System related utilities for PagerMaid to integrate into the system. """
 
 import io, sys, traceback
+from os.path import exists
 from platform import node
 from getpass import getuser
-from os import geteuid
+from os import geteuid, sep
 from requests import head
 from asyncio import sleep
 from requests.exceptions import MissingSchema, InvalidURL, ConnectionError
@@ -73,12 +74,16 @@ async def sh(context):
           parameters=lang('eval_parameters'))
 async def sh(context):
     """ Run python commands from Telegram. """
-    if not redis_status():
-        await context.edit(f"{lang('error_prefix')}{lang('redis_dis')}")
-        return
-    if not redis.get("dev"):
-        await context.edit(lang('eval_need_dev'))
-        return
+    dev_mode = False
+    # file
+    if exists(f"data{sep}dev"):
+        dev_mode = True
+    # redis
+    if redis_status():
+        if redis.get("dev"):
+            dev_mode = True
+    if not dev_mode:
+        return await context.edit(lang('eval_need_dev'))
     if context.is_channel and not context.is_group:
         await context.edit(lang('eval_channel'))
         return

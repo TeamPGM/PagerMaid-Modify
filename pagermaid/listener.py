@@ -39,6 +39,7 @@ def listener(**args):
     owners_only = args.get("owners_only", False)
     admins_only = args.get("admins_only", False)
     groups_only = args.get("groups_only", False)
+    support_inline = args.get("support_inline", False)
     if command is not None:
         if command in help_messages:
             raise ValueError(f"{lang('error_prefix')} {lang('command')} \"{command}\" {lang('has_reg')}")
@@ -67,6 +68,8 @@ def listener(**args):
         del args['admins_only']
     if 'groups_only' in args:
         del args['groups_only']
+    if 'support_inline' in args:
+        del args['support_inline']
 
     def decorator(function):
 
@@ -86,6 +89,9 @@ def listener(**args):
             if groups_only:
                 if not context.is_group:
                     return
+            # filter inline bot msg
+            if not support_inline and context.via_bot_id:
+                return
             try:
                 analytic = True
                 try:
