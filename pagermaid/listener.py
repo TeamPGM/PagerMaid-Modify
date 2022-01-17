@@ -136,7 +136,7 @@ def listener(**args):
                 exc_info = sys.exc_info()[1]
                 exc_format = format_exc()
                 try:
-                    await context.reply(lang('run_error'))
+                    await context.edit(lang('run_error'))
                 except BaseException:
                     pass
                 if not diagnostics:
