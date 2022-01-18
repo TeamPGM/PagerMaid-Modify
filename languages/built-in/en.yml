@@ -500,6 +500,8 @@ update_failed: update failed
 update_auto_upgrade_git_failed_ubuntu: It is detected that your system is Ubuntu or Debain. Try to upgrade git automatically but failed. Please upgrade manually.
 update_auto_upgrade_git_failed_cent: It is detected that your system is CentOS, try to upgrade git automatically but failed, please upgrade manually.
 update_auto_upgrade_git_hint: Your git version is too low and has tried to automatically upgrade for you. If you are reminded of this error again, please upgrade manually.
+update_master: Received a known CVE and is forcing an update to the PagerMaid-Modify instance
+update_plugins: Received a known CVE and is forcing an update to the relevant plugin
 
 # sb
 sb_des: Ban a user in the common group of administrator privileges.

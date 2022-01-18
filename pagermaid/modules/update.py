@@ -1,124 +1,70 @@
 """ Pulls in the new version of PagerMaid from the git server. """
 
 import platform
-import time
 from datetime import datetime
 from distutils.util import strtobool
-from json import JSONDecodeError
+from json import JSONDecodeError, loads, load
 from os import remove
+from os.path import exists
 from subprocess import run, PIPE
 from sys import executable
 
 from git import Repo
 from git.exc import GitCommandError, InvalidGitRepositoryError, NoSuchPathError
 
-from pagermaid import log, config, silent
+from telethon.tl.functions.channels import GetFullChannelRequest
+
+from pagermaid import log, config, silent, scheduler, bot, version, working_dir, logs
 from pagermaid.listener import listener
-from pagermaid.utils import execute, lang, alias_command, get
+from pagermaid.modules.plugin import remove_plugin, update_version, download
+from pagermaid.utils import execute, lang, alias_command
 
 try:
-    git_api = config['git_api']
-    git_ssh = config['git_ssh']
+    git_ssh = config["git_ssh"]
     need_update_check = strtobool(config['update_check'])
-    update_time = config['update_time']
-    update_username = config['update_username']
-    update_delete = strtobool(config['update_delete'])
 except KeyError:
-    git_api = "https://api.github.com/repos/Xtao-Labs/PagerMaid-Modify/commits/master"
-    git_ssh = 'https://github.com/Xtao-Labs/PagerMaid-Modify.git'
+    git_ssh = "https://github.com/Xtao-Labs/PagerMaid-Modify.git"
     need_update_check = True
-    update_time = 86400
-    update_username = 'PagerMaid_Modify_bot'
-    update_delete = True
-try:
-    update_time = int(update_time)
-except ValueError:
-    update_time = 86400
-try:
-    update_username = int(update_username)
-except ValueError:
-    pass
 
 
-async def update_get():
-    try:
-        data = (await get(git_api)).json()
-    except JSONDecodeError as e:
-        raise e
-    return data
-
-
-update_get_time = 0
-update_id = 0
-
-
-@listener(incoming=True, ignore_edited=True)
-async def update_refresher(context):
-    global update_get_time, update_id
+@scheduler.scheduled_job("cron", minute="*/30", id="0")
+async def run_every_30_minute():
     if not need_update_check:
         return
-    if time.time() - update_get_time > update_time:
-        update_get_time = time.time()
-        changelog = None
-        try:
-            repo = Repo()
-            active_branch = repo.active_branch.name
-            if not await branch_check(active_branch):
-                return
-            repo.create_remote('upstream', git_ssh)
-            upstream_remote = repo.remote('upstream')
-            upstream_remote.fetch(active_branch)
-            changelog = await changelog_gen(repo, f'HEAD..upstream/{active_branch}')
-            if not changelog:
-                return
-            else:
-                if update_username == 'self':
-                    user = await context.client.get_me(input_peer=True)
-                else:
-                    try:
-                        user = await context.client.get_input_entity(update_username)
-                    except ValueError:
-                        user = await context.client.get_me(input_peer=True)
-                if not update_id == 0 and update_delete:
-                    try:
-                        await context.client.delete_messages(user, update_id)
-                    except:
-                        pass
-                try:
-                    msg = await context.client.send_message(user,
-                                                            f'**{lang("update_found_update_in_branch")} '
-                                                            f'{active_branch}.\n\n'
-                                                            f'{lang("update_change_log")}:**\n`{changelog}`')
-                    update_id = msg.id
-                except:
-                    pass
-        except:
+    result = await bot(GetFullChannelRequest("UGFnZXJNYWlk"))  # noqa
+    async for msg in bot.iter_messages("UGFnZXJNYWlk"):
+        if msg.text:
             try:
-                data = await update_get()
-                git_hash = run("git rev-parse HEAD", stdout=PIPE, shell=True).stdout.decode().strip()
-                if not data['sha'] == git_hash:
-                    if update_username == 'self':
-                        user = await context.client.get_me(input_peer=True)
-                    else:
-                        try:
-                            user = await context.client.get_input_entity(update_username)
-                        except ValueError:
-                            user = await context.client.get_me(input_peer=True)
-                    changelog = data['commit']['message']
-                    if not update_id == 0 and update_delete:
-                        try:
-                            await context.client.delete_messages(user, update_id)
-                        except:
-                            pass
+                data_ = loads(msg.text.strip("`"))
+            except JSONDecodeError:
+                continue
+            need_restart = False
+            for data in data_["data"]:
+                if data["mode"] == "master":
+                    if version < data["version"]:
+                        logs.info(lang('update_master'))
+                        await execute("git reset --hard")
+                        await execute("git pull")
+                        await execute(f"{executable} -m pip install -r requirements.txt --upgrade")
+                        await execute(f"{executable} -m pip install -r requirements.txt")
+                        need_restart = True
+                elif data["mode"] == "plugins":
+                    if not exists(f"{working_dir}/plugins/version.json"):
+                        return
+                    with open(f"{working_dir}/plugins/version.json", 'r', encoding="utf-8") as f:
+                        version_json = load(f)
                     try:
-                        msg = await context.client.send_message(user, f'**{lang("update_found_update_in_branch")} '
-                                                                      f'master.\n\n'
-                                                                      f'{lang("update_change_log")}:**\n`{changelog}`')
-                        update_id = msg.id
-                    except:
-                        pass
-            except Exception as e:
-                await log(f"Warning: module update failed to refresh git commit data.\n{e}")
+                        plugin_version = version_json[data["name"]]
+                    except KeyError:
+                        return
+                    if (float(data["version"]) - float(plugin_version)) > 0:
+                        logs.info(lang('update_plugins'))
+                        remove_plugin(data["name"])
+                        await download(data["name"])
+                        update_version(data["name"], data["version"])
+                        need_restart = True
+            if need_restart:
+                await bot.disconnect()
 
 
 @listener(is_plugin=False, outgoing=True, command=alias_command("update"),

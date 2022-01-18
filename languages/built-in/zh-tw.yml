@@ -500,6 +500,8 @@ update_failed: 更新失敗
 update_auto_upgrade_git_failed_ubuntu: 檢測到您的系統為Ubuntu/Debian，嘗試自動升級Git失敗，請手動。
 update_auto_upgrade_git_failed_cent: 檢測到您的系統為CentOS/RedHat Linux，嘗試自動升級Git失敗，請手動。
 update_auto_upgrade_git_hint: 檢測到您Git版本過低，已嘗試自動升級。若此錯誤持續發生，請手動。
+update_master: 收到已知的 CVE ，正在強制更新 PagerMaid-Modify 實例
+update_plugins: 收到已知的 CVE ，正在強制更新相關插件
 
 # sb
 sb_des: 在自己擁有管理員權限的共同群組中封禁一位用戶。

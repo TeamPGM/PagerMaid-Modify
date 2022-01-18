@@ -6,7 +6,6 @@ from concurrent.futures import CancelledError
 import sentry_sdk
 from sentry_sdk.integrations.redis import RedisIntegration
 
-from asyncio import CancelledError as CancelError
 from subprocess import run, PIPE
 from datetime import datetime
 from time import time
@@ -20,6 +19,7 @@ from redis import StrictRedis
 from logging import getLogger, INFO, DEBUG, ERROR, StreamHandler, basicConfig
 from distutils.util import strtobool
 from coloredlogs import ColoredFormatter
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 
@@ -32,6 +32,9 @@ from telethon.errors.rpcerrorlist import MessageNotModifiedError, MessageIdInval
 from telethon.errors.common import AlreadyInConversationError
 from requests.exceptions import ChunkedEncodingError
 from requests.exceptions import ConnectionError as ConnectedError
+from asyncio import CancelledError as CancelError
+from asyncio import TimeoutError as AsyncTimeoutError
+from aiohttp.client_exceptions import ServerDisconnectedError
 from sqlite3 import OperationalError
 from http.client import RemoteDisconnected
 from urllib.error import URLError
@@ -43,6 +46,11 @@ module_dir = __path__[0]
 working_dir = getcwd()
 config = None
 help_messages = {}
+scheduler = AsyncIOScheduler()
+if not scheduler.running:
+    scheduler.configure(timezone="Asia/ShangHai")
+    scheduler.start()
+version = 0.1
 logs = getLogger(__name__)
 logging_format = "%(levelname)s [%(asctime)s] [%(name)s] %(message)s"
 logging_handler = StreamHandler()
@@ -274,7 +282,7 @@ def before_send(event, hint):
                                              OSError, AuthKeyDuplicatedError, ResponseError, SlowModeWaitError,
                                              PeerFloodError, MessageEditTimeExpiredError, PeerIdInvalidError,
                                              AuthKeyUnregisteredError, UserBannedInChannelError, AuthKeyError,
-                                             CancelError)):
+                                             CancelError, AsyncTimeoutError, ServerDisconnectedError)):
         return
     elif exc_info and isinstance(exc_info[1], UserDeactivatedBanError):
         # The user has been deleted/deactivated
@@ -295,7 +303,7 @@ report_time = time()
 start_time = datetime.utcnow()
 git_hash = run("git rev-parse HEAD", stdout=PIPE, shell=True).stdout.decode()
 sentry_sdk.init(
-    "https://88b676b38216473db3eb3dd5e1da0133@o416616.ingest.sentry.io/5312335",
+    "https://58c6c9990d5c4d3784aec0aecb7509d3@o416616.ingest.sentry.io/5312335",
     traces_sample_rate=1.0,
     release=git_hash,
     before_send=before_send,

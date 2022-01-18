@@ -301,6 +301,7 @@ async def request(method: str,
         config_["proxy"] = f"http://{http_addr}:{http_port}"
     session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=timeout))
     resp = await session.request(**config_)
+    await session.close()
     # 返回请求
     try:
         resp_data = await resp.text()
@@ -308,7 +309,6 @@ async def request(method: str,
         resp_data = await resp.read()
     content = await resp.content.read()
     status_code = resp.status
-    await session.close()
     return AiohttpResp(resp_data, content, status_code)
 
 
