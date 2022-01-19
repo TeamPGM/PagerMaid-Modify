@@ -13,11 +13,12 @@ from telethon import version as telethon_version
 from telethon.tl.types import User, Chat, Channel
 from sys import platform
 from re import sub, findall
+from requests import get
 from pathlib import Path
 from pagermaid import log, config, redis_status, start_time, silent
 from pagermaid.utils import execute, upload_attachment
 from pagermaid.listener import listener
-from pagermaid.utils import lang, alias_command, get
+from pagermaid.utils import lang, alias_command
 
 DCs = {
     1: "149.154.175.50",
@@ -196,7 +197,7 @@ async def speedtest(context):
                 f"Timestamp: `{result['timestamp']}`"
             )
             # 开始处理图片
-            data = (await get(f"{result['result']['url']}.png")).text
+            data = get(f"{result['result']['url']}.png").content
             with open('speedtest.png', mode='wb') as f:
                 f.write(data)
             try:
@@ -273,7 +274,7 @@ async def speedtest(context):
         f"Timestamp: `{result['timestamp']}`"
     )
     # 开始处理图片
-    data = (await get(result['share'])).text
+    data = get(result['share']).content
     with open('speedtest.png', mode='wb') as f:
         f.write(data)
     try:
