@@ -1,11 +1,14 @@
 """ PagerMaid features that uses external HTTP APIs other than Telegram. """
 
-from pygoogletranslation import Translator
+import translators as ts
 from os import remove
 from magic_google import MagicGoogle
 from gtts import gTTS
 from gtts.tts import gTTSError
 from re import compile as regex_compile
+
+from translators.apis import TranslatorError
+
 from pagermaid import log, silent
 from pagermaid.listener import listener, config
 from pagermaid.utils import clear_emojis, attach_log, fetch_youtube_audio, lang, alias_command
@@ -16,7 +19,6 @@ from pagermaid.utils import clear_emojis, attach_log, fetch_youtube_audio, lang,
           parameters=lang('translate_parameters'))
 async def translate(context):
     """ PagerMaid universal translator. """
-    translator = Translator()
     reply = await context.get_reply_message()
     message = context.arguments
     ap_lang = config['application_language']
@@ -27,26 +29,20 @@ async def translate(context):
     else:
         await context.edit(lang('arg_error'))
         return
-
+    source_text = clear_emojis(message)
     try:
         if not silent:
             await context.edit(lang('translate_processing'))
         try:
-            result = translator.translate(clear_emojis(message), dest=ap_lang)
-        except:
-            from translate import Translator as trans
-            result = trans(to_lang=ap_lang.replace('zh-cn', 'zh')).translate(clear_emojis(message))
+            result = ts.google(source_text, to_language=ap_lang.replace("zh-cn", "zh-CN"))
+        except TranslatorError:
+            return await context.edit(lang('translate_ValueError'))
     except ValueError:
-        await context.edit(lang('translate_ValueError'))
-        return
-    try:
-        source_lang = result.src
-        source_text = result.origin
-        trans_lang = result.dest
-    except AttributeError:
-        await context.edit(lang('google_connection_error'))
-        return
-    result = f"**{lang('translate_hits')}**\n{lang('translate_original_lang')}: {source_lang}\n{source_text} -> {result.text}"
+        return await context.edit(lang('translate_ValueError'))
+    if not result:
+        return await context.edit(lang('google_connection_error'))
+    result = f"**{lang('translate_hits')}**\n" \
+             f"{source_text} -> {result}"
 
     if len(result) > 4096:
         await context.edit(lang('translate_tg_limit_uploading_file'))
@@ -54,9 +50,10 @@ async def translate(context):
         return
     await context.edit(result)
     if len(result) <= 4096:
-        await log(f"{lang('translate_get')}: `{source_text}` \n{lang('translate_from')} {source_lang} {lang('translate_to')} {trans_lang}")
+        await log(f"{lang('translate_get')}: `{source_text}` \n"
+                  f"{lang('translate_to')} {ap_lang}")
     else:
-        await log(f"{lang('translate_get')}{translate('translate_from')} {source_lang} {lang('translate_to')} {trans_lang}.")
+        await log(f"{lang('translate_get')} {lang('translate_to')} {ap_lang}.")
 
 
 @listener(is_plugin=False, outgoing=True, command=alias_command('tts'),
