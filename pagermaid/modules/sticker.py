@@ -12,7 +12,7 @@ from PIL import Image, ImageOps
 from math import floor
 from pagermaid import bot, redis, redis_status, silent
 from pagermaid.listener import listener
-from pagermaid.utils import lang, alias_command, get
+from pagermaid.utils import lang, alias_command, client
 from pagermaid import log
 
 
@@ -337,12 +337,12 @@ async def single_sticker(animated, context, custom_emoji, emoji, message, pic_ro
                 command = '/newanimated'
 
         try:
-            response = await get(f'https://t.me/addstickers/{pack_name}')
+            response = await client.get(f'https://t.me/addstickers/{pack_name}')
         except UnicodeEncodeError:
             pack_name = 's' + hex(context.sender_id)[2:]
             if animated:
                 pack_name = 's' + hex(context.sender_id)[2:] + '_animated'
-            response = await get(f'https://t.me/addstickers/{pack_name}')
+            response = await client.get(f'https://t.me/addstickers/{pack_name}')
         if not response.status_code == 200:
             try:
                 await context.edit(lang('sticker_telegram_server_error'))
@@ -608,7 +608,7 @@ async def sticker_search(context):
         await context.edit(lang('google_processing'))
     query = context.parameter[0]
     try:
-        html = (await get("https://combot.org/telegram/stickers?q=" + query)).text
+        html = (await client.get("https://combot.org/telegram/stickers?q=" + query)).text
     except:
         return await context.edit(lang('sticker_telegram_server_error'))
     xml = BeautifulSoup(html, "lxml")

@@ -8,7 +8,7 @@ from shutil import copyfile, move
 from glob import glob
 from pagermaid import log, working_dir, config
 from pagermaid.listener import listener
-from pagermaid.utils import upload_attachment, lang, alias_command, get
+from pagermaid.utils import upload_attachment, lang, alias_command, client
 from pagermaid.modules import plugin_list as active_plugins, __list_plugins
 
 
@@ -31,7 +31,7 @@ def remove_plugin(name):
 
 
 async def download(name):
-    html = await get(f'{git_source}{name}.py')
+    html = await client.get(f'{git_source}{name}.py')
     with open(f'plugins/{name}.py', mode='wb') as f:
         f.write(html.text.encode('utf-8'))
     return f'plugins/{name}.py'
@@ -94,7 +94,7 @@ async def plugin(context):
             success_list = []
             failed_list = []
             noneed_list = []
-            plugin_list = await get(f"{git_source}list.json")
+            plugin_list = await client.get(f"{git_source}list.json")
             plugin_list = plugin_list.json()['list']
             for i in process_list:
                 if exists(f"{plugin_directory}version.json"):
@@ -260,7 +260,7 @@ async def plugin(context):
             return
         with open(f"{plugin_directory}version.json", 'r', encoding="utf-8") as f:
             version_json = json.load(f)
-        plugin_list = await get(f"{git_source}list.json")
+        plugin_list = await client.get(f"{git_source}list.json")
         plugin_online = plugin_list.json()['list']
         for key, value in version_json.items():
             if value == "0.0":
@@ -304,7 +304,7 @@ async def plugin(context):
         elif len(context.parameter) == 2:
             search_result = []
             plugin_name = context.parameter[1]
-            plugin_list = await get(f"{git_source}list.json")
+            plugin_list = await client.get(f"{git_source}list.json")
             plugin_online = plugin_list.json()['list']
             for i in plugin_online:
                 if search(plugin_name, i['name'], I):
@@ -321,7 +321,7 @@ async def plugin(context):
         elif len(context.parameter) == 2:
             search_result = ''
             plugin_name = context.parameter[1]
-            plugin_list = await get(f"{git_source}list.json")
+            plugin_list = await client.get(f"{git_source}list.json")
             plugin_online = plugin_list.json()['list']
             for i in plugin_online:
                 if plugin_name == i['name']:
@@ -350,7 +350,7 @@ async def plugin(context):
         list_plugin = []
         with open(f"{plugin_directory}version.json", 'r', encoding="utf-8") as f:
             version_json = json.load(f)
-        plugin_list = await get(f"{git_source}list.json")
+        plugin_list = await client.get(f"{git_source}list.json")
         plugin_online = plugin_list.json()['list']
         for key, value in version_json.items():
             if value == "0.0":

@@ -16,9 +16,9 @@ from re import sub, findall
 from requests import get
 from pathlib import Path
 from pagermaid import log, config, redis_status, start_time, silent
-from pagermaid.utils import execute, upload_attachment
+from pagermaid.utils import execute, upload_attachment, lang, alias_command
 from pagermaid.listener import listener
-from pagermaid.utils import lang, alias_command
+
 
 DCs = {
     1: "149.154.175.50",

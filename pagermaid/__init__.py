@@ -34,7 +34,6 @@ from requests.exceptions import ChunkedEncodingError
 from requests.exceptions import ConnectionError as ConnectedError
 from asyncio import CancelledError as CancelError
 from asyncio import TimeoutError as AsyncTimeoutError
-from aiohttp.client_exceptions import ServerDisconnectedError
 from sqlite3 import OperationalError
 from http.client import RemoteDisconnected
 from urllib.error import URLError
@@ -282,7 +281,7 @@ def before_send(event, hint):
                                              OSError, AuthKeyDuplicatedError, ResponseError, SlowModeWaitError,
                                              PeerFloodError, MessageEditTimeExpiredError, PeerIdInvalidError,
                                              AuthKeyUnregisteredError, UserBannedInChannelError, AuthKeyError,
-                                             CancelError, AsyncTimeoutError, ServerDisconnectedError)):
+                                             CancelError, AsyncTimeoutError)):
         return
     elif exc_info and isinstance(exc_info[1], UserDeactivatedBanError):
         # The user has been deleted/deactivated

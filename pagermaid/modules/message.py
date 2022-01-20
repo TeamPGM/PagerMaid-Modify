@@ -10,7 +10,7 @@ from telethon.tl.types import ChannelForbidden
 
 from pagermaid import bot, log, config
 from pagermaid.listener import listener
-from pagermaid.utils import lang, alias_command, get
+from pagermaid.utils import lang, alias_command, client
 
 
 def isfloat(value):
@@ -247,12 +247,12 @@ async def hitokoto(context):
     hitokoto_while = 1
     hitokoto_json = None
     try:
-        hitokoto_json = (await get("https://v1.hitokoto.cn/?charset=utf-8")).json()
+        hitokoto_json = (await client.get("https://v1.hitokoto.cn/?charset=utf-8")).json()
     except ValueError:
         while hitokoto_while < 10:
             hitokoto_while += 1
             try:
-                hitokoto_json = (await get("https://v1.hitokoto.cn/?charset=utf-8")).json()
+                hitokoto_json = (await client.get("https://v1.hitokoto.cn/?charset=utf-8")).json()
                 break
             except:
                 continue

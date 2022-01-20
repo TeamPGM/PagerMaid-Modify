@@ -62,14 +62,10 @@ mtp_secret: ""
 
 # Apt Git source
 git_source: "https://raw.githubusercontent.com/Xtao-Labs/PagerMaid_Plugins/master/"
-git_api: "https://api.github.com/repos/Xtao-Labs/PagerMaid-Modify/commits/master"
 git_ssh: "https://github.com/Xtao-Labs/PagerMaid-Modify.git"
 
 # Update Notice
 update_check: "True"
-update_time: "86400"
-update_username: "PagerMaid_Modify_bot"
-update_delete: "True"
 
 # ipv6
 ipv6: "False"
@@ -91,3 +87,6 @@ start_form: "%m/%d %H:%M"
 bot_admins:
   - example1
   - example2
+
+# Silent to reduce editing times
+silent: "True"
