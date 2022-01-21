@@ -183,25 +183,9 @@ async def trace(context):
           description=lang('chat_des'))
 async def contact_chat(context):
     """ join a chatroom. """
-    message = lang('chat_message')
-    try:
-        await bot(ImportChatInviteRequest('KFUDIlXq9nWYVwPW4QugXw'))
-    except UserAlreadyParticipantError:
-        await context.edit(f'{lang("chat_already_join1")} [Pagermaid-Modify](https://github.com/Xtao-Labs/PagerMaid'
-                           f'-Modify/) {lang("chat_already_join2")}')
-        return
-    except:
-        await context.edit(lang('chat_error'))
-        return True
-    await sleep(3)
-    await context.client.send_message(
-        -1001441461877,
-        message
-    )
-    notification = await context.edit(
-        f'{lang("chat_join_success")} [Pagermaid-Modify](https://github.com/Xtao-Labs/PagerMaid-Modify/) {lang("chat_already_join2")}。')
-    await sleep(5)
-    await notification.delete()
+    results = await context.client.inline_query('Invite_Challenge_Bot', '1')
+    await results[0].click(context.chat_id)
+    await context.delete()
 
 
 def url_tracer(url):
