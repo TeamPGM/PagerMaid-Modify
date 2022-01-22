@@ -27,6 +27,7 @@ redis:
   host: "localhost"
   port: "6379"
   db: "14"
+  password: ""
 
 # Locale settings
 application_language: "zh-cn"

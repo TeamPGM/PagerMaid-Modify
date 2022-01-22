@@ -28,7 +28,8 @@ from telethon.errors import AuthKeyError
 from telethon.errors.rpcerrorlist import MessageNotModifiedError, MessageIdInvalidError, ChannelPrivateError, \
     ChatSendMediaForbiddenError, YouBlockedUserError, FloodWaitError, ChatWriteForbiddenError, \
     AuthKeyDuplicatedError, ChatSendStickersForbiddenError, SlowModeWaitError, MessageEditTimeExpiredError, \
-    PeerIdInvalidError, AuthKeyUnregisteredError, UserBannedInChannelError, UserDeactivatedBanError, PeerFloodError
+    PeerIdInvalidError, AuthKeyUnregisteredError, UserBannedInChannelError, UserDeactivatedBanError, PeerFloodError, \
+    SessionRevokedError
 from telethon.errors.common import AlreadyInConversationError
 from requests.exceptions import ChunkedEncodingError
 from requests.exceptions import ConnectionError as ConnectedError
@@ -173,6 +174,7 @@ mtp_secret = config.get('mtp_secret', '').strip()
 redis_host = config.get('redis').get('host', 'localhost')
 redis_port = config.get('redis').get('port', 6379)
 redis_db = config.get('redis').get('db', 14)
+redis_password = config.get('redis').get('password', '')
 if strtobool(config.get('ipv6', 'False')):
     use_ipv6 = True
 else:
@@ -234,7 +236,7 @@ else:
     bot = TelegramClient(session_string, api_key, api_hash, auto_reconnect=True, use_ipv6=use_ipv6)
 user_id = 0
 user_bot = False
-redis = StrictRedis(host=redis_host, port=redis_port, db=redis_db)
+redis = StrictRedis(host=redis_host, port=redis_port, db=redis_db, password=redis_password)
 
 
 async def save_id():
@@ -283,8 +285,8 @@ def before_send(event, hint):
                                              AuthKeyUnregisteredError, UserBannedInChannelError, AuthKeyError,
                                              CancelError, AsyncTimeoutError)):
         return
-    elif exc_info and isinstance(exc_info[1], UserDeactivatedBanError):
-        # The user has been deleted/deactivated
+    elif exc_info and isinstance(exc_info[1], (UserDeactivatedBanError, SessionRevokedError)):
+        # The user has been deleted/deactivated or session revoked
         try:
             remove('pagermaid.session')
         except Exception as exc:

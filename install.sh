@@ -9,6 +9,7 @@ a=$(curl --noproxy '*' -sSL https://api.myip.com/)
 b="China"
 if [[ $a == *$b* ]]
 then
+  echo "错误：本脚本不支持境内服务器使用。" 1>&2
 	exit 1
 fi
 
