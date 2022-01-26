@@ -86,7 +86,7 @@ async def plugin(context):
             result = await context.edit(
                 f"{lang('apt_plugin')} {path.basename(file_path)[:-3]} {lang('apt_installed')},{lang('apt_reboot')}")
             if redis_status():
-                redis.set("restart_edit", f"{result.id}|{result.peer_id.channel_id}")
+                redis.set("restart_edit", f"{result.id}|{result.chat_id}")
             await log(f"{lang('apt_install_success')} {path.basename(file_path)[:-3]}.")
             await context.client.disconnect()
         elif len(context.parameter) >= 2:
@@ -141,7 +141,7 @@ async def plugin(context):
             result = await context.edit(message)
             if restart:
                 if redis_status():
-                    redis.set("restart_edit", f"{result.id}|{result.peer_id.channel_id}")
+                    redis.set("restart_edit", f"{result.id}|{result.chat_id}")
                 await context.client.disconnect()
         else:
             await context.edit(lang('arg_error'))
@@ -157,7 +157,7 @@ async def plugin(context):
                 result = await context.edit(
                     f"{lang('apt_remove_success')} {context.parameter[1]}, {lang('apt_reboot')} ")
                 if redis_status():
-                    redis.set("restart_edit", f"{result.id}|{result.peer_id.channel_id}")
+                    redis.set("restart_edit", f"{result.id}|{result.chat_id}")
                 await log(f"{lang('apt_remove')} {context.parameter[1]}.")
                 await context.client.disconnect()
             elif exists(f"{plugin_directory}{context.parameter[1]}.py.disabled"):
@@ -219,7 +219,7 @@ async def plugin(context):
                 result = await context.edit(
                     f"{lang('apt_plugin')} {context.parameter[1]} {lang('apt_enable')},{lang('apt_reboot')}")
                 if redis_status():
-                    redis.set("restart_edit", f"{result.id}|{result.peer_id.channel_id}")
+                    redis.set("restart_edit", f"{result.id}|{result.chat_id}")
                 await log(f"{lang('apt_enable')} {context.parameter[1]}.")
                 await context.client.disconnect()
             else:
@@ -234,7 +234,7 @@ async def plugin(context):
                 result = await context.edit(
                     f"{lang('apt_plugin')} {context.parameter[1]} {lang('apt_disable')},{lang('apt_reboot')}")
                 if redis_status():
-                    redis.set("restart_edit", f"{result.id}|{result.peer_id.channel_id}")
+                    redis.set("restart_edit", f"{result.id}|{result.chat_id}")
                 await log(f"{lang('apt_disable')} {context.parameter[1]}.")
                 await context.client.disconnect()
             else:
@@ -309,7 +309,7 @@ async def plugin(context):
                         json.dump(version_json, f)
                 result = await context.edit(lang('apt_reading_list') + need_update)
                 if redis_status():
-                    redis.set("restart_edit", f"{result.id}|{result.peer_id.channel_id}")
+                    redis.set("restart_edit", f"{result.id}|{result.chat_id}")
                 await context.client.disconnect()
     elif context.parameter[0] == "search":
         if len(context.parameter) == 1:

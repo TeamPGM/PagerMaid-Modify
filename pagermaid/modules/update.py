@@ -203,14 +203,14 @@ async def update(context):
         await log(f"PagerMaid-Modify {lang('update_is_updated')}")
         result = await context.edit(lang('update_success') + lang('apt_reboot'))
         if redis_status():
-            redis.set("restart_edit", f"{result.id}|{result.peer_id.channel_id}")
+            redis.set("restart_edit", f"{result.id}|{result.chat_id}")
         await context.client.disconnect()
     except GitCommandError:
         upstream_remote.git.reset('--hard')
         await log(lang('update_failed'))
         result = await context.edit(lang('update_failed') + lang('apt_reboot'))
         if redis_status():
-            redis.set("restart_edit", f"{result.id}|{result.peer_id.channel_id}")
+            redis.set("restart_edit", f"{result.id}|{result.chat_id}")
         await context.client.disconnect()
 
 

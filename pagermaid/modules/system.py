@@ -135,7 +135,7 @@ async def restart(context):
         try:
             result = await context.edit(lang('restart_processing'))
             if redis_status():
-                redis.set("restart_edit", f"{result.id}|{result.peer_id.channel_id}")
+                redis.set("restart_edit", f"{result.id}|{result.chat_id}")
 
         except:  # noqa
             pass

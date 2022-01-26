@@ -85,7 +85,7 @@ async def lang_change(context):
             f.write(file)
         result = await context.edit(f"{lang('lang_change_to')} {to_lang}, {lang('lang_reboot')}")
         if redis_status():
-            redis.set("restart_edit", f"{result.id}|{result.peer_id.channel_id}")
+            redis.set("restart_edit", f"{result.id}|{result.chat_id}")
         await context.client.disconnect()
     else:
         await context.edit(
@@ -120,7 +120,7 @@ async def alias_commands(context):
                 json_dump(alias_dict, f)
             result = await context.edit(lang('alias_success'))
             if redis_status():
-                redis.set("restart_edit", f"{result.id}|{result.peer_id.channel_id}")
+                redis.set("restart_edit", f"{result.id}|{result.chat_id}")
             await context.client.disconnect()
         except KeyError:
             await context.edit(lang('alias_no_exist'))
@@ -136,5 +136,5 @@ async def alias_commands(context):
             json_dump(alias_dict, f)
         result = await context.edit(lang('alias_success'))
         if redis_status():
-            redis.set("restart_edit", f"{result.id}|{result.peer_id.channel_id}")
+            redis.set("restart_edit", f"{result.id}|{result.chat_id}")
         await context.client.disconnect()
