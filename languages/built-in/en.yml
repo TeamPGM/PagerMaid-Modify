@@ -167,6 +167,7 @@ translate_des: Translate the target message into the specified language through 
 translate_parameters: <text>
 translate_processing: The translation is being generated...
 translate_ValueError: Something went wrong ~ The target language could not be found, please correct the error in the configuration file.
+translate_ImportError: Something went wrong ~ The translators module could not be found.
 translate_hits: text translation
 translate_original_lang: source language
 translate_tg_limit_uploading_file: The output exceeds the TG limit, and it is trying to upload a file.
@@ -461,6 +462,7 @@ This command is only for developers. If you know what you are doing, please manu
 # restart
 restart_des: Restart PagerMaid-Modify
 restart_processing: Try to restart PagerMaid-Modify.
+restart_complete: PagerMaid-Modify has been restarted.
 restart_log: PagerMaid-Modify restarts.
 # trace
 trace_des: Trace the redirection of the URL.

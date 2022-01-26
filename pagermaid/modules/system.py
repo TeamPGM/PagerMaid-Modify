@@ -132,7 +132,13 @@ async def sh(context):
 async def restart(context):
     """ To re-execute PagerMaid. """
     if not context.text[0].isalpha():
-        await context.edit(lang('restart_processing'))
+        try:
+            result = await context.edit(lang('restart_processing'))
+            if redis_status():
+                redis.set("restart_edit", f"{result.id}|{result.peer_id.channel_id}")
+
+        except:  # noqa
+            pass
         await log(lang('restart_log'))
         await context.client.disconnect()
 

@@ -176,6 +176,7 @@ translate_des: 通过 Google 翻译将目标消息翻译成指定的语言。（
 translate_parameters: <文本>
 translate_processing: 正在生成翻译中 . . .
 translate_ValueError: 出错了呜呜呜 ~ 找不到目标语言，请更正配置文件中的错误。
+translate_ImportError: 出错了呜呜呜 ~ 请先安装 translators 模块。
 translate_hits: 文本翻译
 translate_original_lang: 源语言
 translate_tg_limit_uploading_file: 输出超出 TG 限制，正在尝试上传文件。
@@ -475,7 +476,8 @@ eval_need_dev: '**请注意：此命令可以直接操作您的账户**
 此命令仅适用于开发者，如果您知道您在做什么的话，请手动在 Redis 数据库配置 dev 项为任意值或者在 data 文件夹下创建 dev 文件。'
 ## restart
 restart_des: 使 PagerMaid-Modify 重新启动
-restart_processing: 尝试重新启动 PagerMaid-Modify.
+restart_processing: 尝试重启 PagerMaid-Modify...
+restart_complete: PagerMaid-Modify 重启完成。
 restart_log: PagerMaid-Modify 重新启动。
 ## trace
 trace_des: 跟踪 URL 的重定向。

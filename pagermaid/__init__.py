@@ -78,6 +78,7 @@ except Exception as e:
     print("Reading language YAML file failed")
     print(e)
     exit(1)
+
 # Customization
 try:
     with open(f"languages/custom.yml", "r", encoding="utf-8") as f:
@@ -266,10 +267,6 @@ async def save_id():
     logs.info(f"{lang('save_id')} {me.first_name}({user_id})")
 
 
-with bot:
-    bot.loop.run_until_complete(save_id())
-
-
 def before_send(event, hint):
     global report_time
     exc_info = hint.get("exc_info")
@@ -299,6 +296,8 @@ def before_send(event, hint):
         report_time = time()
         return event
 
+with bot:
+    bot.loop.run_until_complete(save_id())
 
 report_time = time()
 start_time = datetime.utcnow()

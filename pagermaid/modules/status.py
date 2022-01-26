@@ -1,24 +1,25 @@
 """ PagerMaid module that contains utilities related to system status. """
 
-from json import loads
-from PIL import Image
-from os import remove, popen
 from datetime import datetime
+from json import loads
+from os import remove, popen
+from pathlib import Path
+from platform import python_version, uname
+from re import sub, findall
+from sys import platform
+
+from PIL import Image
+from requests import get
 from speedtest import distance, Speedtest, ShareResultsConnectFailure, ShareResultsSubmitFailure, NoMatchedServers, \
     SpeedtestBestServerFailure, SpeedtestHTTPError
 from telethon import functions
-from platform import python_version, uname
-from wordcloud import WordCloud
 from telethon import version as telethon_version
 from telethon.tl.types import User, Chat, Channel
-from sys import platform
-from re import sub, findall
-from requests import get
-from pathlib import Path
-from pagermaid import log, config, redis_status, start_time, silent
-from pagermaid.utils import execute, upload_attachment, lang, alias_command
-from pagermaid.listener import listener
+from wordcloud import WordCloud
 
+from pagermaid import log, config, redis_status, start_time, silent, bot
+from pagermaid.listener import listener
+from pagermaid.utils import execute, upload_attachment, lang, alias_command
 
 DCs = {
     1: "149.154.175.50",
@@ -324,15 +325,18 @@ async def pingdc(context):
     )
 
 
-@listener(is_plugin=False, outgoing=True, command=alias_command("ping"),
-          description=lang('ping_des'))
+@listener(is_plugin=False, outgoing=True, command=alias_command("ping"), description=lang('ping_des'))
 async def ping(context):
     """ Calculates latency between PagerMaid and Telegram. """
     start = datetime.now()
+    await bot(functions.PingRequest(ping_id=0))
+    end = datetime.now()
+    ping_duration = (end - start).microseconds / 1000
+    start = datetime.now()
     await context.edit("Pong!")
     end = datetime.now()
-    duration = (end - start).microseconds / 1000
-    await context.edit(f"Pong!|{duration}")
+    msg_duration = (end - start).microseconds / 1000
+    await context.edit(f"Pong!| PING: {ping_duration} | MSG: {msg_duration}")
 
 
 @listener(is_plugin=False, outgoing=True, command=alias_command("topcloud"),

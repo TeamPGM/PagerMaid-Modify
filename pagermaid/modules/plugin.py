@@ -6,7 +6,7 @@ from os import remove, rename, chdir, path
 from os.path import exists
 from shutil import copyfile, move
 from glob import glob
-from pagermaid import log, working_dir, config
+from pagermaid import log, working_dir, config, redis_status, redis
 from pagermaid.listener import listener
 from pagermaid.utils import upload_attachment, lang, alias_command, client
 from pagermaid.modules import plugin_list as active_plugins, __list_plugins
@@ -83,8 +83,10 @@ async def plugin(context):
                     pass
                 return
             move_plugin(file_path)
-            await context.edit(
+            result = await context.edit(
                 f"{lang('apt_plugin')} {path.basename(file_path)[:-3]} {lang('apt_installed')},{lang('apt_reboot')}")
+            if redis_status():
+                redis.set("restart_edit", f"{result.id}|{result.peer_id.channel_id}")
             await log(f"{lang('apt_install_success')} {path.basename(file_path)[:-3]}.")
             await context.client.disconnect()
         elif len(context.parameter) >= 2:
@@ -136,8 +138,10 @@ async def plugin(context):
             restart = len(success_list) > 0
             if restart:
                 message += lang('apt_reboot')
-            await context.edit(message)
+            result = await context.edit(message)
             if restart:
+                if redis_status():
+                    redis.set("restart_edit", f"{result.id}|{result.peer_id.channel_id}")
                 await context.client.disconnect()
         else:
             await context.edit(lang('arg_error'))
@@ -150,7 +154,10 @@ async def plugin(context):
                 version_json[context.parameter[1]] = '0.0'
                 with open(f"{plugin_directory}version.json", 'w') as f:
                     json.dump(version_json, f)
-                await context.edit(f"{lang('apt_remove_success')} {context.parameter[1]}, {lang('apt_reboot')} ")
+                result = await context.edit(
+                    f"{lang('apt_remove_success')} {context.parameter[1]}, {lang('apt_reboot')} ")
+                if redis_status():
+                    redis.set("restart_edit", f"{result.id}|{result.peer_id.channel_id}")
                 await log(f"{lang('apt_remove')} {context.parameter[1]}.")
                 await context.client.disconnect()
             elif exists(f"{plugin_directory}{context.parameter[1]}.py.disabled"):
@@ -209,8 +216,10 @@ async def plugin(context):
             if exists(f"{plugin_directory}{context.parameter[1]}.py.disabled"):
                 rename(f"{plugin_directory}{context.parameter[1]}.py.disabled",
                        f"{plugin_directory}{context.parameter[1]}.py")
-                await context.edit(
+                result = await context.edit(
                     f"{lang('apt_plugin')} {context.parameter[1]} {lang('apt_enable')},{lang('apt_reboot')}")
+                if redis_status():
+                    redis.set("restart_edit", f"{result.id}|{result.peer_id.channel_id}")
                 await log(f"{lang('apt_enable')} {context.parameter[1]}.")
                 await context.client.disconnect()
             else:
@@ -222,8 +231,10 @@ async def plugin(context):
             if exists(f"{plugin_directory}{context.parameter[1]}.py") is True:
                 rename(f"{plugin_directory}{context.parameter[1]}.py",
                        f"{plugin_directory}{context.parameter[1]}.py.disabled")
-                await context.edit(
+                result = await context.edit(
                     f"{lang('apt_plugin')} {context.parameter[1]} {lang('apt_disable')},{lang('apt_reboot')}")
+                if redis_status():
+                    redis.set("restart_edit", f"{result.id}|{result.peer_id.channel_id}")
                 await log(f"{lang('apt_disable')} {context.parameter[1]}.")
                 await context.client.disconnect()
             else:
@@ -296,7 +307,9 @@ async def plugin(context):
                             version_json[i] = m['version']
                     with open(f"{plugin_directory}version.json", 'w') as f:
                         json.dump(version_json, f)
-                await context.edit(lang('apt_reading_list') + need_update)
+                result = await context.edit(lang('apt_reading_list') + need_update)
+                if redis_status():
+                    redis.set("restart_edit", f"{result.id}|{result.peer_id.channel_id}")
                 await context.client.disconnect()
     elif context.parameter[0] == "search":
         if len(context.parameter) == 1:

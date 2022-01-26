@@ -2,7 +2,7 @@
 
 from os import listdir
 from json import dump as json_dump
-from pagermaid import help_messages, alias_dict
+from pagermaid import help_messages, alias_dict, redis_status, redis
 from pagermaid.utils import lang, alias_command
 from pagermaid.listener import listener, config
 
@@ -83,7 +83,9 @@ async def lang_change(context):
         file = file.replace(f'application_language: "{from_lang}"', f'application_language: "{to_lang}"')
         with open('config.yml', 'w') as f:
             f.write(file)
-        await context.edit(f"{lang('lang_change_to')} {to_lang}, {lang('lang_reboot')}")
+        result = await context.edit(f"{lang('lang_change_to')} {to_lang}, {lang('lang_reboot')}")
+        if redis_status():
+            redis.set("restart_edit", f"{result.id}|{result.peer_id.channel_id}")
         await context.client.disconnect()
     else:
         await context.edit(
@@ -116,7 +118,9 @@ async def alias_commands(context):
             del alias_dict[source_command]
             with open("data/alias.json", 'w') as f:
                 json_dump(alias_dict, f)
-            await context.edit(lang('alias_success'))
+            result = await context.edit(lang('alias_success'))
+            if redis_status():
+                redis.set("restart_edit", f"{result.id}|{result.peer_id.channel_id}")
             await context.client.disconnect()
         except KeyError:
             await context.edit(lang('alias_no_exist'))
@@ -130,5 +134,7 @@ async def alias_commands(context):
         alias_dict[source_command] = to_command
         with open("data/alias.json", 'w') as f:
             json_dump(alias_dict, f)
-        await context.edit(lang('alias_success'))
+        result = await context.edit(lang('alias_success'))
+        if redis_status():
+            redis.set("restart_edit", f"{result.id}|{result.peer_id.channel_id}")
         await context.client.disconnect()

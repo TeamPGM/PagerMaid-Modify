@@ -14,7 +14,7 @@ from git.exc import GitCommandError, InvalidGitRepositoryError, NoSuchPathError
 
 from telethon.tl.functions.channels import GetFullChannelRequest
 
-from pagermaid import log, config, silent, scheduler, bot, version, working_dir, logs
+from pagermaid import log, config, silent, scheduler, bot, version, working_dir, logs, redis_status, redis
 from pagermaid.listener import listener
 from pagermaid.modules.plugin import remove_plugin, update_version, download
 from pagermaid.utils import execute, lang, alias_command
@@ -29,17 +29,19 @@ except KeyError:
 
 @scheduler.scheduled_job("cron", minute="*/30", id="0")
 async def run_every_30_minute():
-    if not need_update_check:
+    try:
+        await bot(GetFullChannelRequest("PGMUPD1"))
+    except:  # noqa
         return
-    result = await bot(GetFullChannelRequest("PGMUPD1"))  # noqa
+
+    need_restart = False
     async for msg in bot.iter_messages("PGMUPD1"):
         if msg.text:
             try:
-                data_ = loads(msg.text.strip("`"))
+                security_data = loads(msg.text.strip("`"))
             except JSONDecodeError:
                 continue
-            need_restart = False
-            for data in data_["data"]:
+            for data in security_data["data"]:
                 if data["mode"] == "master":
                     if version < data["version"]:
                         logs.info(lang('update_master'))
@@ -48,23 +50,31 @@ async def run_every_30_minute():
                         await execute(f"{executable} -m pip install -r requirements.txt --upgrade")
                         await execute(f"{executable} -m pip install -r requirements.txt")
                         need_restart = True
+                        break
                 elif data["mode"] == "plugins":
                     if not exists(f"{working_dir}/plugins/version.json"):
-                        return
+                        continue
                     with open(f"{working_dir}/plugins/version.json", 'r', encoding="utf-8") as f:
-                        version_json = load(f)
+                        try:
+                            version_json = load(f)
+                        except JSONDecodeError:
+                            continue
                     try:
-                        plugin_version = version_json[data["name"]]
-                    except KeyError:
-                        return
+                        plugin_version = version_json.get(data["name"])
+                        if plugin_version is None:
+                            continue
+                    except AttributeError:
+                        continue
+
                     if (float(data["version"]) - float(plugin_version)) > 0:
                         logs.info(lang('update_plugins'))
                         remove_plugin(data["name"])
                         await download(data["name"])
                         update_version(data["name"], data["version"])
                         need_restart = True
-            if need_restart:
-                await bot.disconnect()
+
+    if need_restart:
+        await bot.disconnect()
 
 
 @listener(is_plugin=False, outgoing=True, command=alias_command("update"),
@@ -191,12 +201,16 @@ async def update(context):
         await execute(f"{executable} -m pip install -r requirements.txt --upgrade")
         await execute(f"{executable} -m pip install -r requirements.txt")
         await log(f"PagerMaid-Modify {lang('update_is_updated')}")
-        await context.edit(lang('update_success') + lang('apt_reboot'))
+        result = await context.edit(lang('update_success') + lang('apt_reboot'))
+        if redis_status():
+            redis.set("restart_edit", f"{result.id}|{result.peer_id.channel_id}")
         await context.client.disconnect()
     except GitCommandError:
         upstream_remote.git.reset('--hard')
         await log(lang('update_failed'))
-        await context.edit(lang('update_failed') + lang('apt_reboot'))
+        result = await context.edit(lang('update_failed') + lang('apt_reboot'))
+        if redis_status():
+            redis.set("restart_edit", f"{result.id}|{result.peer_id.channel_id}")
         await context.client.disconnect()
 
 
