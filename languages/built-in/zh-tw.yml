@@ -462,7 +462,7 @@ eval_need_dev: '**請注意：此命令可以直接操作您的賬戶**
 # restart
 restart_des: 重新啟動
 restart_processing: 正在嘗試重新啟動
-restart_complete: 重新啟動
+restart_complete: 重新啟動完成
 restart_log: 重新啟動 PagerMaid-Modify
 # trace
 trace_des: 跟蹤URL的重新導向。

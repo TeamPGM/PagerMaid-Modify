@@ -59,7 +59,7 @@ if redis_status():
             restart_args = restart_args.decode("utf-8")
             restart_msg, restart_chat = restart_args.split("|")
             await bot.edit_message(
-                restart_chat, restart_msg,
+                int(restart_chat), int(restart_msg),
                 lang('restart_complete')
             )
 
