@@ -1,4 +1,4 @@
-from pagermaid import log, redis, redis_status
+from pagermaid import log, redis, redis_status, user_id as self_user_id
 from pagermaid.listener import listener
 from pagermaid.utils import lang, alias_command
 from struct import error as StructError
@@ -34,7 +34,8 @@ def mention_group(chat):
     return text
 
 
-@listener(is_plugin=False, outgoing=True, command=alias_command("sb"),
+@listener(is_plugin=False, outgoing=True,
+          command=alias_command("sb"),
           description=lang('sb_des'),
           parameters="<reply|id|username> <do_not_del_all>")
 async def span_ban(context):
@@ -109,8 +110,6 @@ async def span_ban(context):
             pass
         except ChatAdminRequiredError:
             pass
-    myself = await context.client.get_me()
-    self_user_id = myself.id
     if target_user.user.id == self_user_id:
         await context.edit(lang('arg_error'))
         return
