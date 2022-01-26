@@ -31,8 +31,8 @@ except KeyError:
 async def run_every_30_minute():
     if not need_update_check:
         return
-    result = await bot(GetFullChannelRequest("UGFnZXJNYWlk"))  # noqa
-    async for msg in bot.iter_messages("UGFnZXJNYWlk"):
+    result = await bot(GetFullChannelRequest("PGMUPD1"))  # noqa
+    async for msg in bot.iter_messages("PGMUPD1"):
         if msg.text:
             try:
                 data_ = loads(msg.text.strip("`"))
