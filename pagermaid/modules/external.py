@@ -1,13 +1,10 @@
 """ PagerMaid features that uses external HTTP APIs other than Telegram. """
 
-import translators as ts
 from os import remove
 from magic_google import MagicGoogle
 from gtts import gTTS
 from gtts.tts import gTTSError
 from re import compile as regex_compile
-
-from translators.apis import TranslatorError
 
 from pagermaid import log, silent
 from pagermaid.listener import listener, config
@@ -34,7 +31,13 @@ async def translate(context):
         if not silent:
             await context.edit(lang('translate_processing'))
         try:
-            result = ts.google(source_text, to_language=ap_lang.replace("zh-cn", "zh-CN"))
+            from translators.apis import TranslatorError
+            from translators import google
+        except ModuleNotFoundError:
+            await context.edit(lang('translate_ImportError'))
+            return
+        try:
+            result = google(source_text, to_language=ap_lang.replace("zh-cn", "zh-CN"))
         except TranslatorError:
             return await context.edit(lang('translate_ValueError'))
     except ValueError:
