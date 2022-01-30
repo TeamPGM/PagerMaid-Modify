@@ -126,6 +126,19 @@ parseqr_nofile: 回覆的訊息裡面沒有附件。
 parseqr_content: 內容
 parseqr_e_noqr: 回覆的附件錯誤！
 parseqr_log: 已解析QR 扣的內容，如下：
+# backup
+# backup
+backup_des: 備份數據文件到本地以及日誌頻道，支持數據庫的全量備份，安全可靠。
+backup_process: 開始備份，可能需要一定的時間。。。
+backup_success_channel: 數據文件備份完成！並且已經打包發送到 Log 頻道！
+backup_success: 數據文件備份完成！
+# recovery
+recovery_des: 從本地備份或者所回复的備份文件中恢復數據，支持數據庫的全量恢復，方便快速。
+recovery_file_error: 未知的文件，可能並不是通過 pagermaid 所備份的文件類型。
+recovery_down: 正在下載備份文件到本地。。。
+recovery_process: 開始恢復，可能需要一定的時間。。
+recovery_file_not_found: 沒有找到備份文件。
+recovery_success: 數據文件恢復完成！您可能需要手動重新啟動才能生效。
 # captions
 # convert
 convert_des: 回覆附件訊息並轉換為圖片

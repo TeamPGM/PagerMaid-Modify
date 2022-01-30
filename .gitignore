@@ -119,6 +119,7 @@ config.yml
 pagermaid.session
 pagermaid.session-journal
 *.pagermaid
+pagermaid_backup.tar.gz
 docker-compose.yml
 plugins/
 data/*

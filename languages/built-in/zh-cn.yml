@@ -133,6 +133,20 @@ parseqr_content: 内容
 parseqr_e_noqr: 回复的附件不是 QR 码。
 parseqr_log: 已解析一张带有 QR 码的消息，内容：
 
+# backup
+## backup
+backup_des: 备份数据文件到本地以及日志频道，支持数据库的全量备份，安全可靠。
+backup_process: 开始备份，可能需要一定的时间。。。
+backup_success_channel: 数据文件备份完成！并且已经打包发送到 Log 频道！
+backup_success: 数据文件备份完成！
+## recovery
+recovery_des: 从本地备份或者所回复的备份文件中恢复数据，支持数据库的全量恢复，方便快速。
+recovery_file_error: 未知的文件，可能并不是通过 pagermaid 所备份的文件类型。
+recovery_down: 正在下载备份文件到本地。。。
+recovery_process: 开始恢复，可能需要一定的时间。。
+recovery_file_not_found: 没有找到备份文件。
+recovery_success: 数据文件恢复完成！您可能需要手动重新启动才能生效。
+
 # captions
 ## convert
 convert_des: 回复某条附件消息然后转换为图片输出
