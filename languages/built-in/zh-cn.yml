@@ -431,7 +431,7 @@ pingdc_3: DC3(美国-迈阿密)
 pingdc_4: DC4(荷兰-阿姆斯特丹)
 pingdc_5: DC5(新加坡)
 ## ping
-ping_des: 计算运行 PagerMaid-Modify 的服务器和 Telegram 服务器之间的延迟。
+ping_des: 计算 PagerMaid-Modify 与 Telegram 之间的封包和信息延迟。
 ## topcloud
 topcloud_des: 生成一张资源占用的词云图片。
 topcloud_processing: 生成图片中 . . .

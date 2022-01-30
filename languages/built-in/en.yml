@@ -416,7 +416,7 @@ pingdc_3: DC3(Miami FL,USA)
 pingdc_4: DC4(Amsterdam,NL)
 pingdc_5: DC5(Singapore)
 # ping
-ping_des: Calculate the delay between the server running PagerMaid-Modify and the Telegram server.
+ping_des: Estimate ping between Telegram and PagerMaid-Modify (Message and Packet)
 # topcloud
 topcloud_des: Generate a word cloud picture of resource usage.
 topcloud_processing: generating pictures...
