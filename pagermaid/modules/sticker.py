@@ -392,7 +392,7 @@ async def single_sticker(animated, context, custom_emoji, emoji, message, pic_ro
                                 pass
                             await conversation.send_message(pack_name)
                             chat_response = await conversation.get_response()
-                            if chat_response.text == "Invalid pack selected.":
+                            if chat_response.text == "Invalid set selected.":
                                 await add_sticker(conversation, command, pack_title, pack_name, animated, message,
                                                   context, file, emoji)
                                 try:
