@@ -144,7 +144,5 @@ async def delete(context):
 async def send_prune_notify(context, count_buffer, count):
     return await context.client.send_message(
         context.chat_id,
-        lang('spn_deleted')
-        + str(count_buffer) + " / " + str(count)
-        + lang('prune_hint2')
+        "%s %s / %s %s" % (lang('spn_deleted'), str(count_buffer), str(count), lang('prune_hint2'))
     )
