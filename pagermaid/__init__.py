@@ -176,14 +176,8 @@ redis_host = config.get('redis').get('host', 'localhost')
 redis_port = config.get('redis').get('port', 6379)
 redis_db = config.get('redis').get('db', 14)
 redis_password = config.get('redis').get('password', '')
-if strtobool(config.get('ipv6', 'False')):
-    use_ipv6 = True
-else:
-    use_ipv6 = False
-if strtobool(config.get('silent', 'True')):
-    silent = True
-else:
-    silent = False
+use_ipv6 = bool(strtobool(config.get('ipv6', 'False')))
+silent = bool(strtobool(config.get('silent', 'True')))
 if api_key is None or api_hash is None:
     logs.info(
         lang('config_error')

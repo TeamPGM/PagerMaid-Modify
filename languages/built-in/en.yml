@@ -128,17 +128,18 @@ parseqr_e_noqr: Target is not a QR Code.
 parseqr_log: Parsed QR Code with content
 # backup
 # backup
-backup_des: Backup data files to local as well as log channels, support full backup of database, safe and reliable.
-backup_process: It may take some time to complete the backup.
-backup_success_channel: Backup is complete! And it has been packaged and sent to the Log channel!
-backup_success: Backup is complete!
+backup_des: Backup data files to local and log channel, support database backup, safe and reliable.
+backup_process: Processing backup... It may take some time to complete.
+backup_success_channel: Backup complete! Zipped backup has been sent to log channel.
+backup_success: Backup complete!
 # recovery
 recovery_des: Restore data from local backup or replied backup file, and support full database recovery easily and quickly.
-recovery_file_error: Unknown file that may not be the type of file backed up by pagermaid.
-recovery_down: Downloading backup file to local...
-recovery_process: It may take some time to complete the recovery.
+recovery_file_error: Unknown backup file. It may not be the type of file backed up by PagerMaid.
+recovery_down: 'Downloading backup file to local...
+It is recommended to reduce the use of PagerMaid in the backup process.'
+recovery_process: Restoring backup... It may take some time to complete.
 recovery_file_not_found: No backup file found.
-recovery_success: Data file recovery is complete! You may need to restart manually for this to take effect.
+recovery_success: Backup restored!
 # captions
 # convert
 convert_des: Reply to an attachment message and convert it to image output
@@ -510,7 +511,7 @@ update_change_log: update log
 update_log_too_big: The update log is too long and files are being attached.
 update_hint: Please use the following command to update
 update_found_pulling: An update was found and is being pulled...
-update_success: Update successfully
+update_success: Update successfully.
 update_failed: update failed
 update_auto_upgrade_git_failed_ubuntu: It is detected that your system is Ubuntu or Debain. Try to upgrade git automatically but failed. Please upgrade manually.
 update_auto_upgrade_git_failed_cent: It is detected that your system is CentOS, try to upgrade git automatically but failed, please upgrade manually.

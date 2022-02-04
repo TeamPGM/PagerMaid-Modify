@@ -4,11 +4,15 @@ import os
 import tarfile
 from distutils.util import strtobool
 from io import BytesIO
+from traceback import format_exc
 
-from pagermaid import config, redis_status, redis, silent
+from telethon.tl.types import MessageMediaDocument
+
+from pagermaid import config, redis_status, redis
 from pagermaid.listener import listener
 from pagermaid.utils import alias_command, upload_attachment, lang
-from telethon.tl.types import MessageMediaDocument
+
+pgm_backup_zip_name = "pagermaid_backup.tar.gz"
 
 
 def make_tar_gz(output_filename, source_dirs: list):
@@ -35,22 +39,25 @@ def un_tar_gz(filename, dirs):
         t.extractall(path=dirs)
         return True
     except Exception as e:
-        print(e)
+        print(e, format_exc())
         return False
 
 
-@listener(is_plugin=True, outgoing=True, command=alias_command("backup"),
+@listener(is_plugin=True, outgoing=True, owners_only=True, command=alias_command("backup"),
           description=lang('back_des'))
 async def backup(context):
-    if not silent:
-        await context.edit(lang('backup_process'))
-    if os.path.exists("pagermaid_backup.tar.gz"):
-        os.remove("pagermaid_backup.tar.gz")
+    await context.edit(lang('backup_process'))
+
+    # Remove old backup
+    if os.path.exists(pgm_backup_zip_name):
+        os.remove(pgm_backup_zip_name)
+
     # remove mp3 , they are so big !
     for i in os.listdir("data"):
         if i.find(".mp3") != -1 or i.find(".jpg") != -1 or i.find(".flac") != -1 or i.find(".ogg") != -1:
             os.remove(f"data{os.sep}{i}")
-    # backup redis
+
+    # backup redis when available
     redis_data = {}
     if redis_status():
         for k in redis.keys():
@@ -58,47 +65,69 @@ async def backup(context):
             if data_type == b'string':
                 v = redis.get(k)
                 redis_data[k.decode()] = v.decode()
-    with open(f"data{os.sep}redis.json", "w", encoding='utf-8') as f:
-        json.dump(redis_data, f, indent=4)
+
+        with open(f"data{os.sep}redis.json", "w", encoding='utf-8') as f:
+            json.dump(redis_data, f, indent=4)
+
     # run backup function
-    make_tar_gz("pagermaid_backup.tar.gz", ["data", "plugins", "config.yml"])
+    make_tar_gz(pgm_backup_zip_name, ["data", "plugins", "config.yml"])
     if strtobool(config['log']):
-        await upload_attachment("pagermaid_backup.tar.gz", int(config['log_chatid']), None)
+        await upload_attachment(pgm_backup_zip_name, int(config['log_chatid']), None)
         await context.edit(lang("backup_success_channel"))
     else:
         await context.edit(lang("backup_success"))
 
 
-@listener(is_plugin=True, outgoing=True, command=alias_command("recovery"),
+@listener(is_plugin=True, outgoing=True, owners_only=True, command=alias_command("recovery"),
           description=lang('recovery_des'))
 async def recovery(context):
     message = await context.get_reply_message()
-    if message and message.media:
+
+    if message and message.media:  # Overwrite local backup
         if isinstance(message.media, MessageMediaDocument):
             try:
-                file_name = message.media.document.attributes[0].file_name
-            except:
-                return await context.edit(lang('recovery_file_error'))
-            if file_name.find(".tar.gz") != -1:
-                await context.edit(lang('recovery_down'))
-            else:
+                if message.media.document.attributes[0].file_name.find(".tar.gz") != -1:  # Verify filename
+                    await context.edit(lang('recovery_down'))
+                    # Start download process
+                    _file = BytesIO()
+                    await context.client.download_file(message.media.document, _file)
+                    with open(pgm_backup_zip_name, "wb") as f:
+                        f.write(_file.getvalue())
+                else:
+                    return await context.edit(lang('recovery_file_error'))
+            except Exception as e:  # noqa
+                print(e, format_exc())
                 return await context.edit(lang('recovery_file_error'))
         else:
             return await context.edit(lang('recovery_file_error'))
-        _file = BytesIO()
-        await context.client.download_file(message.media.document, _file)
-        with open("pagermaid_backup.tar.gz", "wb") as f:
-            f.write(_file.getvalue())
-    if not silent:
-        await context.edit(lang('recovery_process'))
-    if not os.path.exists("pagermaid_backup.tar.gz"):
+
+    # Extract backup files
+    await context.edit(lang('recovery_process'))
+    if not os.path.exists(pgm_backup_zip_name):
         return await context.edit(lang('recovery_file_not_found'))
-    un_tar_gz("pagermaid_backup.tar.gz", "")
-    # recovery redis
-    if redis_status():
-        if os.path.exists(f"data{os.sep}redis.json"):
-            with open(f"data{os.sep}redis.json", "r", encoding='utf-8') as f:
+    elif not un_tar_gz(pgm_backup_zip_name, ""):
+        os.remove(pgm_backup_zip_name)
+        return await context.edit(lang('recovery_file_error'))
+
+    # Recovery redis
+    if redis_status() and os.path.exists(f"data{os.sep}redis.json"):
+        with open(f"data{os.sep}redis.json", "r", encoding='utf-8') as f:
+            try:
                 redis_data = json.load(f)
-            for k, v in redis_data.items():
-                redis.set(k, v)
-    await context.edit(lang('recovery_success'))
+                for k, v in redis_data.items():
+                    redis.set(k, v)
+            except json.JSONDecodeError:
+                """JSON load failed, skip redis recovery"""
+            except Exception as e:  # noqa
+                print(e, format_exc())
+
+    # Cleanup
+    if os.path.exists(pgm_backup_zip_name):
+        os.remove(pgm_backup_zip_name)
+    if os.path.exists(f"data{os.sep}redis.json"):
+        os.remove(f"data{os.sep}redis.json")
+
+    result = await context.edit(lang('recovery_success') + " " + lang('apt_reboot'))
+    if redis_status():
+        redis.set("restart_edit", f"{result.id}|{result.chat_id}")
+    await context.client.disconnect()

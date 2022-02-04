@@ -136,16 +136,16 @@ parseqr_log: 已解析一张带有 QR 码的消息，内容：
 # backup
 ## backup
 backup_des: 备份数据文件到本地以及日志频道，支持数据库的全量备份，安全可靠。
-backup_process: 开始备份，可能需要一定的时间。。。
-backup_success_channel: 数据文件备份完成！并且已经打包发送到 Log 频道！
+backup_process: 备份中，请耐心等待备份程序完成...
+backup_success_channel: 数据文件备份完成并已打包发送到 Log 频道！
 backup_success: 数据文件备份完成！
 ## recovery
 recovery_des: 从本地备份或者所回复的备份文件中恢复数据，支持数据库的全量恢复，方便快速。
-recovery_file_error: 未知的文件，可能并不是通过 pagermaid 所备份的文件类型。
-recovery_down: 正在下载备份文件到本地。。。
+recovery_file_error: 未知的文件，可能并不是通过 PagerMaid 所备份的文件类型。
+recovery_down: 正在下载备份文件到本地... 在备份的过程中，建议减少使用 PagerMaid
 recovery_process: 开始恢复，可能需要一定的时间。。
-recovery_file_not_found: 没有找到备份文件。
-recovery_success: 数据文件恢复完成！您可能需要手动重新启动才能生效。
+recovery_file_not_found: 找不到可用的备份文件。
+recovery_success: 備份恢复完成！
 
 # captions
 ## convert
@@ -527,7 +527,7 @@ update_change_log: 更新日志
 update_log_too_big: 更新日志太长，正在附加文件。
 update_hint: 请使用以下命令进行更新
 update_found_pulling: 找到更新，正在拉取 . . .
-update_success: 更新成功
+update_success: 更新成功。
 update_failed: 更新失败
 update_auto_upgrade_git_failed_ubuntu: 检测到您的系统是Ubuntu或Debain，尝试自动升级git但失败,请手动升级.
 update_auto_upgrade_git_failed_cent: 检测到您的系统是CentOS，尝试自动升级git但失败,请手动升级.

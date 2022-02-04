@@ -128,17 +128,17 @@ parseqr_e_noqr: 回覆的附件錯誤！
 parseqr_log: 已解析QR 扣的內容，如下：
 # backup
 # backup
-backup_des: 備份數據文件到本地以及日誌頻道，支持數據庫的全量備份，安全可靠。
-backup_process: 開始備份，可能需要一定的時間。。。
-backup_success_channel: 數據文件備份完成！並且已經打包發送到 Log 頻道！
+backup_des: 備份數據文件到本地以及日誌頻道，支援數據庫備份，安全可靠。
+backup_process: 備份中，請耐心等待備份程序完成...
+backup_success_channel: 數據文件備份完成並已打包發送到 Log 頻道！
 backup_success: 數據文件備份完成！
 # recovery
 recovery_des: 從本地備份或者所回复的備份文件中恢復數據，支持數據庫的全量恢復，方便快速。
-recovery_file_error: 未知的文件，可能並不是通過 pagermaid 所備份的文件類型。
-recovery_down: 正在下載備份文件到本地。。。
+recovery_file_error: 未知的文件，可能並不是通過 PagerMaid 所備份的文件類型。
+recovery_down: 正在下載備份文件到本地... 備份的過程中，建議減少使用 PagerMaid
 recovery_process: 開始恢復，可能需要一定的時間。。
-recovery_file_not_found: 沒有找到備份文件。
-recovery_success: 數據文件恢復完成！您可能需要手動重新啟動才能生效。
+recovery_file_not_found: 找不到備份文件。
+recovery_success: 備份恢復完成！
 # captions
 # convert
 convert_des: 回覆附件訊息並轉換為圖片
@@ -306,7 +306,7 @@ apt_processing: 安裝插件中…
 apt_no_py: Error！無法獲取插件文件。
 apt_plugin: 插件
 apt_installed: 已安裝
-apt_reboot: 正在重新啟動。
+apt_reboot: 正在重新啟動 PagerMaid-Modify。
 apt_install_success: 安裝成功
 apt_not_found: Error！沒有找到插件
 apt_install_failed: 安裝失敗
@@ -475,7 +475,7 @@ eval_need_dev: '**請注意：此命令可以直接操作您的賬戶**
 # restart
 restart_des: 重新啟動
 restart_processing: 正在嘗試重新啟動
-restart_complete: 重新啟動完成
+restart_complete: PagerMaid-Modify 重新啟動完成
 restart_log: 重新啟動 PagerMaid-Modify
 # trace
 trace_des: 跟蹤URL的重新導向。
@@ -510,7 +510,7 @@ update_change_log: 更新日誌
 update_log_too_big: 更新日誌太長，正在產生文件
 update_hint: 請使用以下命令更新
 update_found_pulling: 找到更新，正在獲取
-update_success: 更新成功
+update_success: 更新成功。
 update_failed: 更新失敗
 update_auto_upgrade_git_failed_ubuntu: 檢測到您的系統為Ubuntu/Debian，嘗試自動升級Git失敗，請手動。
 update_auto_upgrade_git_failed_cent: 檢測到您的系統為CentOS/RedHat Linux，嘗試自動升級Git失敗，請手動。
