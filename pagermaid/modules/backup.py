@@ -43,7 +43,7 @@ def un_tar_gz(filename, dirs):
         return False
 
 
-@listener(is_plugin=True, outgoing=True, owners_only=True, command=alias_command("backup"),
+@listener(is_plugin=True, outgoing=True, command=alias_command("backup"),
           description=lang('back_des'))
 async def backup(context):
     await context.edit(lang('backup_process'))
@@ -78,7 +78,7 @@ async def backup(context):
         await context.edit(lang("backup_success"))
 
 
-@listener(is_plugin=True, outgoing=True, owners_only=True, command=alias_command("recovery"),
+@listener(is_plugin=True, outgoing=True, command=alias_command("recovery"),
           description=lang('recovery_des'))
 async def recovery(context):
     message = await context.get_reply_message()
