@@ -1,10 +1,11 @@
 ![pagermaid](https://tlgur.com/d/8nomNo9G "pagermaid")
 
-<h1 align="center"><a href="https://t.me/PagerMaid_Modify" target="_blank">Pagermaid</a></h1>
+<h1 align="center"><a href="https://t.me/PagerMaid_Modify" target="_blank">PagerMaid</a></h1>
 
-> 一个人形自走 bot
+<div align="center">
 
-<p align="center">
+一个人形自走 bot
+
 <img alt="star" src="https://img.shields.io/github/stars/Xtao-Labs/PagerMaid-Modify.svg"/>
 <img alt="fork" src="https://img.shields.io/github/forks/Xtao-Labs/PagerMaid-Modify.svg"/>
 <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/Xtao-Labs/PagerMaid-Modify.svg?label=commits">
@@ -13,9 +14,10 @@
 <img alt="docker" src="https://img.shields.io/docker/pulls/mrwangzhe/pagermaid_modify"/>
 <a href="https://github.com/Xtao-Labs/PagerMaid-Modify/blob/master/LICENSE"><img alt="license" src="https://img.shields.io/github/license/Xtao-Labs/PagerMaid-Modify.svg"/></a>
 <img alt="telethon" src="https://img.shields.io/badge/telethon-blue.svg"/>
-</p>
 
-# 用途
+</div>
+
+## 简介
 
 Pagermaid 是一个用在 Telegram 的实用工具。
 
