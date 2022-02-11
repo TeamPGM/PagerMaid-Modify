@@ -78,7 +78,7 @@ async def status(context):
 
 
 @listener(is_plugin=False, incoming=True, owners_only=True, command=alias_command("speedtest"),
-          description=lang('speedtest_des'))
+          description=lang('speedtest_des'), parameters="(Server ID)")
 async def speedtest(context):
     """ Tests internet speed using speedtest. """
     try:
