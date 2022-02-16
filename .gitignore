@@ -150,3 +150,6 @@ dmypy.json
 
 # docker
 install.lock
+
+# backup
+pagermaid*.tar.gz

@@ -2,7 +2,7 @@
 
 from os import listdir
 from json import dump as json_dump
-from pagermaid import help_messages, alias_dict, redis_status, redis
+from pagermaid import help_messages, alias_dict, redis_status, redis, language
 from pagermaid.utils import lang, alias_command
 from pagermaid.listener import listener, config
 
@@ -72,24 +72,24 @@ async def help_raw_command(context):
           description=lang('lang_des'))
 async def lang_change(context):
     to_lang = context.arguments
-    from_lang = config["application_language"]
-    dir, ldir = listdir('languages/built-in'), []
-    for i in dir:
-        if not i.find('yml') == -1:
-            ldir.append(i[:-4])
+    from_lang = language.locale
+
     with open('config.yml') as f:
         file = f.read()
-    if to_lang in ldir:
+    if to_lang in language.locales:
         file = file.replace(f'application_language: "{from_lang}"', f'application_language: "{to_lang}"')
         with open('config.yml', 'w') as f:
             f.write(file)
-        result = await context.edit(f"{lang('lang_change_to')} {to_lang}, {lang('lang_reboot')}")
-        if redis_status():
-            redis.set("restart_edit", f"{result.id}|{result.chat_id}")
-        await context.client.disconnect()
+        await context.edit(f"{lang('lang_change_to')} {to_lang}")
+        language.locale = to_lang
     else:
+        msg = ""
+        for i in language.help_msg:
+            msg += f"\n{language.help_msg[i]}"
         await context.edit(
-            f'{lang("lang_current_lang")} {config["application_language"]}\n\n{lang("lang_all_lang")}{"，".join(ldir)}')
+            f'{lang("lang_current_lang")} {language.help_msg[from_lang]}\n\n'
+            f'{lang("lang_all_lang")}\n'
+            f'{msg}')
 
 
 @listener(is_plugin=False, outgoing=True, command="alias",

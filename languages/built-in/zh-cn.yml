@@ -255,7 +255,6 @@ coin_lost: 我丢了硬币
 ## lang
 lang_des: 切换语言。
 lang_change_to: 语言已切换到
-lang_reboot: 正在重新启动。
 lang_current_lang: 当前语言是
 lang_all_lang: 所有可用的语言有：
 ## alias

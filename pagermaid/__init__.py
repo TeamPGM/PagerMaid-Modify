@@ -12,7 +12,7 @@ from time import time
 from os import getcwd, makedirs, environ, remove
 from os.path import exists
 from sys import version_info, platform
-from yaml import load, FullLoader, safe_load
+from yaml import load, FullLoader
 from json import load as load_json
 from shutil import copyfile
 from redis import StrictRedis
@@ -40,6 +40,8 @@ from http.client import RemoteDisconnected
 from urllib.error import URLError
 from concurrent.futures._base import TimeoutError
 from redis.exceptions import ResponseError
+
+from languages.languages import Lang
 
 persistent_vars = {}
 module_dir = __path__[0]
@@ -69,26 +71,7 @@ except FileNotFoundError:
     exit(1)
 
 # i18n
-lang_dict: dict = {}
-
-try:
-    with open(f"languages/built-in/{config['application_language']}.yml", "r", encoding="utf-8") as f:
-        lang_dict = safe_load(f)
-except Exception as e:
-    print("Reading language YAML file failed")
-    print(e)
-    exit(1)
-
-# Customization
-try:
-    with open(f"languages/custom.yml", "r", encoding="utf-8") as f:
-        lang_temp = safe_load(f)
-    for key, value in lang_temp.items():
-        lang_dict[key] = value
-except FileNotFoundError:
-    pass
-except Exception as e:
-    logs.fatal("Reading custom YAML file failed")
+language = Lang(config["application_language"])
 
 # alias
 alias_dict: dict = {}
@@ -105,8 +88,7 @@ if exists("data/alias.json"):
 
 def lang(text: str) -> str:
     """ i18n """
-    result = lang_dict.get(text, text)
-    return result
+    return language.get(text)
 
 
 analytics = None
