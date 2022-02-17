@@ -38,7 +38,7 @@ def alias_command(command: str) -> str:
     return command
 
 
-async def upload_attachment(file_path, chat_id, reply_id, caption=None, preview=None, document=None):
+async def upload_attachment(file_path, chat_id, reply_id, caption=None, preview=None, document=None, thumb=None):
     """ Uploads a local attachment file. """
     if not exists(file_path):
         return False
@@ -49,7 +49,8 @@ async def upload_attachment(file_path, chat_id, reply_id, caption=None, preview=
             reply_to=reply_id,
             caption=caption,
             link_preview=preview,
-            force_document=document
+            force_document=document,
+            thumb=thumb,
         )
     except BaseException as exception:
         raise exception

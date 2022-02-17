@@ -255,7 +255,8 @@ async def plugin(context):
                 await context.edit(lang('apt_uploading'))
                 await upload_attachment(file_name,
                                         context.chat_id, reply_id,
-                                        caption=f"PagerMaid-Modify {context.parameter[1]} plugin.")
+                                        caption=f"PagerMaid-Modify {context.parameter[1]} plugin.",
+                                        thumb="pagermaid/static/images/logo.jpg")
                 remove(file_name)
                 await context.delete()
             else:
