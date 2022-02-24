@@ -62,8 +62,8 @@ mtp_port: ""
 mtp_secret: ""
 
 # Apt Git source
-git_source: "https://raw.githubusercontent.com/Xtao-Labs/PagerMaid_Plugins/master/"
-git_ssh: "https://github.com/Xtao-Labs/PagerMaid-Modify.git"
+git_source: "https://gitlab.com/Xtao-Labs/PagerMaid_Plugins/-/raw/master/"
+git_ssh: "https://gitlab.com/Xtao-Labs/pagermaid-modify.git"
 
 # Update Notice
 update_check: "True"
