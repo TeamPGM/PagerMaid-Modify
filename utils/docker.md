@@ -22,7 +22,7 @@ bash docker.sh
 1. 准备脚本
 
 ```
-git clone https://github.com/Xtao-Labs/PagerMaid-Modify pagermaid
+git clone https://gitlab.com/Xtao-Labs/pagermaid-modify.git pagermaid
 cd pagermaid
 cp docker-compose.gen.yml docker-compose.yml
 ```
