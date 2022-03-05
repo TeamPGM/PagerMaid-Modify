@@ -10,7 +10,7 @@
 - 多功能
 - 可扩展
 
-[GitHub](https://github.com/Xtao-Labs/PagerMaid-Modify)
+[GitLab](https://gitlab.com/Xtao-Labs/PagerMaid-Modify)
 [Get Started](#%e7%ae%80%e4%bb%8b)
 [Plugins](https://index.xtaolabs.com)
 

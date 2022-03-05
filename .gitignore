@@ -5,3 +5,4 @@ pagermaid.session
 pagermaid/
 plugins/
 unknown_errors.txt
+__pycache__/

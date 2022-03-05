@@ -4,7 +4,7 @@
 
 # 拉取项目
 
-本项目托管在 `github` ，所以您首先需要检查您是否已经安装 `git` 软件包。并且我们发现当 `git` 软件包版本过低时，无法实现程序的自动更新，所以您需要首先升级 `git` 软件包：
+本项目托管在 `gitlab` ，所以您首先需要检查您是否已经安装 `git` 软件包。并且我们发现当 `git` 软件包版本过低时，无法实现程序的自动更新，所以您需要首先升级 `git` 软件包：
 
 ```bash
 sudo pacman -S git
@@ -13,7 +13,7 @@ sudo pacman -S git
 从仓库拉取项目
 
 ```bash
-cd /var/lib && git clone https://github.com/Xtao-Labs/PagerMaid-Modify.git pagermaid && cd pagermaid
+cd /var/lib && git clone https://gitlab.com/Xtao-Labs/PagerMaid-Modify.git pagermaid && cd pagermaid
 ```
 
 # 安装软件包
@@ -113,11 +113,7 @@ mtp_secret: "ddwqrwr892778whwee78789"
 此步是将安装插件的获取源文件更改为国内可以访问的反代源，但是可能因为 cdn 原因，插件更新不及时。
 
 ```bash
-git_source: "https://raw.fastgit.org/Xtao-Labs/PagerMaid_Plugins/master/"
-```
-
-```bash
-git_source: "https://cdn.jsdelivr.net/gh/Xtao-Labs/PagerMaid_Plugins/"
+git_source: "https://gitlab.com/Xtao-Labs/PagerMaid_Plugins/-/raw/master/"
 ```
 
 # 登录账号

@@ -68,10 +68,10 @@ git config --global https.proxy 'socks5://123.45.678.9:7890'
 
 # 拉取项目
 
-本项目托管在 `github` ，从仓库直接拉取项目
+本项目托管在 `gitlab` ，从仓库直接拉取项目
 
 ```bash
-git clone https://github.com/Xtao-Labs/PagerMaid-Modify.git pagermaid && cd pagermaid
+git clone https://gitlab.com/Xtao-Labs/PagerMaid-Modify.git pagermaid && cd pagermaid
 ```
 
 # 安装软件包

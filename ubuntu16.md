@@ -4,7 +4,7 @@
 
 # 拉取项目
 
-本项目托管在 `github` ，所以您首先需要检查您是否已经安装 `git` 软件包。并且我们发现当 `git` 软件包版本过低时，无法实现程序的自动更新，所以您需要首先升级 `git` 软件包：
+本项目托管在 `gitlab` ，所以您首先需要检查您是否已经安装 `git` 软件包。并且我们发现当 `git` 软件包版本过低时，无法实现程序的自动更新，所以您需要首先升级 `git` 软件包：
 
 ```bash
 sudo apt-get install --only-upgrade git -y
@@ -13,7 +13,7 @@ sudo apt-get install --only-upgrade git -y
 从仓库拉取项目
 
 ```bash
-cd /var/lib && git clone https://github.com/Xtao-Labs/PagerMaid-Modify.git pagermaid && cd pagermaid
+cd /var/lib && git clone https://gitlab.com/Xtao-Labs/PagerMaid-Modify.git pagermaid && cd pagermaid
 ```
 
 # 安装软件包
