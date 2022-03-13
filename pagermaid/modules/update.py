@@ -3,20 +3,15 @@
 import platform
 from datetime import datetime
 from distutils.util import strtobool
-from json import JSONDecodeError, loads, load
 from os import remove
-from os.path import exists
 from subprocess import run, PIPE
 from sys import executable
 
 from git import Repo
 from git.exc import GitCommandError, InvalidGitRepositoryError, NoSuchPathError
 
-from telethon.tl.functions.channels import GetFullChannelRequest
-
-from pagermaid import log, config, silent, scheduler, bot, version, working_dir, logs, redis_status, redis
+from pagermaid import log, config, silent, redis_status, redis
 from pagermaid.listener import listener
-from pagermaid.modules.plugin import remove_plugin, update_version, download
 from pagermaid.utils import execute, lang, alias_command
 
 try:
@@ -25,56 +20,6 @@ try:
 except KeyError:
     git_ssh = "https://gitlab.com/Xtao-Labs/pagermaid-modify.git"
     need_update_check = True
-
-
-@scheduler.scheduled_job("cron", minute="*/30", id="0")
-async def run_every_30_minute():
-    try:
-        await bot(GetFullChannelRequest("PGMUPD1"))
-    except:  # noqa
-        return
-
-    need_restart = False
-    async for msg in bot.iter_messages("PGMUPD1"):
-        if msg.text:
-            try:
-                security_data = loads(msg.text.strip("`"))
-            except JSONDecodeError:
-                continue
-            for data in security_data["data"]:
-                if data["mode"] == "master":
-                    if version < data["version"]:
-                        logs.info(lang('update_master'))
-                        await execute("git reset --hard")
-                        await execute("git pull")
-                        await execute(f"{executable} -m pip install -r requirements.txt --upgrade")
-                        await execute(f"{executable} -m pip install -r requirements.txt")
-                        need_restart = True
-                        break
-                elif data["mode"] == "plugins":
-                    if not exists(f"{working_dir}/plugins/version.json"):
-                        continue
-                    with open(f"{working_dir}/plugins/version.json", 'r', encoding="utf-8") as f:
-                        try:
-                            version_json = load(f)
-                        except JSONDecodeError:
-                            continue
-                    try:
-                        plugin_version = version_json.get(data["name"])
-                        if plugin_version is None:
-                            continue
-                    except AttributeError:
-                        continue
-
-                    if (float(data["version"]) - float(plugin_version)) > 0:
-                        logs.info(lang('update_plugins'))
-                        remove_plugin(data["name"])
-                        await download(data["name"])
-                        update_version(data["name"], data["version"])
-                        need_restart = True
-
-    if need_restart:
-        await bot.disconnect()
 
 
 @listener(is_plugin=False, outgoing=True, command=alias_command("update"),
