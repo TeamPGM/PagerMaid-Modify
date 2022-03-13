@@ -1,15 +1,9 @@
 """ PagerMaid initialization. """
 
-from concurrent.futures import CancelledError
-
-# Analytics
-import sentry_sdk
-from sentry_sdk.integrations.redis import RedisIntegration
-
 from subprocess import run, PIPE
 from datetime import datetime
 from time import time
-from os import getcwd, makedirs, environ, remove
+from os import getcwd, makedirs, environ
 from os.path import exists
 from sys import version_info, platform
 from yaml import load, FullLoader
@@ -22,24 +16,6 @@ from coloredlogs import ColoredFormatter
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from telethon import TelegramClient
 from telethon.sessions import StringSession
-
-# Errors
-from telethon.errors import AuthKeyError
-from telethon.errors.rpcerrorlist import MessageNotModifiedError, MessageIdInvalidError, ChannelPrivateError, \
-    ChatSendMediaForbiddenError, YouBlockedUserError, FloodWaitError, ChatWriteForbiddenError, \
-    AuthKeyDuplicatedError, ChatSendStickersForbiddenError, SlowModeWaitError, MessageEditTimeExpiredError, \
-    PeerIdInvalidError, AuthKeyUnregisteredError, UserBannedInChannelError, UserDeactivatedBanError, PeerFloodError, \
-    SessionRevokedError
-from telethon.errors.common import AlreadyInConversationError
-from requests.exceptions import ChunkedEncodingError
-from requests.exceptions import ConnectionError as ConnectedError
-from asyncio import CancelledError as CancelError
-from asyncio import TimeoutError as AsyncTimeoutError
-from sqlite3 import OperationalError
-from http.client import RemoteDisconnected
-from urllib.error import URLError
-from concurrent.futures._base import TimeoutError
-from redis.exceptions import ResponseError
 
 from languages.languages import Lang
 
@@ -222,8 +198,6 @@ async def save_id():
     user_id = me.id
     user_bot = me.bot
     if me.username is not None:
-        sentry_sdk.set_user({"id": user_id, "name": me.first_name, "username": me.username, "ip_address": "{{auto}}",
-                             "bot": f"{user_bot}"})
         if allow_analytics:
             analytics.identify(user_id, {
                 'name': me.first_name,
@@ -231,8 +205,6 @@ async def save_id():
                 'bot': f"{user_bot}"
             })
     else:
-        sentry_sdk.set_user({"id": user_id, "name": me.first_name, "ip_address": "{{auto}}",
-                             "bot": f"{user_bot}"})
         if allow_analytics:
             analytics.identify(user_id, {
                 'name': me.first_name,
@@ -243,49 +215,12 @@ async def save_id():
     logs.info(f"{lang('save_id')} {me.first_name}({user_id})")
 
 
-def before_send(event, hint):
-    global report_time
-    exc_info = hint.get("exc_info")
-    if exc_info and isinstance(exc_info[1], (ConnectionError, CancelledError, MessageNotModifiedError,
-                                             MessageIdInvalidError, OperationalError, ChannelPrivateError,
-                                             BufferError, RemoteDisconnected, ChatSendMediaForbiddenError,
-                                             TypeError, URLError, YouBlockedUserError, FloodWaitError,
-                                             ChunkedEncodingError, TimeoutError, UnicodeEncodeError,
-                                             ChatWriteForbiddenError, ChatSendStickersForbiddenError,
-                                             AlreadyInConversationError, ConnectedError, KeyboardInterrupt,
-                                             OSError, AuthKeyDuplicatedError, ResponseError, SlowModeWaitError,
-                                             PeerFloodError, MessageEditTimeExpiredError, PeerIdInvalidError,
-                                             AuthKeyUnregisteredError, UserBannedInChannelError, AuthKeyError,
-                                             CancelError, AsyncTimeoutError)):
-        return
-    elif exc_info and isinstance(exc_info[1], (UserDeactivatedBanError, SessionRevokedError)):
-        # The user has been deleted/deactivated or session revoked
-        try:
-            remove('pagermaid.session')
-        except Exception as exc:
-            print(exc)
-        exit(1)
-    if time() <= report_time + 30:
-        report_time = time()
-        return
-    else:
-        report_time = time()
-        return event
-
 with bot:
     bot.loop.run_until_complete(save_id())
 
 report_time = time()
 start_time = datetime.utcnow()
 git_hash = run("git rev-parse HEAD", stdout=PIPE, shell=True).stdout.decode()
-sentry_sdk.init(
-    "https://58c6c9990d5c4d3784aec0aecb7509d3@o416616.ingest.sentry.io/5312335",
-    traces_sample_rate=1.0,
-    release=git_hash,
-    before_send=before_send,
-    environment="production",
-    integrations=[RedisIntegration()]
-)
 
 
 def redis_status():

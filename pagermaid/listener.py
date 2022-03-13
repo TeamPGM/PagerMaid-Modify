@@ -1,7 +1,5 @@
 """ PagerMaid event listener. """
 
-import re
-import sentry_sdk
 import sys
 from distutils.util import strtobool
 from time import gmtime, strftime, time
@@ -10,7 +8,6 @@ from traceback import format_exc
 from telethon import events
 from telethon.errors import MessageTooLongError
 from telethon.events import StopPropagation
-from telethon.tl.types import PeerUser
 
 from pagermaid import bot, config, help_messages, logs, user_id, analytics, user_bot
 from pagermaid.utils import attach_report, lang, alias_command, admin_check
@@ -152,16 +149,6 @@ def listener(**args):
                              f"# Error: \"{str(exc_info)}\". \n"
                     await attach_report(report, f"exception.{time()}.pagermaid", None,
                                         "Error report generated.")
-                    try:
-                        sentry_sdk.set_context("Target",
-                                               {"ChatID": str(context.chat_id), "UserID": str(context.sender_id),
-                                                "Msg": context.text})
-                        sentry_sdk.set_tag('com', re.findall("\w+", str.lower(context.text.split()[0]))[0])
-                        sentry_sdk.capture_exception(e)
-                    except:
-                        logs.info(
-                            lang('report_error')
-                        )
 
         if not ignore_edited:
             bot.add_event_handler(handler, events.MessageEdited(**args))
