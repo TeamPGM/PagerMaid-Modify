@@ -6,7 +6,7 @@ from time import gmtime, strftime, time
 from traceback import format_exc
 
 from telethon import events
-from telethon.errors import MessageTooLongError
+from telethon.errors import MessageTooLongError, MessageNotModifiedError, MessageEmptyError
 from telethon.events import StopPropagation
 
 from pagermaid import bot, config, help_messages, logs, user_id, analytics, user_bot
@@ -129,6 +129,10 @@ def listener(**args):
                 raise StopPropagation
             except MessageTooLongError:
                 await context.edit(lang('too_long'))
+            except MessageNotModifiedError:
+                pass
+            except MessageEmptyError:
+                pass
             except BaseException as e:
                 exc_info = sys.exc_info()[1]
                 exc_format = format_exc()
