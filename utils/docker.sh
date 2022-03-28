@@ -187,7 +187,11 @@ reinstall_pager () {
 }
 
 shon_online () {
-    echo
+    echo "一键脚本出现任何问题请转手动搭建！ xtaolabs.com"
+    echo "一键脚本出现任何问题请转手动搭建！ xtaolabs.com"
+    echo "一键脚本出现任何问题请转手动搭建！ xtaolabs.com"
+    echo ""
+    echo ""
     echo "欢迎使用 PagerMaid-Modify Docker 一键安装脚本。"
     echo
     echo "请选择您需要进行的操作:"

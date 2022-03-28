@@ -32,6 +32,10 @@ check_sys() {
 }
 
 welcome() {
+    echo "一键脚本出现任何问题请转手动搭建！ xtaolabs.com"
+    echo "一键脚本出现任何问题请转手动搭建！ xtaolabs.com"
+    echo "一键脚本出现任何问题请转手动搭建！ xtaolabs.com"
+    echo ""
     echo ""
     echo "欢迎使用 PagerMaid-Modify 一键安装程序。"
     echo "安装即将开始"
@@ -357,6 +361,10 @@ login_screen() {
         exit 1
     fi
     while :; do
+        echo "一键脚本出现任何问题请转手动搭建！ xtaolabs.com"
+        echo "一键脚本出现任何问题请转手动搭建！ xtaolabs.com"
+        echo "一键脚本出现任何问题请转手动搭建！ xtaolabs.com"
+        echo ""
         read -p "请输入您的 Telegram 手机号码（带国际区号 如 +8618888888888）: " phonenum
 
         if [ "$phonenum" == "" ]; then
@@ -590,6 +598,11 @@ install_require() {
 }
 
 shon_online() {
+    echo "一键脚本出现任何问题请转手动搭建！ xtaolabs.com"
+    echo "一键脚本出现任何问题请转手动搭建！ xtaolabs.com"
+    echo "一键脚本出现任何问题请转手动搭建！ xtaolabs.com"
+    echo ""
+    echo ""
     echo "请选择您需要进行的操作:"
     echo "  1) 安装 PagerMaid"
     echo "  2) 卸载 PagerMaid"
@@ -601,7 +614,7 @@ shon_online() {
     echo "  8) 重新安装 PagerMaid 依赖"
     echo "  9) 退出脚本"
     echo ""
-    echo "     Version：0.1.3"
+    echo "     Version：0.1.4"
     echo ""
     echo -n "请输入编号: "
     read N
