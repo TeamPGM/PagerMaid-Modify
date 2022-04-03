@@ -260,9 +260,11 @@ async def speedtest(context):
         test.download()
         test.upload()
         test.results.share()
-    except (ShareResultsConnectFailure, ShareResultsSubmitFailure, RuntimeError) as e:
+    except (ShareResultsSubmitFailure, RuntimeError) as e:
         await context.edit(lang('speedtest_ConnectFailure'))
         return
+    except ShareResultsConnectFailure:
+        pass
     result = test.results.dict()
     des = (
         f"**Speedtest** \n"
@@ -275,24 +277,27 @@ async def speedtest(context):
         f"Timestamp: `{result['timestamp']}`"
     )
     # 开始处理图片
-    data = get(result['share']).content
-    with open('speedtest.png', mode='wb') as f:
-        f.write(data)
-    try:
-        img = Image.open('speedtest.png')
-        c = img.crop((17, 11, 727, 389))
-        c.save('speedtest.png')
-    except:
-        pass
-    try:
-        await context.client.send_file(context.chat_id, 'speedtest.png', caption=des)
-    except:
-        return
-    try:
-        remove('speedtest.png')
-    except:
-        pass
-    await context.delete()
+    if result['share']:
+        data = get(result['share']).content
+        with open('speedtest.png', mode='wb') as f:
+            f.write(data)
+        try:
+            img = Image.open('speedtest.png')
+            c = img.crop((17, 11, 727, 389))
+            c.save('speedtest.png')
+        except:
+            pass
+        try:
+            await context.client.send_file(context.chat_id, 'speedtest.png', caption=des)
+        except:
+            return
+        try:
+            remove('speedtest.png')
+        except:
+            pass
+        await context.delete()
+    else:
+        await context.edit(des)
 
 
 @listener(is_plugin=False, outgoing=True, command=alias_command("connection"),
