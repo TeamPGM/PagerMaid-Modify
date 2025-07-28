@@ -1,74 +1,81 @@
-""" PagerMaid launch sequence. """
+import asyncio
+from os import sep
+from pathlib import Path
+from signal import signal as signal_fn, SIGINT, SIGTERM, SIGABRT
+from sys import path, platform, exit
 
-from sys import path
-from importlib import import_module
-from telethon.errors.rpcerrorlist import PhoneNumberInvalidError
-from pagermaid import bot, logs, working_dir, user_bot, redis, redis_status
-from pagermaid.utils import lang
+from telethon.errors.rpcerrorlist import AuthKeyError
 
+from pagermaid.common.reload import load_all
+from pagermaid.config import SESSION_PATH
+from pagermaid.dependence import scheduler
+from pagermaid.services import bot
+from pagermaid.static import working_dir
+from pagermaid.utils import lang, safe_remove, logs
+from pagermaid.utils.listener import process_exit
+from pagermaid.web import web
 
-if not user_bot:
-    from pagermaid.modules import module_list, plugin_list
-else:
-    from pagermaid.bots import module_list, plugin_list
-
-try:
-    from pagermaid.interface import server
-except TypeError:
-    logs.error(lang('web_TypeError'))
-    server = None
-except KeyError:
-    logs.error(lang('web_KeyError'))
-    server = None
+bot.PARENT_DIR = Path(working_dir)
+path.insert(1, f"{working_dir}{sep}plugins")
 
 
-path.insert(1, f"{working_dir}/plugins")
+async def idle():
+    task = None
 
-try:
-    bot.start()
-except PhoneNumberInvalidError:
-    print(lang('PhoneNumberInvalidError'))
-    exit(1)
+    def signal_handler(_, __):
+        if web.web_server_task:
+            web.web_server_task.cancel()
+        task.cancel()
 
-for module_name in module_list:
+    for s in (SIGINT, SIGTERM, SIGABRT):
+        signal_fn(s, signal_handler)
+
+    while True:
+        task = asyncio.create_task(bot._run_until_disconnected())
+        web.bot_main_task = task
+        try:
+            await task
+        except asyncio.CancelledError:
+            break
+
+
+async def console_bot():
     try:
-        if user_bot:
-            import_module("pagermaid.bots." + module_name)
-        else:
-            import_module("pagermaid.modules." + module_name)
-    except BaseException as exception:
-        logs.info(f"{lang('module')} {module_name} {lang('error')}: {type(exception)}: {exception}")
+        await bot.start()
+    except AuthKeyError:
+        safe_remove(SESSION_PATH)
+        exit()
+    me = await bot.get_me()
+    bot.me = me
+    if me.bot:
+        safe_remove(SESSION_PATH)
+        exit()
+    logs.info(f"{lang('save_id')} {me.first_name}({me.id})")
+    await load_all()
+    await process_exit(start=True, _client=bot)
 
-for plugin_name in plugin_list:
+
+async def main():
+    logs.info(lang("platform") + platform + lang("platform_load"))
+    if not scheduler.running:
+        scheduler.start()
+    await web.start()
+    await console_bot()
+    logs.info(lang("start"))
     try:
-        import_module("plugins." + plugin_name)
-    except BaseException as exception:
-        logs.info(f"{lang('module')} {plugin_name} {lang('error')}: {exception}")
-        plugin_list.remove(plugin_name)
+        await idle()
+    finally:
+        if scheduler.running:
+            scheduler.shutdown()
+        try:
+            await bot.disconnect()
+        except ConnectionError:
+            pass
+        if web.web_server:
+            try:
+                await web.web_server.shutdown()
+            except AttributeError:
+                pass
 
-if server is not None:
-    import_module("pagermaid.interface")
 
-logs.info(lang('start'))
-
-if redis_status():
-    async def _restart_complete_report():
-        restart_args = redis.get("restart_edit")
-        if restart_args:
-            redis.delete("restart_edit")
-            restart_args = restart_args.decode("utf-8")
-            restart_msg, restart_chat = restart_args.split("|")
-            await bot.edit_message(
-                int(restart_chat), int(restart_msg),
-                lang('restart_complete')
-            )
-
-    bot.loop.create_task(_restart_complete_report())
-
-bot.run_until_disconnected()
-
-if server is not None:
-    try:
-        server.stop()
-    except AttributeError:
-        pass
+bot.loop.run_until_complete(main())

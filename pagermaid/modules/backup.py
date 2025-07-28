@@ -1,16 +1,17 @@
-""" Pagermaid backup and recovery plugin. """
-import json
+"""Pagermaid backup and recovery plugin."""
+
 import os
 import tarfile
-from distutils.util import strtobool
 from io import BytesIO
 from traceback import format_exc
 
 from telethon.tl.types import MessageMediaDocument
 
-from pagermaid import config, redis_status, redis
+from pagermaid.config import Config
+from pagermaid.enums import Message
 from pagermaid.listener import listener
-from pagermaid.utils import alias_command, upload_attachment, lang
+from pagermaid.utils import lang
+from pagermaid.utils.bot_utils import upload_attachment
 
 pgm_backup_zip_name = "pagermaid_backup.tar.gz"
 
@@ -43,10 +44,11 @@ def un_tar_gz(filename, dirs):
         return False
 
 
-@listener(is_plugin=True, outgoing=True, command=alias_command("backup"),
-          description=lang('back_des'))
-async def backup(context):
-    await context.edit(lang('backup_process'))
+@listener(
+    is_plugin=False, outgoing=True, command="backup", description=lang("backup_des")
+)
+async def backup(message: Message):
+    await message.edit(lang("backup_process"))
 
     # Remove old backup
     if os.path.exists(pgm_backup_zip_name):
@@ -54,80 +56,69 @@ async def backup(context):
 
     # remove mp3 , they are so big !
     for i in os.listdir("data"):
-        if i.find(".mp3") != -1 or i.find(".jpg") != -1 or i.find(".flac") != -1 or i.find(".ogg") != -1:
+        if (
+            i.find(".mp3") != -1
+            or i.find(".jpg") != -1
+            or i.find(".flac") != -1
+            or i.find(".ogg") != -1
+        ):
             os.remove(f"data{os.sep}{i}")
 
-    # backup redis when available
-    redis_data = {}
-    if redis_status():
-        for k in redis.keys():
-            data_type = redis.type(k)
-            if data_type == b'string':
-                v = redis.get(k)
-                redis_data[k.decode()] = v.decode()
-
-        with open(f"data{os.sep}redis.json", "w", encoding='utf-8') as f:
-            json.dump(redis_data, f, indent=4)
-
     # run backup function
-    make_tar_gz(pgm_backup_zip_name, ["data", "plugins", "config.yml"])
-    if strtobool(config['log']):
-        await upload_attachment(pgm_backup_zip_name, int(config['log_chatid']), None)
-        await context.edit(lang("backup_success_channel"))
+    make_tar_gz(pgm_backup_zip_name, ["data", "plugins"])
+    if Config.LOG:
+        try:
+            await upload_attachment(pgm_backup_zip_name, Config.LOG_ID, None)
+            await message.edit(lang("backup_success_channel"))
+        except Exception:
+            await message.edit(lang("backup_success"))
     else:
-        await context.edit(lang("backup_success"))
+        await message.edit(lang("backup_success"))
 
 
-@listener(is_plugin=True, outgoing=True, command=alias_command("recovery"),
-          description=lang('recovery_des'))
-async def recovery(context):
-    message = await context.get_reply_message()
+@listener(
+    is_plugin=False,
+    outgoing=True,
+    command="recovery",
+    need_admin=True,
+    description=lang("recovery_des"),
+)
+async def recovery(message: Message):
+    reply = await message.get_reply_message()
 
-    if message and message.media:  # Overwrite local backup
-        if isinstance(message.media, MessageMediaDocument):
-            try:
-                if message.media.document.attributes[0].file_name.find(".tar.gz") != -1:  # Verify filename
-                    await context.edit(lang('recovery_down'))
-                    # Start download process
-                    _file = BytesIO()
-                    await context.client.download_file(message.media.document, _file)
-                    with open(pgm_backup_zip_name, "wb") as f:
-                        f.write(_file.getvalue())
-                else:
-                    return await context.edit(lang('recovery_file_error'))
-            except Exception as e:  # noqa
-                print(e, format_exc())
-                return await context.edit(lang('recovery_file_error'))
-        else:
-            return await context.edit(lang('recovery_file_error'))
+    if not reply:
+        return await message.edit(lang("recovery_file_error"))
+    if not reply.media:
+        return await message.edit(lang("recovery_file_error"))
+    if not isinstance(reply.media, MessageMediaDocument):
+        return await message.edit(lang("recovery_file_error"))
 
+    try:
+        if (
+            ".tar.gz" not in reply.media.document.attributes[0].file_name
+        ):  # Verify filename
+            return await message.edit(lang("recovery_file_error"))
+        await message.edit(lang("recovery_down"))
+        # Start download process
+        _file = BytesIO()
+        await message.client.download_file(message.media.document, _file)
+        with open(pgm_backup_zip_name, "wb") as f:
+            f.write(_file.getvalue())
+    except Exception as e:  # noqa
+        print(e, format_exc())
+        return await message.edit(lang("recovery_file_error"))
     # Extract backup files
-    await context.edit(lang('recovery_process'))
+    await message.edit(lang("recovery_process"))
     if not os.path.exists(pgm_backup_zip_name):
-        return await context.edit(lang('recovery_file_not_found'))
+        return await message.edit(lang("recovery_file_not_found"))
     elif not un_tar_gz(pgm_backup_zip_name, ""):
         os.remove(pgm_backup_zip_name)
-        return await context.edit(lang('recovery_file_error'))
-
-    # Recovery redis
-    if redis_status() and os.path.exists(f"data{os.sep}redis.json"):
-        with open(f"data{os.sep}redis.json", "r", encoding='utf-8') as f:
-            try:
-                redis_data = json.load(f)
-                for k, v in redis_data.items():
-                    redis.set(k, v)
-            except json.JSONDecodeError:
-                """JSON load failed, skip redis recovery"""
-            except Exception as e:  # noqa
-                print(e, format_exc())
+        return await message.edit(lang("recovery_file_error"))
 
     # Cleanup
     if os.path.exists(pgm_backup_zip_name):
         os.remove(pgm_backup_zip_name)
-    if os.path.exists(f"data{os.sep}redis.json"):
-        os.remove(f"data{os.sep}redis.json")
 
-    result = await context.edit(lang('recovery_success') + " " + lang('apt_reboot'))
-    if redis_status():
-        redis.set("restart_edit", f"{result.id}|{result.chat_id}")
-    await context.client.disconnect()
+    await message.edit(lang("recovery_success") + " " + lang("apt_reboot"))
+    await message.client.disconnect()
+    return None

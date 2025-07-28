@@ -1,30 +1,19 @@
-""" Message related utilities. """
+"""Message related utilities."""
 
-from telethon.tl.functions.messages import DeleteChatUserRequest
-from telethon.tl.functions.channels import LeaveChannelRequest
 from telethon.errors import ForbiddenError, AuthKeyError
-from telethon.errors.rpcerrorlist import ChatIdInvalidError, FloodWaitError, UserNotParticipantError, MessageIdInvalidError
-from distutils.util import strtobool
-
+from telethon.errors.rpcerrorlist import FloodWaitError, MessageIdInvalidError
 from telethon.tl.types import ChannelForbidden
 
-from pagermaid import bot, log, config
+from pagermaid.config import Config
+from pagermaid.enums import Message
 from pagermaid.listener import listener
-from pagermaid.utils import lang, alias_command, client
+from pagermaid.utils import lang
+from pagermaid.utils.bot_utils import log
 
 
-def isfloat(value):
-    try:
-        float(value)
-        return True
-    except ValueError:
-        return False
-
-
-@listener(is_plugin=False, outgoing=True, command=alias_command("id"),
-          description=lang('id_des'))
+@listener(is_plugin=False, outgoing=True, command="id", description=lang("id_des"))
 async def userid(context):
-    """ Query the UserID of the sender of the message you replied to. """
+    """Query the UserID of the sender of the message you replied to."""
     message = await context.get_reply_message()
     text = "Message ID: `" + str(context.message.id) + "`\n\n"
     text += "**Chat**\nid:`" + str(context.chat_id) + "`\n"
@@ -46,11 +35,19 @@ async def userid(context):
             if msg_from.username:
                 text += "username: @" + msg_from.username + "\n"
         except AttributeError:
-            await context.edit(lang('leave_not_group'))
+            await context.edit(lang("leave_not_group"))
             return
         text += "date: `" + str(msg_from.date) + "`\n"
     if message:
-        text += "\n" + lang('id_hint') + "\nMessage ID: `" + str(message.id) + "`\n\n**User**\nid: `" + str(message.sender_id) + "`"
+        text += (
+            "\n"
+            + lang("id_hint")
+            + "\nMessage ID: `"
+            + str(message.id)
+            + "`\n\n**User**\nid: `"
+            + str(message.sender_id)
+            + "`"
+        )
         try:
             if message.sender.bot:
                 text += f"\nis_bot: {lang('id_is_bot_yes')}"
@@ -67,9 +64,14 @@ async def userid(context):
         except AttributeError:
             pass
         if message.forward:
-            if str(message.forward.chat_id).startswith('-100'):
-                text += "\n\n**Forward From Channel**\nid: `" + str(
-                    message.forward.chat_id) + "`\ntitle: `" + message.forward.chat.title + "`"
+            if str(message.forward.chat_id).startswith("-100"):
+                text += (
+                    "\n\n**Forward From Channel**\nid: `"
+                    + str(message.forward.chat_id)
+                    + "`\ntitle: `"
+                    + message.forward.chat.title
+                    + "`"
+                )
                 if not isinstance(message.forward.chat, ChannelForbidden):
                     if message.forward.chat.username:
                         text += "\nusername: @" + message.forward.chat.username
@@ -79,189 +81,129 @@ async def userid(context):
                     text += "\ndate: `" + str(message.forward.date) + "`"
             else:
                 if message.forward.sender:
-                    text += "\n\n**Forward From User**\nid: `" + str(
-                        message.forward.sender_id) + "`"
+                    text += (
+                        "\n\n**Forward From User**\nid: `"
+                        + str(message.forward.sender_id)
+                        + "`"
+                    )
                     try:
                         if message.forward.sender.bot:
                             text += f"\nis_bot: {lang('id_is_bot_yes')}"
                         try:
-                            text += "\nfirst_name: `" + message.forward.sender.first_name + "`"
+                            text += (
+                                "\nfirst_name: `"
+                                + message.forward.sender.first_name
+                                + "`"
+                            )
                         except TypeError:
                             text += f"\n**{lang('id_da')}**"
                         if message.forward.sender.last_name:
-                            text += "\nlast_name: `" + message.forward.sender.last_name + "`"
+                            text += (
+                                "\nlast_name: `"
+                                + message.forward.sender.last_name
+                                + "`"
+                            )
                         if message.forward.sender.username:
                             text += "\nusername: @" + message.forward.sender.username
                         if message.forward.sender.lang_code:
-                            text += "\nlang_code: `" + message.forward.sender.lang_code + "`"
+                            text += (
+                                "\nlang_code: `"
+                                + message.forward.sender.lang_code
+                                + "`"
+                            )
                     except AttributeError:
                         pass
                     text += "\ndate: `" + str(message.forward.date) + "`"
     await context.edit(text)
 
 
-@listener(is_plugin=False, outgoing=True, command=alias_command("uslog"),
-          description=lang('uslog_des'),
-          parameters="<string>")
-async def uslog(context):
-    """ Forwards a message into log group """
-    if strtobool(config['log']):
-        if context.reply_to_msg_id:
-            reply_msg = await context.get_reply_message()
-            await reply_msg.forward_to(int(config['log_chatid']))
-        elif context.arguments:
-            await log(context.arguments)
+@listener(
+    is_plugin=False,
+    outgoing=True,
+    command="uslog",
+    description=lang("uslog_des"),
+    parameters="<string>",
+)
+async def uslog(message: Message):
+    """Forwards a message into log group"""
+    if Config.LOG:
+        if message.reply_to_msg_id:
+            reply_msg = await message.get_reply_message()
+            await reply_msg.forward_to(Config.LOG_ID)
+        elif message.arguments:
+            await log(message.arguments)
         else:
-            await context.edit(lang('arg_error'))
+            await message.edit(lang("arg_error"))
             return
-        await context.edit(lang('uslog_success'))
+        await message.edit(lang("uslog_success"))
     else:
-        await context.edit(lang('uslog_log_disable'))
+        await message.edit(lang("uslog_log_disable"))
+    return
 
 
-@listener(is_plugin=False, outgoing=True, command=alias_command("log"),
-          description=lang('log_des'),
-          parameters="<string>")
-async def logging(context):
-    """ Forwards a message into log group """
-    if strtobool(config['log']):
-        if context.reply_to_msg_id:
-            reply_msg = await context.get_reply_message()
-            await reply_msg.forward_to(int(config['log_chatid']))
-        elif context.arguments:
-            await log(context.arguments)
+@listener(
+    is_plugin=False,
+    outgoing=True,
+    command="log",
+    description=lang("log_des"),
+    parameters="<string>",
+)
+async def logging(message: Message):
+    """Forwards a message into log group"""
+    if Config.LOG:
+        if message.reply_to_msg_id:
+            reply_msg = await message.get_reply_message()
+            await reply_msg.forward_to(Config.LOG_ID)
+        elif message.arguments:
+            await log(message.arguments)
         else:
-            await context.edit(lang('arg_error'))
+            await message.edit(lang("arg_error"))
             return
-        await context.delete()
+        await message.delete()
     else:
-        await context.edit(lang('uslog_log_disable'))
+        await message.edit(lang("uslog_log_disable"))
 
 
-@listener(is_plugin=False, outgoing=True, command=alias_command("re"),
-          description=lang('re_des'),
-          parameters=lang('re_parameters'))
-async def re(context):
-    """ Forwards a message into this group """
-    reply = await context.get_reply_message()
+@listener(
+    is_plugin=False,
+    outgoing=True,
+    command="re",
+    description=lang("re_des"),
+    parameters=lang("re_parameters"),
+)
+async def re(message: Message):
+    """Forwards a message into this group"""
+    reply = await message.get_reply_message()
     if reply:
-        if context.arguments == '':
+        if message.arguments == "":
             num = 1
         else:
             try:
-                num = int(context.arguments)
+                num = int(message.arguments)
                 if num > 100:
-                    await context.edit(lang('re_too_big'))
-                    return True
-            except:
-                await context.edit(lang('re_arg_error'))
-                return True
-        try:
-            await context.delete()
-        except ValueError:
-            pass
+                    await message.edit(lang("re_too_big"))
+            except Exception:
+                await message.edit(lang("re_arg_error"))
+                return
+        await message.safe_delete()
         forward_allowed = True
         for nums in range(0, num):
             try:
                 if forward_allowed:
                     await reply.forward_to(reply.peer_id)
                 else:
-                    await bot.send_message(reply.peer_id, reply)
+                    await message.client.send_message(reply.peer_id, reply)
             except MessageIdInvalidError:
                 if forward_allowed:
                     forward_allowed = False
-                    await bot.send_message(reply.peer_id, reply)
+                    await message.client.send_message(reply.peer_id, reply)
                 else:
-                    await context.respond(lang('re_forbidden'))
+                    await message.respond(lang("re_forbidden"))
                     return
-            except ForbiddenError:
-                return
-            except FloodWaitError:
-                return
-            except ValueError:
+            except (ForbiddenError, FloodWaitError, ValueError):
                 return
             except AuthKeyError:
-                await context.respond(lang('re_forbidden'))
+                await message.respond(lang("re_forbidden"))
                 return
     else:
-        await context.edit(lang('not_reply'))
-
-
-@listener(is_plugin=False, outgoing=True, command=alias_command("leave"),
-          description=lang('leave_res'))
-async def leave(context):
-    """ It leaves you from the group. """
-    if context.is_group:
-        await context.edit(lang('leave_bye'))
-        try:
-            await bot(DeleteChatUserRequest(chat_id=context.chat_id,
-                                            user_id=context.sender_id
-                                            ))
-        except ChatIdInvalidError:
-            try:
-                await bot(LeaveChannelRequest(context.chat_id))
-            except UserNotParticipantError:
-                await context.delete()
-    else:
-        await context.edit(lang('leave_not_group'))
-
-
-@listener(is_plugin=False, outgoing=True, command=alias_command("meter2feet"),
-          description=lang('m2f_des'),
-          parameters="<meters>")
-async def meter2feet(context):
-    """ Convert meter to feet. """
-    if not len(context.parameter) == 1:
-        await context.edit(lang('arg_error'))
-        return
-    try:
-        meter = float(context.parameter[0])
-    except ValueError:
-        await context.edit(lang('re_arg_error'))
-        return
-    feet = meter / .3048
-    await context.edit(f"{lang('m2f_get')} {str(meter)}{lang('m2f_meter')} {lang('m2f_convert_to')}  "
-                       f"{str(feet)} {lang('m2f_feet')}")
-
-
-@listener(is_plugin=False, outgoing=True, command=alias_command("feet2meter"),
-          description=lang('f2m_des'),
-          parameters="<feet>")
-async def feet2meter(context):
-    """ Convert feet to meter. """
-    if not len(context.parameter) == 1:
-        await context.edit(lang('arg_error'))
-        return
-    if not isfloat(context.parameter[0]):
-        return await context.edit(lang('re_arg_error'))
-    feet = float(context.parameter[0])
-    meter = feet * .3048
-    await context.edit(f"{lang('m2f_get')} {str(feet)} {lang('m2f_feet')}{lang('m2f_convert_to')} {str(meter)} "
-                       f"{lang('m2f_meter')}")
-
-
-@listener(is_plugin=False, outgoing=True, command=alias_command("hitokoto"),
-          description=lang('hitokoto_des'))
-async def hitokoto(context):
-    """ Get hitokoto.cn """
-    hitokoto_while = 1
-    hitokoto_json = None
-    try:
-        hitokoto_json = (await client.get("https://v1.hitokoto.cn/?charset=utf-8")).json()
-    except ValueError:
-        while hitokoto_while < 10:
-            hitokoto_while += 1
-            try:
-                hitokoto_json = (await client.get("https://v1.hitokoto.cn/?charset=utf-8")).json()
-                break
-            except:
-                continue
-        if not hitokoto_json:
-            return
-    hitokoto_type = {'a': lang('hitokoto_type_anime'), 'b': lang('hitokoto_type_manga'),
-                     'c': lang('hitokoto_type_game'),  'd': lang('hitokoto_type_article'),
-                     'e': lang('hitokoto_type_original'), 'f': lang('hitokoto_type_web'),
-                     'g': lang('hitokoto_type_other'), 'h': lang('hitokoto_type_movie'),
-                     'i': lang('hitokoto_type_poem'), 'j': lang('hitokoto_type_netease_music'),
-                     'k': lang('hitokoto_type_philosophy'), 'l': lang('hitokoto_type_meme')}
-    await context.edit(f"{hitokoto_json['hitokoto']} - {hitokoto_json['from']}（{hitokoto_type[hitokoto_json['type']]}）")
+        await message.edit(lang("not_reply"))

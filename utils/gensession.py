@@ -5,6 +5,7 @@ try:
     from telethon.errors.rpcerrorlist import ApiIdInvalidError, PhoneNumberInvalidError
     from telethon.sessions import StringSession
     from telethon.sync import TelegramClient
+
     print("Found an existing installation of Telethon...\nSuccessfully Imported.")
 except ImportError:
     print("Installing Telethon...")

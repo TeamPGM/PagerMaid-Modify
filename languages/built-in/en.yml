@@ -12,7 +12,7 @@ msg_ValueError: Oops ~ No messages were successfully obtained!
 isinstance: Oops ~ Length must be an integer!
 #init
 platform: Detected platform as
-platform_load: proceeding to early load process of PagerMaid.
+platform_load: 'proceeding to early load process of PagerMaid.'
 platform_unsupported: is not supported, please start PagerMaid on Linux or *BSD.
 error_prefix: Oops ~
 python: Please upgrade your python interpreter to at least version 3.6.
@@ -28,6 +28,7 @@ too_long: Oops ~ The output generated was too long and could not be presented.
 run_error: Oops ~ An error occurred while executing this command.
 report_error: Oops ~ report error.
 use_method: Usage
+need_permission: Required Permission
 #account
 ## username
 username_des: sets the username.
@@ -111,6 +112,7 @@ help_des: Shows a list of commands or help string of a single command.
 help_list: Commands
 help_send: Issue
 help_see: to view help for a specific command.*
+help_no_permission: Sorry, you don't have permission to view help information for this command.
 help_source: '🖥 Source'
 help_plugin: '🔅 Plugins'
 help_module: '💠 Modules'
@@ -243,13 +245,14 @@ coin_lost: I lost my coin
 ## lang
 lang_des: Switch language.
 lang_change_to: The language has been switched to
+lang_reboot: Reloading.
 lang_current_lang: The current language is
-lang_all_lang: All available languages are 
+lang_all_lang: All available languages are
 ## alias
 alias_des: Redirect original command.
 alias_list: 'The following is a list of redirect commands:'
 alias_no: You have not redirected any original commands.
-alias_success: Edit redirection command success，PagerMaid-Modify is restarting.
+alias_success: Edit redirection command success，PagerMaid-Modify is reloading.
 alias_exist: Something went wrong, woooo~ The command that is redirected is already occupied.
 alias_no_exist: Something went wrong, woooo~ The original command is not redirected.
 #message
@@ -301,21 +304,21 @@ hitokoto_type_meme: trembling
 ## apt
 apt_des: Used to manage plugins installed to PagerMaid-Modify.
 apt_parameters: "{update|search|show|status|install|remove|enable|disable|upload|export} <plugin name/file>"
+apt_name: "PagerMaid-Modify Plugins Manager"
 apt_processing: Installing plugins...
 apt_no_py: Something went wrong ~ Failed to get the plug-in file from the attachment.
 apt_plugin: plugin
 apt_installed: installed
-apt_reboot: PagerMaid-Modify is restarting.
+apt_reboot: PagerMaid-Modify is reloading.
 apt_install_success: successful installation
-apt_not_found: Error, No plugin found
-apt_install_failed: installation failed
+apt_not_found: not founded
 apt_no_update: no need to update
 apt_remove_success: The plugin was successfully removed
 apt_remove: remove plugin
 apt_removed_plugins: removed plugins
 apt_not_exist: Something went wrong ~ The specified plug-in does not exist.
 apt_no_running_plugins: There are no running plugins.
-apt_no_load_falied_plugins: There are no running plugins.
+apt_no_load_failed_plugins: No failed plugins loaded
 apt_no_disabled_plugins: Plugins that are not disabled
 apt_plugin_list: plug-in list
 apt_plugin_running: running
@@ -341,6 +344,15 @@ apt_plugin_maintainer: Author
 apt_plugin_size: size
 apt_plugin_support: support period
 apt_plugin_des_short: description
+apt_source_des: "Add/Del/View Custom Plugin Sources."
+apt_source_parameters: "[add/del] [custom plugin source links]"
+apt_source_not_found: There is currently no custom plugin source.
+apt_source_header: "Current custom plugin source:"
+apt_source_add_success: Add successful.
+apt_source_del_success: Del successful.
+apt_source_add_failed: Add failed, this source already exists.
+apt_source_add_invalid: Add failed, this source is invalid.
+apt_source_del_failed: Deletion failed, this source does not exist.
 #prune
 ## prune
 prune_des: Replying to a message with this command will delete all messages between the latest message and the message. Limit, 1000 messages based on message ID, more than 1000 messages may trigger the limit of deleting messages too quickly. (Non-group administrators only delete their own messages)
@@ -384,7 +396,8 @@ status_platform: Host platform
 status_release: Kernel version
 status_python: Python version
 status_telethon: Telethon version
-status_db: Database status
+status_pyrogram: Pyrogram version
+status_pgm: PagerMaid version
 status_uptime: Uptime
 ## stats
 stats_des: View conversation statistics.
@@ -399,7 +412,7 @@ stats_bot: Bot
 ## speedtest
 speedtest_des: Execute the speedtest script and send the result.
 speedtest_processing: Execute test scripts...
-speedtest_ServerFailure: Unable to determine the best server.
+speedtest_ServerFailure: Enable to determine the best server.
 speedtest_ConnectFailure: Connection failure.
 ## connection
 connection_des: Display the connection information between the server running PagerMaid-Modify and the Telegram server.
@@ -421,6 +434,29 @@ topcloud_des: Generate a word cloud picture of resource usage.
 topcloud_processing: generating pictures...
 topcloud_caption: The running process.
 topcloud_success: A word cloud picture of resource usage is generated.
+#sudo
+sudo_des: Allow other users to use your PagerMaid-Modify.
+sudo_has_enabled: Sudo Mode is not turned off.
+sudo_enable: Sudo Mode on successfully.
+sudo_no_sudo: 'Please note: You haven''t added a Sudo administrator yet.'
+sudo_disable: Sudo Mode off successfully.
+sudo_has_disabled: Sudo Mode is not on.
+sudo_add: Successfully added this user to the Sudo Administrators list.
+sudo_add_chat: Successfully added this chat to Sudo admin list.
+sudo_no: This user does not exist in the Sudo Administrators list.
+sudo_remove: Successful removal of this user from the Sudo administrator list.
+sudo_remove_chat: Successfully removed this chat from Sudo admin list
+sudo_no_one: You haven't added any users to the Sudo admin list yet.
+sudo_group_list: 'Group have the following permissions:'
+sudo_group_list_no: There is no permission for this permission group or this permission group
+sudo_group_add_user: Add this user to this permission group successfully.
+sudo_group_del_user: Successfully removed this user from this permission group.
+sudo_group_add_per: Successfully added this permission to this permission group.
+sudo_group_del_per: Successfully removed this permission from this permission group.
+sudo_group_rename_per: Successfully renamed this permission group.
+sudo_user_add_per: This permission was added to this user.
+sudo_user_del_per: Successfully removed this permission from this user.
+sudo_list: 'Sudo Administrator List:'
 #sticker
 ## sticker
 sticker_des: Collect the replied images/stickers as stickers, and specify emoji through parameters to set a non-default emoji.
@@ -432,7 +468,7 @@ sticker_pack_title: private possession
 sticker_resizing: Resizing the image...
 sticker_telegram_server_error: Failed to connect to Telegram server...
 sticker_change_pack_to: switch to private collection
-sticker_last_is_full: The last sticker pack is full...
+sticker_last_is_full: 'The last sticker pack is full...'
 sticker_has_been_added: This picture/sticker has been added to
 sticker_this: this
 sticker_pack: sticker pack
@@ -468,6 +504,14 @@ eval_parameters: <command>
 eval_channel: Something went wrong ~ The current PagerMaid-Modify configuration prohibits the execution of Python commands in the channel.
 eval_success: execute Python commands remotely
 eval_need_dev: '**Please note: This command can directly operate your account** This command is only for developers. If you know what you are doing, please manually configure the `dev` item in the Redis database to any value or create the `dev` file in the `data` folder.'
+eval_executing: '🔃 Executing...'
+eval_code: '💻 Code:'
+eval_result: '✨ Result:'
+eval_time: 'Completed in {}s.'
+## send_log
+send_log_des: Send the log file to the specified user.
+send_log_not_found: The log file does not exist.
+send_log_caption: Log file of PagerMaid-Modify.
 ## restart
 restart_des: Restart PagerMaid-Modify
 restart_processing: Try to restart PagerMaid-Modify.
@@ -480,7 +524,7 @@ trace_over128: Something went wrong, woooo~ More than 128 redirects, aborting!
 trace_re: redirect
 trace_http_error: Something went wrong ~ There was a problem when sending the HTTP request.
 ## chat
-chat_des: Join the Pagermaid-Modify user group.
+chat_des: Join the PagerMaid-Modify user group.
 chat_message: Hello everyone, I am a newcomer.
 chat_already_join1: You have already successfully joined
 chat_already_join2: User group.
@@ -527,3 +571,9 @@ sb_remove: The automatic banned list has been removed this group.
 sb_exist: This group exists in the automatic banned list.
 sb_no_exist: This group does't exist in the automatic banned list.
 sb_channel: Successfully blocked this channel in this group.
+#reload
+reload_des: Reload the PagerMaid-Modify instance.
+reload_ok: Successfully reloaded.
+#conversation
+conversation_already_in_error: Another conversation is already in progress.
+conversation_timed_out_error: Response timed out.

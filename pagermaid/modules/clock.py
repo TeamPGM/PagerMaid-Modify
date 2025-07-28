@@ -1,33 +1,40 @@
-""" This module handles world clock related utility. """
+"""This module handles world clock related utility."""
 
 from datetime import datetime
+
 from pytz import country_names, country_timezones, timezone
-from pagermaid import config
+
+from pagermaid.config import Config
+from pagermaid.enums import Message
 from pagermaid.listener import listener
-from pagermaid.utils import lang, alias_command
+from pagermaid.utils import lang
 
 
-@listener(is_plugin=False, outgoing=True, command=alias_command('time'),
-          description=lang('time_des'),
-          parameters=lang('time_parameters'))
-async def time(context):
-    """ For querying time. """
-    if len(context.parameter) == 1:
-        country = context.parameter[0].title()
+@listener(
+    is_plugin=False,
+    outgoing=True,
+    command="time",
+    description=lang("time_des"),
+    parameters=lang("time_parameters"),
+)
+async def time(message: Message):
+    """For querying time."""
+    if len(message.parameter) == 1:
+        country = message.parameter[0].title()
     else:
-        country = config['application_region']
+        country = Config.REGION
     try:
-        time_form = config['time_form']
-        date_form = config['date_form']
+        time_form = Config.TIME_FORM
+        date_form = Config.DATE_FORM
         datetime.now().strftime(time_form)
         datetime.now().strftime(date_form)
     except (ValueError, KeyError):
         time_form = "%H:%M"
         date_form = "%A %y/%m/%d"
     if not country:
-        time_zone = await get_timezone(config['application_region'])
-        await context.edit(
-            f"**{config['application_region']} {lang('time_time')}：**\n"
+        time_zone = await get_timezone(Config.REGION)
+        await message.edit(
+            f"**{Config.REGION} {lang('time_time')}：**\n"
             f"`{datetime.now(time_zone).strftime(date_form)} "
             f"{datetime.now(time_zone).strftime(time_form)}`"
         )
@@ -35,25 +42,25 @@ async def time(context):
 
     time_zone = await get_timezone(country)
     if not time_zone:
-        if len(context.parameter) < 1:
-            await context.edit(lang('time_config'))
+        if len(message.parameter) < 1:
+            await message.edit(lang("time_config"))
             return
         try:
-            time_num, utc_num = int(context.parameter[0]), int(context.parameter[0])
+            time_num, utc_num = int(message.parameter[0]), int(message.parameter[0])
             if time_num == 0:
-                time_num, utc_num = '', ''
+                time_num, utc_num = "", ""
             elif 0 < time_num < 13:
-                time_num, utc_num = f'-{time_num}', f'+{time_num}'
+                time_num, utc_num = f"-{time_num}", f"+{time_num}"
             elif -13 < time_num < 0:
-                time_num, utc_num = f'+{-time_num}', f'{time_num}'
+                time_num, utc_num = f"+{-time_num}", f"{time_num}"
             elif time_num < -12:
-                time_num, utc_num = '+12', '-12'
+                time_num, utc_num = "+12", "-12"
             elif time_num > 12:
-                time_num, utc_num = '-12', '+12'
-            time_zone = timezone(f'Etc/GMT{time_num}')
-            country_name = f'UTC{utc_num}'
+                time_num, utc_num = "-12", "+12"
+            time_zone = timezone(f"Etc/GMT{time_num}")
+            country_name = f"UTC{utc_num}"
         except ValueError:
-            await context.edit(lang('arg_error'))
+            await message.edit(lang("arg_error"))
             return
     else:
         try:
@@ -61,13 +68,15 @@ async def time(context):
         except KeyError:
             country_name = country
 
-    await context.edit(f"**{country_name} {lang('time_time')}：**\n"
-                       f"`{datetime.now(time_zone).strftime(date_form)} "
-                       f"{datetime.now(time_zone).strftime(time_form)}`")
+    await message.edit(
+        f"**{country_name} {lang('time_time')}：**\n"
+        f"`{datetime.now(time_zone).strftime(date_form)} "
+        f"{datetime.now(time_zone).strftime(time_form)}`"
+    )
 
 
 async def get_timezone(target):
-    """ Returns timezone of the parameter in command. """
+    """Returns timezone of the parameter in command."""
     if "(Uk)" in target:
         target = target.replace("Uk", "UK")
     if "(Us)" in target:

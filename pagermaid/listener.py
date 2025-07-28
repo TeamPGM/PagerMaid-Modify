@@ -1,175 +1,263 @@
-""" PagerMaid event listener. """
+"""PagerMaid event listener."""
 
+import asyncio
+import contextlib
 import sys
-from distutils.util import strtobool
-from time import gmtime, strftime, time
+from asyncio import CancelledError
+from time import strftime, gmtime, time
 from traceback import format_exc
 
 from telethon import events
-from telethon.errors import MessageTooLongError, MessageNotModifiedError, MessageEmptyError
+from telethon.errors import (
+    MessageTooLongError,
+    MessageNotModifiedError,
+    MessageEmptyError,
+    UserNotParticipantError,
+    ForbiddenError,
+    PeerIdInvalidError,
+    MessageIdInvalidError,
+)
 from telethon.events import StopPropagation
 
-from pagermaid import bot, config, help_messages, logs, user_id, analytics, user_bot
-from pagermaid.utils import attach_report, lang, alias_command, admin_check
+from pagermaid.common.ignore import ignore_groups_manager
+from pagermaid.config import Config
+from pagermaid.enums import Message
+from pagermaid.enums.command import CommandHandler, CommandHandlerDecorator
+from pagermaid.group_manager import Permission
+from pagermaid.hook import Hook
+from pagermaid.services import bot
+from pagermaid.static import help_messages, read_context, all_permissions
+from pagermaid.utils import (
+    lang,
+    alias_command,
+    logs,
+)
+from pagermaid.utils.bot_utils import attach_report
+from pagermaid.utils.listener import (
+    # sudo_filter,
+    get_permission_name,
+    process_exit,
+    format_exc as format_exc_text,
+)
+from pagermaid.web import web
 
-try:
-    allow_analytics = strtobool(config['allow_analytic'])
-except KeyError:
-    allow_analytics = True
-except ValueError:
-    allow_analytics = True
+_lock = asyncio.Lock()
 
 
 def noop(*args, **kw):
     pass
 
 
-def listener(**args):
-    """ Register an event listener. """
-    command = args.get('command', None)
-    description = args.get('description', None)
-    parameters = args.get('parameters', None)
-    pattern = args.get('pattern', None)
-    diagnostics = args.get('diagnostics', True)
-    ignore_edited = args.get('ignore_edited', False)
-    is_plugin = args.get('is_plugin', True)
-    owners_only = args.get("owners_only", False)
-    admins_only = args.get("admins_only", False)
+def listener(**args) -> CommandHandlerDecorator:
+    """Register an event listener."""
+    parent_command = args.get("__parent_command")
+    command = args.get("command")
+    allow_parent = args.get("allow_parent", False)
+    disallow_alias = args.get("disallow_alias", False)
+    need_admin = args.get("need_admin", False)
+    description = args.get("description", None)
+    parameters = args.get("parameters", None)
+    pattern = sudo_pattern = args.get("pattern")
+    diagnostics = args.get("diagnostics", True)
+    ignore_edited = args.get("ignore_edited", False)
+    ignore_reacted = args.get("ignore_reacted", True)
+    ignore_forwarded = args.get("ignore_forwarded", True)
+    is_plugin = args.get("is_plugin", True)
+    incoming = args.get("incoming", False)
+    outgoing = args.get("outgoing", True)
     groups_only = args.get("groups_only", False)
+    privates_only = args.get("privates_only", False)
     support_inline = args.get("support_inline", False)
+    priority = args.get("priority", 50)
+    block_process = args.get("block_process", False)
+
+    if priority < 0 or priority > 100:
+        raise ValueError("Priority must be between 0 and 100.")
+    elif priority == 0 and is_plugin:
+        """Priority 0 is reserved for modules."""
+        priority = 1
+    elif (not is_plugin) and need_admin:
+        priority = 0
+
     if command is not None:
-        if command in help_messages:
-            raise ValueError(f"{lang('error_prefix')} {lang('command')} \"{command}\" {lang('has_reg')}")
-        pattern = fr"^-{command}(?: |$)([\s\S]*)"
-        if user_bot:
-            pattern = fr"^/{command}(@{user_bot})?(?: |$)([\s\S]*)"
-    if pattern is not None and not pattern.startswith('(?i)'):
-        args['pattern'] = f"(?i){pattern}"
+        if parent_command is None and command in help_messages:
+            if help_messages[alias_command(command)]["priority"] <= priority:
+                raise ValueError(
+                    f'{lang("error_prefix")} {lang("command")} "{command}" {lang("has_reg")}'
+                )
+            else:
+                block_process = True
+        real_command = (
+            alias_command(command, disallow_alias)
+            if parent_command is None
+            else f"{parent_command} {command}"
+        )
+        pattern = rf"^(-){real_command}(?: |$)([\s\S]*)"
+        sudo_pattern = rf"^(/){real_command}(?: |$)([\s\S]*)"
+    if pattern is not None and not pattern.startswith("(?i)"):
+        args["pattern"] = f"(?i){pattern}"
     else:
-        args['pattern'] = pattern
-    if 'ignore_edited' in args:
-        del args['ignore_edited']
-    if 'command' in args:
-        del args['command']
-    if 'diagnostics' in args:
-        del args['diagnostics']
-    if 'description' in args:
-        del args['description']
-    if 'parameters' in args:
-        del args['parameters']
-    if 'is_plugin' in args:
-        del args['is_plugin']
-    if 'owners_only' in args:
-        del args['owners_only']
-    if 'admins_only' in args:
-        del args['admins_only']
-    if 'groups_only' in args:
-        del args['groups_only']
-    if 'support_inline' in args:
-        del args['support_inline']
+        args["pattern"] = pattern
+    if sudo_pattern is not None and not sudo_pattern.startswith("(?i)"):
+        sudo_pattern = f"(?i){sudo_pattern}"
+    permission_name = get_permission_name(is_plugin, need_admin, command)
 
-    def decorator(function):
+    for key in (
+        "__parent_command",
+        "command",
+        "allow_parent",
+        "disallow_alias",
+        "need_admin",
+        "description",
+        "parameters",
+        "diagnostics",
+        "ignore_edited",
+        "ignore_reacted",
+        "ignore_forwarded",
+        "is_plugin",
+        "groups_only",
+        "privates_only",
+        "support_inline",
+        "priority",
+        "block_process",
+    ):
+        if key in args:
+            del args[key]
 
-        async def handler(context):
-            # bot admin command
-            if owners_only:
-                if context.sender_id and 'bot_admins' in config:
-                    if config['bot_admins'].count(context.sender_id) == 0:
-                        return
-                else:
-                    return
-            # group admin command
-            if admins_only:
-                if not (await admin_check(context)):
-                    return
-            # groups only
-            if groups_only:
-                if not context.is_group:
-                    return
+    def decorator(function) -> CommandHandler:
+        func = CommandHandler(
+            function,
+            (
+                alias_command(command, disallow_alias)
+                if command and parent_command is None
+                else None
+            ),
+        )
+
+        async def handler(context: "Message"):
+            if groups_only and not context.is_group:
+                return
+            if privates_only and not context.is_private:
+                return
             # filter inline bot msg
             if not support_inline and context.via_bot_id:
                 return
             try:
-                analytic = True
+                # ignore
                 try:
-                    if user_bot:
-                        parameter = context.pattern_match.group(2).split(' ')
-                    else:
-                        parameter = context.pattern_match.group(1).split(' ')
-                    if parameter == ['']:
-                        parameter = []
-                    context.parameter = parameter
-                    if user_bot:
-                        context.arguments = context.pattern_match.group(2)
-                    else:
-                        context.arguments = context.pattern_match.group(1)
-                except BaseException:
-                    analytic = False
-                    context.parameter = None
-                    context.arguments = None
-                await function(context)
-                # analytic
-                if analytic and allow_analytics:
-                    try:
-                        upload_command = context.text.split()[0][1:].split("@")[0]
-                        upload_command = alias_command(upload_command)
-                        if context.sender_id:
-                            if context.sender_id > 0:
-                                analytics.track(context.sender_id, f'Function {upload_command}',
-                                                {'command': upload_command})
-                            else:
-                                analytics.track(user_id, f'Function {upload_command}',
-                                                {'command': upload_command})
-                        else:
-                            analytics.track(user_id, f'Function {upload_command}',
-                                            {'command': upload_command})
-                    except Exception as e:
-                        logs.info(f"Analytics Error ~ {e}")
-            except StopPropagation:
-                raise StopPropagation
-            except MessageTooLongError:
-                await context.edit(lang('too_long'))
-            except MessageNotModifiedError:
-                pass
-            except MessageEmptyError:
-                pass
-            except BaseException as e:
-                exc_info = sys.exc_info()[1]
-                exc_format = format_exc()
-                try:
-                    await context.edit(lang('run_error'))
+                    if ignore_groups_manager.check_id(context.chat_id):
+                        return
                 except BaseException:
                     pass
+                try:
+                    arguments = context.pattern_match.group(2)
+                    parameter = arguments.split(" ")
+                    if parameter == [""]:
+                        parameter = []
+                    if parent_command is not None and command is not None:
+                        parameter.insert(0, command)
+                        arguments = f"{command} {arguments}".strip()
+                    context.parameter = parameter
+                    context.arguments = arguments
+                except BaseException:
+                    context.parameter = None
+                    context.arguments = None
+                # solve same process
+                async with _lock:
+                    if (context.chat_id, context.id) in read_context:
+                        return
+                    read_context[(context.chat_id, context.id)] = True
+
+                if command:
+                    await Hook.command_pre(
+                        context,
+                        parent_command or command,
+                        command if parent_command else None,
+                    )
+                await func.handler(context)
+                if command:
+                    await Hook.command_post(
+                        context,
+                        parent_command or command,
+                        command if parent_command else None,
+                    )
+            except StopPropagation:
+                raise StopPropagation
+            except KeyboardInterrupt as e:
+                raise KeyboardInterrupt from e
+            except MessageTooLongError:
+                await context.edit(lang("too_long"))
+            except (
+                UserNotParticipantError,
+                MessageNotModifiedError,
+                MessageEmptyError,
+                ForbiddenError,
+                PeerIdInvalidError,
+            ):
+                logs.warning(
+                    "An unknown chat error occurred while processing a command.",
+                )
+            except MessageIdInvalidError:
+                logs.warning("Please Don't Delete Commands While it's Processing..")
+            except (SystemExit, CancelledError):
+                await process_exit(start=False, _client=context.client, message=context)
+                await Hook.shutdown()
+                web.stop()
+            except BaseException as exc:
+                exc_info = sys.exc_info()[1]
+                exc_format = format_exc()
+                with contextlib.suppress(BaseException):
+                    exc_text = format_exc_text(exc)
+                    text = f"{lang('run_error')}\n\n{exc_text}"
+                    await context.edit(text, no_reply=True)  # noqa
                 if not diagnostics:
                     return
-                if strtobool(config['error_report']):
-                    report = f"# Generated: {strftime('%H:%M %d/%m/%Y', gmtime())}. \n" \
-                             f"# ChatID: {str(context.chat_id)}. \n" \
-                             f"# UserID: {str(context.sender_id)}. \n" \
-                             f"# Message: \n-----BEGIN TARGET MESSAGE-----\n" \
-                             f"{context.text}\n-----END TARGET MESSAGE-----\n" \
-                             f"# Traceback: \n-----BEGIN TRACEBACK-----\n" \
-                             f"{str(exc_format)}\n-----END TRACEBACK-----\n" \
-                             f"# Error: \"{str(exc_info)}\". \n"
-                    await attach_report(report, f"exception.{time()}.pagermaid", None,
-                                        "Error report generated.")
+                report = (
+                    f"# Generated: {strftime('%H:%M %d/%m/%Y', gmtime())}. \n"
+                    f"# ChatID: {str(context.chat_id)}. \n"
+                    f"# UserID: {str(context.sender_id)}. \n"
+                    f"# Message: \n-----BEGIN TARGET MESSAGE-----\n"
+                    f"{context.text}\n-----END TARGET MESSAGE-----\n"
+                    f"# Traceback: \n-----BEGIN TRACEBACK-----\n"
+                    f"{str(exc_format)}\n-----END TRACEBACK-----\n"
+                    f'# Error: "{str(exc_info)}". \n'
+                )
+
+                logs.error(report)
+                if Config.ERROR_REPORT:
+                    await attach_report(
+                        report,
+                        f"exception.{time()}.pgm.txt",
+                        None,
+                        "PGM Error report generated.",
+                    )
+                await Hook.process_error_exec(context, command, exc_info, exc_format)
+            if (context.chat_id, context.id) in read_context:
+                del read_context[(context.chat_id, context.id)]
+            if block_process or (parent_command and not allow_parent):
+                raise StopPropagation
 
         if not ignore_edited:
             bot.add_event_handler(handler, events.MessageEdited(**args))
         bot.add_event_handler(handler, events.NewMessage(**args))
 
-        return handler
+        func.set_handler(handler)
+        return func
 
-    if not is_plugin and 'disabled_cmd' in config:
-        if config['disabled_cmd'].count(command) != 0:
-            return noop
-
-    if description is not None and command is not None:
+    if description is not None and command is not None and parent_command is None:
         if parameters is None:
             parameters = ""
-        help_messages.update({
-            f"{command}": f"**{lang('use_method')}:** `-{command} {parameters}`\
-            \n{description}"
-        })
+        help_messages.update(
+            {
+                f"{alias_command(command)}": {
+                    "permission": permission_name,
+                    "use": f"**{lang('use_method')}:** `-{command} {parameters}`\n"
+                    f"**{lang('need_permission')}:** `{permission_name}`\n"
+                    f"{description}",
+                    "priority": priority,
+                }
+            }
+        )
+        all_permissions.append(Permission(permission_name))
 
     return decorator

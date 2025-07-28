@@ -1,142 +1,74 @@
-""" PagerMaid module that contains utilities related to system status. """
+"""PagerMaid module that contains utilities related to system status."""
 
+import re
 from datetime import datetime
-from json import loads
-from os import remove, popen
-from pathlib import Path
-from platform import python_version, uname
-from re import sub, findall
+from getpass import getuser
+from platform import uname, python_version
+from shutil import disk_usage
+from socket import gethostname
+from subprocess import Popen, PIPE
 from sys import platform
+from time import time
 
-from PIL import Image
-from requests import get
-from speedtest import distance, Speedtest, ShareResultsConnectFailure, ShareResultsSubmitFailure, NoMatchedServers, \
-    SpeedtestBestServerFailure, SpeedtestHTTPError
+from psutil import boot_time, virtual_memory, disk_partitions
+
 from telethon import functions
-from telethon import version as telethon_version
+from telethon.version import __version__ as telethon_version
 from telethon.tl.types import User, Chat, Channel
-from wordcloud import WordCloud
 
-from pagermaid import log, config, redis_status, start_time, silent, bot
+from pagermaid.common.status import get_bot_uptime
+from pagermaid.config import Config
+from pagermaid.enums import Client, Message
 from pagermaid.listener import listener
-from pagermaid.utils import execute, upload_attachment, lang, alias_command
+from pagermaid.utils import lang, execute
+from pagermaid.version import pgm_version
 
 DCs = {
     1: "149.154.175.50",
     2: "149.154.167.51",
     3: "149.154.175.100",
     4: "149.154.167.91",
-    5: "91.108.56.130"
+    5: "91.108.56.130",
 }
 
 
-@listener(is_plugin=False, outgoing=True, command=alias_command("sysinfo"),
-          description=lang('sysinfo_des'))
-async def sysinfo(context):
-    """ Retrieve system information via neofetch. """
-    if not silent:
-        await context.edit(lang('sysinfo_loading'))
+@listener(is_plugin=False, command="sysinfo", description=lang("sysinfo_des"))
+async def sysinfo(message: Message):
+    """Retrieve system information via neofetch."""
+    if not Config.SILENT:
+        message = await message.edit(lang("sysinfo_loading"))
+    if platform == "win32":
+        return await message.edit(neofetch_win(), parse_mode="html")
     result = await execute("neofetch --config none --stdout")
-    await context.edit(f"`{result}`")
+    await message.edit(f"`{result}`")
+    return None
 
 
-@listener(is_plugin=False, outgoing=True, command=alias_command("fortune"),
-          description=lang('fortune_des'))
-async def fortune(context):
-    """ Reads a fortune cookie. """
-    result = await execute("fortune")
-    if result == "/bin/sh: fortune: command not found":
-        await context.edit(lang('fortune_not_exist'))
-        return
-    await context.edit(result)
-
-
-@listener(is_plugin=False, outgoing=True, command=alias_command("fbcon"),
-          description=lang('fbcon_des'))
-async def tty(context):
-    """ Screenshots a TTY and prints it. """
-    if not silent:
-        await context.edit(lang('fbcon_processing'))
-    reply_id = context.message.reply_to_msg_id
-    result = await execute("fbdump | convert - image.png")
-    if result == "/bin/sh: fbdump: command not found":
-        await context.edit(lang('fbcon_no_fbdump'))
-        remove("image.png")
-        return
-    if result == "/bin/sh: convert: command not found":
-        await context.edit(lang('fbcon_no_ImageMagick'))
-        remove("image.png")
-        return
-    if result == "Failed to open /dev/fb0: Permission denied":
-        await context.edit(lang('fbcon_no_permission'))
-        return
-    if not await upload_attachment("./image.png", context.chat_id, reply_id,
-                                   caption=lang('fbcon_caption'),
-                                   preview=False, document=False):
-        await context.edit(lang('fbcon_error'))
-        return
-    await context.delete()
-    try:
-        remove("./image.png")
-    except:
-        pass
-    await log("Screenshot of binded framebuffer console taken.")
-
-
-@listener(is_plugin=False, outgoing=True, command=alias_command("status"),
-          description=lang('status_des'))
-async def status(context):
+@listener(is_plugin=False, command="status", description=lang("status_des"))
+async def status(message: Message):
     # database
-    database = lang('status_online') if redis_status() else lang('status_offline')
+    # database = lang('status_online') if redis_status() else lang('status_offline')
     # uptime https://gist.github.com/borgstrom/936ca741e885a1438c374824efb038b3
-    time_units = (
-        ('%m', 60 * 60 * 24 * 30),
-        ('%d', 60 * 60 * 24),
-        ('%H', 60 * 60),
-        ('%M', 60),
-        ('%S', 1)
+    uptime = await get_bot_uptime()
+    text = (
+        f"**{lang('status_hint')}** \n"
+        f"{lang('status_name')}: `{uname().node}` \n"
+        f"{lang('status_platform')}: `{platform}` \n"
+        f"{lang('status_release')}: `{uname().release}` \n"
+        f"{lang('status_python')}: `{python_version()}` \n"
+        f"{lang('status_telethon')}: `{telethon_version}` \n"
+        f"{lang('status_pgm')}: `{pgm_version}`\n"
+        f"{lang('status_uptime')}: `{uptime}`"
     )
-
-    async def human_time_duration(seconds):
-        parts = {}
-        for unit, div in time_units:
-            amount, seconds = divmod(int(seconds), div)
-            parts[unit] = str(amount)
-        try:
-            time_form = config['start_form']
-        except (ValueError, KeyError):
-            time_form = "%m/%d %H:%M"
-        for key, value in parts.items():
-            time_form = time_form.replace(key, value)
-        return time_form
-
-    current_time = datetime.utcnow()
-    uptime_sec = (current_time - start_time).total_seconds()
-    uptime = await human_time_duration(int(uptime_sec))
-    text = (f"**{lang('status_hint')}** \n"
-            f"{lang('status_name')}: `{uname().node}` \n"
-            f"{lang('status_platform')}: `{platform}` \n"
-            f"{lang('status_release')}: `{uname().release}` \n"
-            f"{lang('status_python')}: `{python_version()}` \n"
-            f"{lang('status_telethon')}: `{telethon_version.__version__}` \n"
-            f"{lang('status_db')}: `{database}` \n"
-            f"{lang('status_uptime')}: `{uptime}`"
-            )
-    await context.edit(text)
+    await message.edit(text)
 
 
-@listener(is_plugin=False, outgoing=True, command=alias_command("stats"),
-          description=lang('stats_des'))
-async def stats(context):
-    if not silent:
-        await context.edit(lang('stats_loading'))
-    u, g, s, c, b = 0, 0, 0, 0, 0
-    dialogs = await context.client.get_dialogs(
-        limit=None,
-        ignore_migrated=True
-    )
-    for d in dialogs:
-        current_entity = d.entity
+@listener(is_plugin=False, command="stats", description=lang("stats_des"))
+async def stats(client: Client, message: Message):
+    msg = await message.edit(lang("stats_loading"))
+    a, u, g, s, c, b = 0, 0, 0, 0, 0, 0
+    for dialog in await client.get_dialogs_list():
+        current_entity = dialog.entity
         if type(current_entity) is User:
             if current_entity.bot:
                 b += 1
@@ -149,161 +81,27 @@ async def stats(context):
                 c += 1
             else:
                 s += 1
-    text = (f"**{lang('stats_hint')}** \n"
-            f"{lang('stats_dialogs')}: `{len(dialogs)}` \n"
-            f"{lang('stats_private')}: `{u}` \n"
-            f"{lang('stats_group')}: `{g}` \n"
-            f"{lang('stats_supergroup')}: `{s}` \n"
-            f"{lang('stats_channel')}: `{c}` \n"
-            f"{lang('stats_bot')}: `{b}`"
-            )
-    await context.edit(text)
-
-
-@listener(is_plugin=False, outgoing=True, command=alias_command("speedtest"),
-          description=lang('speedtest_des'), parameters="(Server ID)")
-async def speedtest(context):
-    """ Tests internet speed using speedtest. """
-    try:
-        speed_test_path = config['speed_test_path']
-    except KeyError:
-        speed_test_path = ''
-    if not speed_test_path == '':
-        server = None
-        if len(context.parameter) == 1:
-            try:
-                server = int(context.parameter[0])
-            except ValueError:
-                await context.edit(lang('arg_error'))
-                return
-        speed_test_path += ' -f json'
-        if server:
-            speed_test_path += f' -s {server}'
-        if not silent:
-            await context.edit(lang('speedtest_processing'))
-        result = await execute(f'{speed_test_path}')
-        result = loads(result)
-        if result['type'] == 'log':
-            await context.edit(f"{result['level'].upper()}:{result['message']}")
-        elif result['type'] == 'result':
-            des = (
-                f"**Speedtest** \n"
-                f"Server: `{result['server']['name']} - "
-                f"{result['server']['location']}` \n"
-                f"Host: `{result['server']['host']}` \n"
-                f"Upload: `{unit_convert(result['upload']['bandwidth'] * 8)}` \n"
-                f"Download: `{unit_convert(result['download']['bandwidth'] * 8)}` \n"
-                f"Latency: `{result['ping']['latency']}` \n"
-                f"Jitter: `{result['ping']['jitter']}` \n"
-                f"Timestamp: `{result['timestamp']}`"
-            )
-            # 开始处理图片
-            data = get(f"{result['result']['url']}.png").content
-            with open('speedtest.png', mode='wb') as f:
-                f.write(data)
-            try:
-                img = Image.open('speedtest.png')
-                c = img.crop((17, 11, 727, 389))
-                c.save('speedtest.png')
-            except:
-                pass
-            try:
-                await context.client.send_file(context.chat_id, 'speedtest.png', caption=des)
-            except:
-                pass
-            try:
-                remove('speedtest.png')
-            except:
-                pass
-            await context.delete()
-        else:
-            await context.edit(result)
-        return
-    try:
-        test = Speedtest()
-    except SpeedtestHTTPError:
-        await context.edit(lang('speedtest_ConnectFailure'))
-        return
-    server, server_json = [], False
-    if len(context.parameter) == 1:
-        try:
-            server = [int(context.parameter[0])]
-        except ValueError:
-            await context.edit(lang('arg_error'))
-            return
-    elif len(context.parameter) >= 2:
-        try:
-            temp_json = findall(r'{(.*?)}', context.text.replace("'", '"'))
-            if len(temp_json) == 1:
-                server_json = loads("{" + temp_json[0] + "}")
-                server_json['d'] = distance(test.lat_lon, (float(server_json['lat']), float(server_json['lon'])))
-                test.servers = [server_json]
-            else:
-                await context.edit(lang('arg_error'))
-                return
-        except:
-            pass
-    if not silent:
-        await context.edit(lang('speedtest_processing'))
-    try:
-        if len(server) == 0:
-            if not server_json:
-                test.get_best_server()
-            else:
-                test.get_best_server(servers=test.servers)
-        else:
-            test.get_servers(servers=server)
-    except (SpeedtestBestServerFailure, NoMatchedServers) as e:
-        await context.edit(lang('speedtest_ServerFailure'))
-        return
-    try:
-        test.download()
-        test.upload()
-        test.results.share()
-    except (ShareResultsSubmitFailure, RuntimeError) as e:
-        await context.edit(lang('speedtest_ConnectFailure'))
-        return
-    except ShareResultsConnectFailure:
-        pass
-    result = test.results.dict()
-    des = (
-        f"**Speedtest** \n"
-        f"Server: `{result['server']['name']} - "
-        f"{result['server']['cc']}` \n"
-        f"Sponsor: `{result['server']['sponsor']}` \n"
-        f"Upload: `{unit_convert(result['upload'])}` \n"
-        f"Download: `{unit_convert(result['download'])}` \n"
-        f"Latency: `{result['ping']}` \n"
-        f"Timestamp: `{result['timestamp']}`"
+        a += 1
+    text = (
+        f"**{lang('stats_hint')}** \n"
+        f"{lang('stats_dialogs')}: `{a}` \n"
+        f"{lang('stats_private')}: `{u}` \n"
+        f"{lang('stats_group')}: `{g}` \n"
+        f"{lang('stats_supergroup')}: `{s}` \n"
+        f"{lang('stats_channel')}: `{c}` \n"
+        f"{lang('stats_bot')}: `{b}`"
     )
-    # 开始处理图片
-    if result['share']:
-        data = get(result['share']).content
-        with open('speedtest.png', mode='wb') as f:
-            f.write(data)
-        try:
-            img = Image.open('speedtest.png')
-            c = img.crop((17, 11, 727, 389))
-            c.save('speedtest.png')
-        except:
-            pass
-        try:
-            await context.client.send_file(context.chat_id, 'speedtest.png', caption=des)
-        except:
-            return
-        try:
-            remove('speedtest.png')
-        except:
-            pass
-        await context.delete()
-    else:
-        await context.edit(des)
+    await msg.edit(text)
 
 
-@listener(is_plugin=False, outgoing=True, command=alias_command("connection"),
-          description=lang('connection_des'))
-async def connection(context):
-    """ Displays connection information between PagerMaid and Telegram. """
+@listener(
+    is_plugin=False,
+    outgoing=True,
+    command="connection",
+    description=lang("connection_des"),
+)
+async def connection(context: Message):
+    """Displays connection information between PagerMaid and Telegram."""
     datacenter = await context.client(functions.help.GetNearestDcRequest())
     await context.edit(
         f"**{lang('connection_hint')}** \n"
@@ -313,15 +111,28 @@ async def connection(context):
     )
 
 
-@listener(is_plugin=False, outgoing=True, command=alias_command("pingdc"),
-          description=lang('pingdc_des'))
-async def pingdc(context):
-    """ Ping your or other data center's IP addresses. """
+@listener(is_plugin=False, command="pingdc", description=lang("pingdc_des"))
+async def ping_dc(message: Message):
+    """Ping your or other data center's IP addresses."""
     data = []
+    print("1")
     for dc in range(1, 6):
-        result = await execute(f"ping -c 1 {DCs[dc]} | awk -F '/' " + "'END {print $5}'")
-        data.append(result)
-    await context.edit(
+        if platform == "win32":
+            result = await execute(f'ping -n 1 {DCs[dc]} | find "最短"')
+            if result := re.findall(r"= (.*?)ms", result or ""):
+                data.append(result[0])
+            else:
+                data.append("0")
+        else:
+            result = await execute(
+                f"ping -c 1 {DCs[dc]} | awk -F 'time=' "
+                + "'/time=/ {print $2}' | awk '{print $1}'"
+            )
+            try:
+                data.append(str(float(result)))
+            except ValueError:
+                data.append("0")
+    await message.edit(
         f"{lang('pingdc_1')}: `{data[0]}ms`\n"
         f"{lang('pingdc_2')}: `{data[1]}ms`\n"
         f"{lang('pingdc_3')}: `{data[2]}ms`\n"
@@ -330,108 +141,119 @@ async def pingdc(context):
     )
 
 
-@listener(is_plugin=False, outgoing=True, command=alias_command("ping"), description=lang('ping_des'))
-async def ping(context):
-    """ Calculates latency between PagerMaid and Telegram. """
+@listener(is_plugin=False, command="ping", description=lang("ping_des"))
+async def ping(bot: Client, message: Message):
+    """Calculates latency between PagerMaid and Telegram."""
     start = datetime.now()
     await bot(functions.PingRequest(ping_id=0))
     end = datetime.now()
     ping_duration = (end - start).microseconds / 1000
     start = datetime.now()
-    await context.edit("Pong!")
+    message = await message.edit("Pong!")
     end = datetime.now()
     msg_duration = (end - start).microseconds / 1000
-    await context.edit(f"Pong!| PING: {ping_duration} | MSG: {msg_duration}")
+    await message.edit(f"Pong!| PING: {ping_duration} | MSG: {msg_duration}")
 
 
-@listener(is_plugin=False, outgoing=True, command=alias_command("topcloud"),
-          description=lang('topcloud_des'))
-async def topcloud(context):
-    """ Generates a word cloud of resource-hungry processes. """
-    if not silent:
-        await context.edit(lang('topcloud_processing'))
-    command_list = []
-    if not Path('/usr/bin/top').is_symlink():
-        output = str(await execute("top -b -n 1")).split("\n")[7:]
+def wmic(command: str):
+    """Fetch the wmic command to cmd"""
+    try:
+        p = Popen(command.split(" "), stdout=PIPE)
+    except FileNotFoundError:
+        return r"WMIC.exe was not found... Make sure 'C:\Windows\System32\wbem' is added to PATH."
+
+    stdout, _ = p.communicate()
+
+    output = stdout.decode("gbk", "ignore")
+    lines = output.split("\r\r")
+    lines = [g.replace("\n", "").replace("  ", "") for g in lines if len(g) > 2]
+    return lines
+
+
+def get_uptime():
+    """Get the device uptime"""
+    delta = round(time() - boot_time())
+
+    hours, remainder = divmod(int(delta), 3600)
+    minutes, seconds = divmod(remainder, 60)
+    days, hours = divmod(hours, 24)
+
+    def include_s(text: str, num: int):
+        return f"{num} {text}{'' if num == 1 else 's'}"
+
+    d = include_s("day", days)
+    h = include_s("hour", hours)
+    m = include_s("minute", minutes)
+    s = include_s("second", seconds)
+
+    if days:
+        output = f"{d}, {h}, {m} and {s}"
+    elif hours:
+        output = f"{h}, {m} and {s}"
+    elif minutes:
+        output = f"{m} and {s}"
     else:
-        output = str(await execute("top -b -n 1")).split("\n")[4:]
-    for line in output[:-1]:
-        line = sub(r'\s+', ' ', line).strip()
-        fields = line.split(" ")
+        output = s
+
+    return output
+
+
+def readable(num, suffix="B"):
+    """Convert Bytes into human-readable formats"""
+    for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
+        if abs(num) < 1024.0:
+            return "%3.1f%s%s" % (num, unit, suffix)
+        num /= 1024.0
+    return "%.1f%s%s" % (num, "Yi", suffix)
+
+
+def get_ram():
+    """Get RAM used/free/total"""
+    ram = virtual_memory()
+    used = readable(ram.used)
+    total = readable(ram.total)
+
+    percent_used = round(ram.used / ram.total * 100, 2)
+
+    return f"{used} / {total} ({percent_used}%)"
+
+
+def partitions():
+    """Find the disk partitions on current OS"""
+    parts = disk_partitions()
+    listparts = []
+
+    for g in parts:
         try:
-            if fields[11].count("/") > 0:
-                command = fields[11].split("/")[0]
-            else:
-                command = fields[11]
+            total, used, _ = disk_usage(g.device)
+            percent_used = round(used / total * 100, 2)
+            listparts.append(
+                f"      {g.device[:2]} {readable(used)} / {readable(total)} ({percent_used}%)"
+            )
+        except PermissionError:
+            continue
 
-            cpu = float(fields[8].replace(",", "."))
-            mem = float(fields[9].replace(",", "."))
+    return listparts
 
-            if command != "top":
-                command_list.append((command, cpu, mem))
-        except BaseException:
-            pass
-    command_dict = {}
-    for command, cpu, mem in command_list:
-        if command in command_dict:
-            command_dict[command][0] += cpu
-            command_dict[command][1] += mem
-        else:
-            command_dict[command] = [cpu + 1, mem + 1]
 
-    resource_dict = {}
-
-    for command, [cpu, mem] in command_dict.items():
-        resource_dict[command] = (cpu ** 2 + mem ** 2) ** 0.5
-
-    width, height = None, None
+def neofetch_win():
+    user_name = getuser()
+    host_name = gethostname()
+    os = wmic("wmic os get Caption")[-1].replace("Microsoft ", "")
+    uptime = get_uptime()
+    mboard_name = wmic("wmic baseboard get Manufacturer")
+    mboard_module = wmic("wmic baseboard get product")
     try:
-        width, height = ((popen("xrandr | grep '*'").read()).split()[0]).split("x")
-        width = int(width)
-        height = int(height)
-    except BaseException:
-        pass
-    if not width or not height:
-        width = int(config['width'])
-        height = int(config['height'])
-    background = config['background']
-    margin = int(config['margin'])
-
-    try:
-        cloud = WordCloud(
-            background_color=background,
-            width=width - 2 * int(margin),
-            height=height - 2 * int(margin)
-        ).generate_from_frequencies(resource_dict)
-    except ValueError:
-        await context.edit(lang('run_error'))
-        return
-
-    cloud.to_file("cloud.png")
-    if not silent:
-        await context.edit(lang('highlight_uploading'))
-    await context.client.send_file(
-        context.chat_id,
-        "cloud.png",
-        reply_to=None,
-        caption=lang('topcloud_caption')
+        mboard = f"{mboard_name[-1]} ({mboard_module[-1]})"
+    except IndexError:
+        mboard = "Unknown..."
+    cpu = wmic("wmic cpu get name")[-1]
+    gpu = wmic("wmic path win32_VideoController get name")
+    gpu = [f"     {g.strip()}" for g in gpu[1:]][0].strip()
+    ram = get_ram()
+    disks = "\n".join(partitions())
+    return (
+        f"<code>{user_name}@{host_name}\n---------\nOS: {os}\nUptime: {uptime}\n"
+        f"Motherboard: {mboard}\nCPU: {cpu}\nGPU: {gpu}\nMemory: {ram}\n"
+        f"Disk:\n{disks}</code>"
     )
-    remove("cloud.png")
-    await context.delete()
-    await log(lang('topcloud_success'))
-
-
-def unit_convert(byte):
-    """ Converts byte into readable formats. """
-    power = 1000
-    zero = 0
-    units = {
-        0: '',
-        1: 'Kb/s',
-        2: 'Mb/s',
-        3: 'Gb/s',
-        4: 'Tb/s'}
-    while byte > power:
-        byte /= power
-        zero += 1
-    return f"{round(byte, 2)} {units[zero]}"

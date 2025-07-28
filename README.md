@@ -1,4 +1,4 @@
-![pagermaid](https://tlgur.com/d/8nomNo9G "pagermaid")
+![pagermaid](pagermaid/assets/logo.jpg "pagermaid")
 
 <h1 align="center"><a href="https://t.me/PagerMaid_Modify" target="_blank">PagerMaid</a></h1>
 
@@ -6,13 +6,13 @@
 
 一个人形自走 bot
 
-<img alt="star" src="https://img.shields.io/github/stars/Xtao-Labs/PagerMaid-Modify.svg"/>
-<img alt="fork" src="https://img.shields.io/github/forks/Xtao-Labs/PagerMaid-Modify.svg"/>
-<img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/Xtao-Labs/PagerMaid-Modify.svg?label=commits">
-<img alt="size" src="https://img.shields.io/github/repo-size/Xtao-Labs/PagerMaid-Modify?color=pink"/>
-<img alt="issues" src="https://img.shields.io/github/issues/Xtao-Labs/PagerMaid-Modify.svg"/>
+<img alt="star" src="https://img.shields.io/github/stars/TeamPGM/PagerMaid-Modify.svg"/>
+<img alt="fork" src="https://img.shields.io/github/forks/TeamPGM/PagerMaid-Modify.svg"/>
+<img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/TeamPGM/PagerMaid-Modify.svg?label=commits">
+<img alt="size" src="https://img.shields.io/github/repo-size/TeamPGM/PagerMaid-Modify?color=pink"/>
+<img alt="issues" src="https://img.shields.io/github/issues/TeamPGM/PagerMaid-Modify.svg"/>
 <img alt="docker" src="https://img.shields.io/docker/pulls/mrwangzhe/pagermaid_modify"/>
-<a href="https://github.com/Xtao-Labs/PagerMaid-Modify/blob/master/LICENSE"><img alt="license" src="https://img.shields.io/github/license/Xtao-Labs/PagerMaid-Modify.svg"/></a>
+<a href="https://github.com/TeamPGM/PagerMaid-Modify/blob/master/LICENSE"><img alt="license" src="https://img.shields.io/github/license/TeamPGM/PagerMaid-Modify.svg"/></a>
 <img alt="telethon" src="https://img.shields.io/badge/telethon-blue.svg"/>
 
 </div>
@@ -27,7 +27,7 @@ Pagermaid 是一个用在 Telegram 的实用工具。
 
 ## 安装
 
-[Ubuntu 16.04 手动搭建教程](https://github.com/Xtao-Labs/PagerMaid-Modify/wiki/Ubuntu-16.04-%E5%AE%89%E8%A3%85%E8%AF%A6%E8%A7%A3)
+[Ubuntu 16.04 手动搭建教程](https://github.com/TeamPGM/PagerMaid-Modify/wiki/Ubuntu-16.04-%E5%AE%89%E8%A3%85%E8%AF%A6%E8%A7%A3)
 
 [一键脚本](https://t.me/PagerMaid_Modify/58)
 
@@ -39,7 +39,7 @@ Pagermaid 是一个用在 Telegram 的实用工具。
 
 获得 `API_ID` 和 `API_HASH` 后，你可以通过下面两种方式获取 `SESSION`：
 
-* 在线获取：[![Repl.it](https://replit.com/badge/github/Xtao-Labs/PagerMaid-Modify)](https://replit.com/@mrwangzhe/gensession)
+* 在线获取：[![Repl.it](https://replit.com/badge/github/TeamPGM/PagerMaid-Modify)](https://replit.com/@mrwangzhe/gensession)
 * 本地获取：`cd utils && python3 -m pip install telethon && python3 gensession.py`
 
 # 对存在使用本项目用户群组的提醒
@@ -92,73 +92,10 @@ Pagermaid 是一个用在 Telegram 的实用工具。
 
 # 建议
 
-欢迎您加入 [本项目支持群](https://t.me/PagerMaid_Modify/3) ，对于本项目用户，我们通常情况下可在支持群中予以提供搭建和使用帮助。
+欢迎您加入 [本项目支持群](https://t.me/PagerMaid_Modify) ，对于本项目用户，我们通常情况下可在支持群中予以提供搭建和使用帮助。
 
 # 特别提醒
 
 由于 userbot 的特殊性，请不要相信任何能够免费提供服务器给您搭建的人。
 
 尤其是需要保护好 `pagermaid.session` ，任何拥有此文件的人都可以进行包括修改二次验证密码、更改手机号等操作。
-
-# 与原作者联络
-
-您可以在搭建完毕后在 Telegram 客户端上使用 -contact <message> 并点击链接进入通过 Pagermaid 自动打开的 PM ，如果您安装上出现了问题，请通过 [stykers@stykers.moe](mailto:stykers@stykers.moe) 给我发电子邮件，或在 Telegram [@KatOnKeyboard](https://t.me/KatOnKeyboard) 上给我发消息。
-
-# 特别感谢
-
-[Amine Oversoul](https://bitbucket.org/oversoul/pagermaid-ui)
-
-## 修改内容
-
-- `PagerMaid-Modify/README.md`
-
-- `PagerMaid-Modify/INSTALL.md`
-
-- `PagerMaid-Modify/some-plugins/autorespond.py`
-
-- `PagerMaid-Modify/some-plugins/yt-dl.py`
-
-- `PagerMaid-Modify/pagermaid/listener.py`
-
-- `PagerMaid-Modify/pagermaid/utils.py`
-
-- `PagerMaid-Modify/pagermaid/__main__.py`
-
-- `PagerMaid-Modify/pagermaid/__init__.py`
-
-- `pagermaid-Modify/interface/__init__.py`
-
-- `PagerMaid-Modify/pagermaid/interface/__main__.py`
-
-- `PagerMaid-Modify/pagermaid/interface/views.py`
-
-- `PagerMaid-Modify/pagermaid/modules/account.py`
-
-- `PagerMaid-Modify/pagermaid/modules/avoid.py`
-
-- `PagerMaid-Modify/pagermaid/modules/captions.py`
-
-- `PagerMaid-Modify/pagermaid/modules/clock.py`
-
-- `PagerMaid-Modify/pagermaid/modules/external.py`
-
-- `PagerMaid-Modify/pagermaid/modules/fun.py`
-
-- `PagerMaid-Modify/pagermaid/modules/help.py`
-
-- `PagerMaid-Modify/pagermaid/modules/message.py`
-
-- `PagerMaid-Modify/pagermaid/modules/plugin.py`
-
-- `PagerMaid-Modify/pagermaid/modules/prune.py`
-
-- `PagerMaid-Modify/pagermaid/modules/qr.py`
-
-- `PagerMaid-Modify/pagermaid/modules/status.py`
-
-- `PagerMaid-Modify/pagermaid/modules/sticker.py`
-
-- `PagerMaid-Modify/pagermaid/modules/system.py`
-
-- `PagerMaid-Modify/pagermaid/modules/update.py`
-

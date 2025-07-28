@@ -7,9 +7,11 @@
 #                \//_____/      \/              \/     \/        \/
 # ===================================================================
 
-# API Credentials of your telegram application created at https://my.telegram.org/apps | api_key is api_id
-api_key: "ID_HERE"
+# API Credentials of your telegram application created at https://my.telegram.org/apps
+api_id: "ID_HERE"
 api_hash: "HASH_HERE"
+qrcode_login: "False"
+web_login: "False"
 
 # Either debug logging is enabled or not
 debug: "False"
@@ -21,22 +23,18 @@ web_interface:
   secret_key: "RANDOM_STRING_HERE"
   host: "127.0.0.1"
   port: "3333"
-
-# Redis connection information
-redis:
-  host: "localhost"
-  port: "6379"
-  db: "14"
-  password: ""
+  origins: ["*"]
 
 # Locale settings
 application_language: "zh-cn"
 application_region: "China"
 application_tts: "zh-CN"
+timezone: "Asia/Shanghai"
 
 # In-Chat logging settings, default settings logs directly into Kat, strongly advised to change
 log: "False"
-log_chatid: "503691334"
+# chat id of the log group, such as -1001234567890, also can use username, such as "telegram"
+log_chatid: "me"
 
 # Disabled Built-in Commands
 disabled_cmd:
@@ -62,17 +60,22 @@ mtp_port: ""
 mtp_secret: ""
 
 # Apt Git source
-git_source: "https://gitlab.com/Xtao-Labs/PagerMaid_Plugins/-/raw/master/"
-git_ssh: "https://gitlab.com/Xtao-Labs/pagermaid-modify.git"
+git_source: "https://v1.xtaolabs.com/"
+git_ssh: "https://github.com/TeamPGM/PagerMaid-Modify.git"
 
 # Update Notice
 update_check: "True"
+update_time: "86400"
+update_username: "PagerMaid_Modify_bot"
+update_delete: "True"
 
 # ipv6
 ipv6: "False"
 
 # Analytics
 allow_analytic: "True"
+sentry_api: ""
+mixpanel_api: ""
 
 # Speed_test cli path
 speed_test_path: ""
@@ -84,10 +87,8 @@ date_form: "%A %y/%m/%d"
 # only support %m %d %H %M %S
 start_form: "%m/%d %H:%M"
 
-# Bot admins
-bot_admins:
-  - example1
-  - example2
-
 # Silent to reduce editing times
 silent: "True"
+
+# Eval use pb or not
+use_pb: "True"
