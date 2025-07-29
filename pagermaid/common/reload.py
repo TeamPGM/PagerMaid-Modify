@@ -1,6 +1,5 @@
 import importlib
 import os
-from asyncio import sleep
 
 import pagermaid.config
 import pagermaid.modules
