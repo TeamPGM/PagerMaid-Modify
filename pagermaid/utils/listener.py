@@ -51,7 +51,7 @@ def from_self(message: "Message") -> bool:
 def from_msg_get_sudo_uid(message: "Message") -> int:
     """Get the sudo uid from the message."""
     from_id = message.sender_id
-    return from_id if from_id in get_sudo_list() else message.cha
+    return from_id if from_id in get_sudo_list() else message.chat_id
 
 
 def check_manage_subs(message: "Message") -> bool:
