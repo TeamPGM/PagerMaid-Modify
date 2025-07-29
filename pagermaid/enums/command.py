@@ -13,6 +13,8 @@ CommandHandlerDecorator = NewType(
 
 
 class CommandHandler:
+    ignore_sub_commands_key = "_ignore_sub_commands"
+
     def __init__(self, func: CommandHandlerFunc, command: Optional[str]) -> None:
         self._pgp_func__: CommandHandlerFunc = func
         self._pgp_command__: Optional[str] = command
@@ -47,6 +49,7 @@ class CommandHandler:
             raise ValueError("Cannot add subcommand to a handler without a command")
         if self._pgp_raw_handler is None:
             raise ValueError("Cannot add subcommand to a handler without init")
+        setattr(self._pgp_raw_handler, self.ignore_sub_commands_key, True)
         from pagermaid.listener import listener
 
         def decorator(func: CommandHandlerFunc) -> CommandHandlerFunc:

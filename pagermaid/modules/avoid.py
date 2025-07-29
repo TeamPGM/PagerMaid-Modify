@@ -16,9 +16,7 @@ from pagermaid.utils.bot_utils import log
 )
 async def ghost(message: Message):
     """Toggles ghosting of a user."""
-    if len(message.parameter) != 1:
-        await message.edit(f"{lang('error_prefix')}{lang('arg_error')}")
-        return
+    await message.edit(f"{lang('error_prefix')}{lang('arg_error')}")
 
 
 ghost: "CommandHandler"
@@ -80,9 +78,7 @@ async def ghost_status(message: Message):
 )
 async def deny(message: Message):
     """Toggles denying of a user."""
-    if len(message.parameter) != 1:
-        await message.edit(f"{lang('error_prefix')}{lang('arg_error')}")
-        return
+    await message.edit(f"{lang('error_prefix')}{lang('arg_error')}")
 
 
 deny: "CommandHandler"

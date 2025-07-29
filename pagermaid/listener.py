@@ -55,12 +55,12 @@ def listener(**args) -> CommandHandlerDecorator:
     parameters = args.get("parameters", None)
     pattern = sudo_pattern = args.get("pattern")
     diagnostics = args.get("diagnostics", True)
-    ignore_edited = args.get("ignore_edited", False)
-    ignore_reacted = args.get("ignore_reacted", True)
-    ignore_forwarded = args.get("ignore_forwarded", True)
-    is_plugin = args.get("is_plugin", True)
     incoming = args.get("incoming", False)
     outgoing = args.get("outgoing", True)
+    ignore_edited = args.get("ignore_edited", False)
+    ignore_reacted = args.get("ignore_reacted", True)
+    ignore_forwarded = args.get("ignore_forwarded", True if outgoing else False)
+    is_plugin = args.get("is_plugin", True)
     groups_only = args.get("groups_only", False)
     privates_only = args.get("privates_only", False)
     support_inline = args.get("support_inline", False)
@@ -135,8 +135,9 @@ def listener(**args) -> CommandHandlerDecorator:
                 return
             if privates_only and not context.is_private:
                 return
-            # filter inline bot msg
             if not support_inline and context.via_bot_id:
+                return
+            if ignore_forwarded and context.forward is not None:
                 return
             try:
                 # ignore
@@ -153,6 +154,11 @@ def listener(**args) -> CommandHandlerDecorator:
                     if parent_command is not None and command is not None:
                         parameter.insert(0, command)
                         arguments = f"{command} {arguments}".strip()
+                    if (
+                        getattr(handler, CommandHandler.ignore_sub_commands_key, False)
+                        and len(arguments) > 0
+                    ):
+                        return
                     context.parameter = parameter
                     context.arguments = arguments
                 except BaseException:
@@ -235,9 +241,9 @@ def listener(**args) -> CommandHandlerDecorator:
                 raise StopPropagation
 
         setattr(handler, HandlerList.PRIORITY_KEY, priority)
+        bot.add_event_handler(handler, events.NewMessage(**args))
         if not ignore_edited:
             bot.add_event_handler(handler, events.MessageEdited(**args))
-        bot.add_event_handler(handler, events.NewMessage(**args))
 
         func.set_handler(handler)
         return func

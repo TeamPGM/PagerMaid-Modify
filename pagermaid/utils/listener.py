@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 from telethon.errors import RPCError
 
-from pagermaid.dependence import get_sudo_list, sqlite
+from pagermaid.dependence import status_sudo, get_sudo_list, sqlite
 from pagermaid.group_manager import enforce_permission
 from ._config_utils import lang
 
@@ -17,6 +17,29 @@ def get_permission_name(is_plugin: bool, need_admin: bool, command: str) -> str:
         return f"plugins_root.{command}" if need_admin else f"plugins.{command}"
     else:
         return f"system.{command}" if need_admin else f"modules.{command}"
+
+
+def sudo_filter(permission: str, handler):
+    async def if_sudo(message: "Message"):
+        if not status_sudo():
+            return False
+        try:
+            from_id = message.sender_id
+            sudo_list = get_sudo_list()
+            if from_id not in sudo_list:
+                if message.chat_id in sudo_list:
+                    return enforce_permission(message.chat.id, permission)
+                return False
+            return enforce_permission(from_id, permission)
+        except Exception:  # noqa
+            return False
+
+    async def handler2(context: "Message"):
+        if not await if_sudo(context):
+            return
+        return await handler(context)
+
+    return handler2
 
 
 def from_self(message: "Message") -> bool:
