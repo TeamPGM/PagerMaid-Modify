@@ -101,6 +101,8 @@ simpleeval==1.0.3 ; python_full_version >= '3.9'
     # via casbin
 sniffio==1.3.1
     # via anyio
+socksio==1.0.0
+    # via httpx
 sqlitedict==2.1.0
     # via pagermaid-modify
 starlette==0.44.0 ; python_full_version < '3.9'
@@ -111,7 +113,7 @@ starlette==0.47.2 ; python_full_version >= '3.9'
     # via
     #   fastapi
     #   pagermaid-modify
-telethon @ git+https://github.com/TeamPGM/Telethon@45a546a675abda07fb970141da3ba174b4e1999d
+telethon @ git+https://github.com/TeamPGM/Telethon@1.5.0
     # via pagermaid-modify
 typing-extensions==4.13.2 ; python_full_version < '3.9'
     # via

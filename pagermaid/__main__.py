@@ -7,13 +7,15 @@ from sys import path, platform, exit
 from telethon.errors.rpcerrorlist import AuthKeyError
 
 from pagermaid.common.reload import load_all
-from pagermaid.config import SESSION_PATH
+from pagermaid.config import SESSION_PATH, Config
 from pagermaid.dependence import scheduler
 from pagermaid.services import bot
 from pagermaid.static import working_dir
 from pagermaid.utils import lang, safe_remove, logs
 from pagermaid.utils.listener import process_exit
 from pagermaid.web import web
+from pagermaid.web.api.web_login import web_login
+from pyromod.methods.sign_in_qrcode import start_client
 
 bot.PARENT_DIR = Path(working_dir)
 path.insert(1, f"{working_dir}{sep}plugins")
@@ -31,7 +33,11 @@ async def idle():
         signal_fn(s, signal_handler)
 
     while True:
-        task = asyncio.create_task(bot._run_until_disconnected())
+        if Config.WEB_ENABLE and Config.WEB_LOGIN:
+            t = asyncio.sleep(600)
+        else:
+            t = bot._run_until_disconnected()
+        task = asyncio.create_task(t)
         web.bot_main_task = task
         try:
             await task
@@ -41,7 +47,7 @@ async def idle():
 
 async def console_bot():
     try:
-        await bot.start()
+        await start_client(bot)
     except AuthKeyError:
         safe_remove(SESSION_PATH)
         exit()
@@ -55,13 +61,31 @@ async def console_bot():
     await process_exit(start=True, _client=bot)
 
 
+async def web_bot():
+    try:
+        await web_login.init()
+    except AuthKeyError:
+        safe_remove(SESSION_PATH)
+        exit()
+    if bot.me is not None:
+        me = await bot.get_me()
+        if me.bot:
+            safe_remove(SESSION_PATH)
+            exit()
+    else:
+        logs.info("Please use web to login, path: web_login .")
+
+
 async def main():
     logs.info(lang("platform") + platform + lang("platform_load"))
     if not scheduler.running:
         scheduler.start()
     await web.start()
-    await console_bot()
-    logs.info(lang("start"))
+    if not (Config.WEB_ENABLE and Config.WEB_LOGIN):
+        await console_bot()
+        logs.info(lang("start"))
+    else:
+        await web_bot()
     try:
         await idle()
     finally:

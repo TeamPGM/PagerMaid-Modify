@@ -34,18 +34,14 @@ from pagermaid.utils import (
 )
 from pagermaid.utils.bot_utils import attach_report
 from pagermaid.utils.listener import (
-    # sudo_filter,
     get_permission_name,
     process_exit,
     format_exc as format_exc_text,
 )
 from pagermaid.web import web
+from pyromod.utils.handler_priority import HandlerList
 
 _lock = asyncio.Lock()
-
-
-def noop(*args, **kw):
-    pass
 
 
 def listener(**args) -> CommandHandlerDecorator:
@@ -232,11 +228,13 @@ def listener(**args) -> CommandHandlerDecorator:
                         "PGM Error report generated.",
                     )
                 await Hook.process_error_exec(context, command, exc_info, exc_format)
-            if (context.chat_id, context.id) in read_context:
-                del read_context[(context.chat_id, context.id)]
+            finally:
+                if (context.chat_id, context.id) in read_context:
+                    del read_context[(context.chat_id, context.id)]
             if block_process or (parent_command and not allow_parent):
                 raise StopPropagation
 
+        setattr(handler, HandlerList.PRIORITY_KEY, priority)
         if not ignore_edited:
             bot.add_event_handler(handler, events.MessageEdited(**args))
         bot.add_event_handler(handler, events.NewMessage(**args))
