@@ -131,8 +131,7 @@ async def send_log(message: Message):
     await upload_attachment(
         "data/pagermaid.log.txt",
         message.chat_id,
-        message.reply_to_message_id,
-        message_thread_id=message.message_thread_id,
+        message.reply_to_msg_id,
         thumb=f"pagermaid{sep}assets{sep}logo.jpg",
         caption=lang("send_log_caption"),
     )
