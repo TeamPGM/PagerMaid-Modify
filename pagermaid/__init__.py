@@ -1,8 +1,11 @@
 import contextlib
+import warnings
 
 import pagermaid.update
 from pagermaid.config import Config as _Config
 from pagermaid.utils import logs as _logs
+
+warnings.filterwarnings("ignore", module="telethon")
 
 module_dir = __path__[0]
 

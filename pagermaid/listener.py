@@ -57,6 +57,8 @@ def listener(**args) -> CommandHandlerDecorator:
     diagnostics = args.get("diagnostics", True)
     incoming = args.get("incoming", False)
     outgoing = args.get("outgoing", True)
+    args["incoming"] = incoming
+    args["outgoing"] = outgoing
     ignore_edited = args.get("ignore_edited", False)
     ignore_reacted = args.get("ignore_reacted", True)
     ignore_forwarded = args.get("ignore_forwarded", True if outgoing else False)
