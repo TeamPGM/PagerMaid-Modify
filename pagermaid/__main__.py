@@ -7,11 +7,11 @@ from sys import path, platform, exit
 from telethon.errors.rpcerrorlist import AuthKeyError
 
 from pagermaid.common.reload import load_all
-from pagermaid.config import SESSION_PATH, Config
+from pagermaid.config import Config
 from pagermaid.dependence import scheduler
 from pagermaid.services import bot
 from pagermaid.static import working_dir
-from pagermaid.utils import lang, safe_remove, logs
+from pagermaid.utils import lang, logs, SessionFileManager
 from pagermaid.utils.listener import process_exit
 from pagermaid.web import web
 from pagermaid.web.api.web_login import web_login
@@ -49,12 +49,12 @@ async def console_bot():
     try:
         await start_client(bot)
     except AuthKeyError:
-        safe_remove(SESSION_PATH)
+        SessionFileManager.safe_remove_session()
         exit()
     me = await bot.get_me()
     bot.me = me
     if me.bot:
-        safe_remove(SESSION_PATH)
+        SessionFileManager.safe_remove_session()
         exit()
     logs.info(f"{lang('save_id')} {me.first_name}({me.id})")
     await load_all()
@@ -65,12 +65,12 @@ async def web_bot():
     try:
         await web_login.init()
     except AuthKeyError:
-        safe_remove(SESSION_PATH)
+        SessionFileManager.safe_remove_session()
         exit()
     if bot.me is not None:
         me = await bot.get_me()
         if me.bot:
-            safe_remove(SESSION_PATH)
+            SessionFileManager.safe_remove_session()
             exit()
     else:
         logs.info("Please use web to login, path: web_login .")

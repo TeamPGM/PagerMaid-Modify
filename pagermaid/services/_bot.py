@@ -4,7 +4,8 @@ import pyromod.listen
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 
-from pagermaid.config import Config, SESSION_PATH
+from pagermaid.config import Config
+from pagermaid.utils import SessionFileManager
 from pagermaid.version import pgm_version
 
 client_proxy = None
@@ -20,7 +21,7 @@ elif Config.PROXY_HTTP_ADDRESS and Config.PROXY_HTTP_PORT:
         Config.PROXY_HTTP_ADDRESS,
         int(Config.PROXY_HTTP_PORT),
     )
-session = SESSION_PATH
+session = SessionFileManager.get_session_file_path()
 if Config.STRING_SESSION:
     session = StringSession(Config.STRING_SESSION)
 

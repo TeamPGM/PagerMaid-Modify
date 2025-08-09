@@ -10,7 +10,6 @@ from yaml import load, FullLoader, safe_load
 DATA_PATH = Path("data")
 DATA_PATH.mkdir(exist_ok=True)
 CONFIG_PATH = DATA_PATH / "config.yml"
-SESSION_PATH = DATA_PATH / "pagermaid.session"
 
 
 def strtobool(val, default=False):

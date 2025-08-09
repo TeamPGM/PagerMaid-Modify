@@ -1,13 +1,12 @@
-import base64
 import ipaddress
 import sqlite3
-import struct
 
 from pydantic import BaseModel, Field
 from pathlib import Path
 
-PYROGRAM_SESSION_FILE = Path("data/pyrogram.session")
-TELETHON_SESSION_FILE = Path("data/telethon.session")
+from pagermaid.config import DATA_PATH
+from ._path import safe_remove
+from ..version import pgm_telethon
 
 
 class TDSession(BaseModel):
@@ -41,12 +40,39 @@ class TDSession(BaseModel):
         )
 
 
-class SessionManager:
+class SessionConvert:
+    PYROGRAM_VERSION = 3
+    TELETHON_VERSION = 7
+
     def __init__(self, session: TDSession):
         self.session = session
 
+    @staticmethod
+    def is_telethon_file(file: "Path") -> bool:
+        if not file.exists():
+            return False
+        try:
+            conn = sqlite3.connect(file, check_same_thread=False)
+            version = conn.execute("SELECT version from version;").fetchone()[0]
+            conn.close()
+            return version >= SessionConvert.TELETHON_VERSION
+        except sqlite3.DatabaseError:
+            return False
+
+    @staticmethod
+    def is_pyrogram_file(file: "Path") -> bool:
+        if not file.exists():
+            return False
+        try:
+            conn = sqlite3.connect(file, check_same_thread=False)
+            version = conn.execute("SELECT number from version;").fetchone()[0]
+            conn.close()
+            return version >= SessionConvert.PYROGRAM_VERSION
+        except sqlite3.DatabaseError:
+            return False
+
     @classmethod
-    def from_pyrogram_session_file(cls, file) -> "SessionManager":
+    def from_pyrogram_file(cls, file) -> "SessionConvert":
         try:
             conn = sqlite3.connect(file, check_same_thread=False)
             version = conn.execute("SELECT number from version;").fetchone()[0]
@@ -81,74 +107,8 @@ class SessionManager:
         else:
             raise ValueError("Invalid version")
 
-    @staticmethod
-    def pyrogram_struct_formatter():
-        return {351: ">B?256sI?", 356: ">B?256sQ?", 362: ">BI?256sQ?"}
-
     @classmethod
-    def from_pyrogram_string_session(cls, session_string: str) -> "SessionManager":
-        if len(session_string) in [351, 356]:
-            api_id = 0
-            dc_id, test_mode, auth_key, user_id, is_bot = struct.unpack(
-                cls.pyrogram_struct_formatter()[len(session_string)],
-                base64.urlsafe_b64decode(
-                    session_string + "=" * (-len(session_string) % 4)
-                ),
-            )
-
-        elif len(session_string) == 362:
-            dc_id, api_id, test_mode, auth_key, user_id, is_bot = struct.unpack(
-                cls.pyrogram_struct_formatter()[len(session_string)],
-                base64.urlsafe_b64decode(
-                    session_string + "=" * (-len(session_string) % 4)
-                ),
-            )
-
-        else:
-            raise ValueError("Invalid session string")
-
-        session = TDSession(
-            dc_id=dc_id,
-            api_id=api_id,
-            test_mode=test_mode,
-            auth_key=auth_key,
-            user_id=user_id,
-            is_bot=is_bot,
-        )
-        return cls(session)
-
-    @classmethod
-    def from_telethon_string_session(
-        cls,
-        session_string: str,
-    ) -> "SessionManager":
-        """Convert a Telethon string session to a TDLib session
-
-        Args:
-            session_string (str): Telethon string session
-            Otherwise, auth token will be revoked. Defaults to False.
-
-        Returns:
-            SessionManager: SessionManager object
-        """
-        if session_string[0] == "1":
-            session_string = session_string[1:]
-
-        dc_id, _, port, auth_key = struct.unpack(
-            f">B{4 if len(session_string) == 352 else 16}sH256s",
-            base64.urlsafe_b64decode(session_string + "=" * (-len(session_string) % 4)),
-        )
-
-        session = TDSession(
-            dc_id=dc_id,
-            test_mode=port == 80,
-            auth_key=auth_key,
-            port=port,
-        )
-        return cls(session)
-
-    @classmethod
-    def from_telethon_file(cls, file) -> "SessionManager":
+    def from_telethon_file(cls, file) -> "SessionConvert":
         try:
             conn = sqlite3.connect(file, check_same_thread=False)
             version = conn.execute("SELECT version from version;").fetchone()[0]
@@ -169,84 +129,6 @@ class SessionManager:
 
         else:
             raise ValueError("Invalid version")
-
-    def pyrogram_string_session(self, version: int = 3, api_id: int = 0) -> str:
-        """Export the session as a string.
-
-        Args:
-            version (int, optional): Allows user to specify the version of the string session.
-            Defaults to 3.
-            api_id (int, optional): Only used when version is 3. Defaults to 0.
-
-        Raises:
-            ValueError: If version is not 2 or 3.
-
-        Returns:
-            str: The string session.
-        """
-
-        if version == 2:
-            if self.session.user_id > 2**32:
-                return (
-                    base64.urlsafe_b64encode(
-                        struct.pack(
-                            ">B?256sQ?",
-                            self.session.dc_id,
-                            self.session.test_mode,
-                            self.session.auth_key,
-                            self.session.user_id,
-                            self.session.is_bot,
-                        )
-                    )
-                    .decode()
-                    .rstrip("=")
-                )
-            else:
-                return (
-                    base64.urlsafe_b64encode(
-                        struct.pack(
-                            ">B?256sI?",
-                            self.session.dc_id,
-                            self.session.test_mode,
-                            self.session.auth_key,
-                            self.session.user_id,
-                            self.session.is_bot,
-                        )
-                    )
-                    .decode()
-                    .rstrip("=")
-                )
-
-        elif version == 3:
-            return (
-                base64.urlsafe_b64encode(
-                    struct.pack(
-                        ">BI?256sQ?",
-                        self.session.dc_id,
-                        api_id or self.session.api_id,
-                        self.session.test_mode,
-                        self.session.auth_key,
-                        self.session.user_id,
-                        self.session.is_bot,
-                    )
-                )
-                .decode()
-                .rstrip("=")
-            )
-
-        else:
-            raise ValueError("Invalid version")
-
-    def telethon_string_session(self):
-        return "1" + base64.urlsafe_b64encode(
-            struct.pack(
-                f">B{len(self.session.server_address.packed)}sH256s",
-                self.session.dc_id,
-                self.session.server_address.packed,
-                self.session.port,
-                self.session.auth_key,
-            )
-        ).decode("ascii")
 
     def telethon_file(self, file):
         conn = sqlite3.connect(file, check_same_thread=False)
@@ -292,7 +174,7 @@ class SessionManager:
                     seq integer
                 )"""
         )
-        conn.execute("INSERT INTO version VALUES (?);", (7,))
+        conn.execute("INSERT INTO version VALUES (?);", (self.TELETHON_VERSION,))
         conn.execute(
             "INSERT INTO sessions VALUES (?, ?, ?, ?, ?);",
             (
@@ -346,7 +228,7 @@ class SessionManager:
             END;
         """
         conn.executescript(schema)
-        conn.execute("INSERT INTO version VALUES (?)", (3,))
+        conn.execute("INSERT INTO version VALUES (?)", (self.PYROGRAM_VERSION,))
         conn.execute(
             "INSERT INTO sessions VALUES (?, ?, ?, ?, ?, ?, ?)",
             (2, None, None, None, 0, None, None),
@@ -366,41 +248,69 @@ class SessionManager:
         return True
 
 
-def from_pyrogram_to_telethon():
-    if not PYROGRAM_SESSION_FILE.exists():
-        raise FileNotFoundError("Pyrogram session file not found.")
-    if TELETHON_SESSION_FILE.exists():
-        raise FileExistsError("Telethon session file already exists.")
-    session_manager = SessionManager.from_pyrogram_session_file(PYROGRAM_SESSION_FILE)
-    session_manager.telethon_file(TELETHON_SESSION_FILE)
-    print("Converted Pyrogram session to Telethon session successfully.")
+class SessionFileManager:
+    SESSION_PATH = DATA_PATH / "pagermaid.session"
+    SESSION_TELETHON_PATH = DATA_PATH / "pagermaid_telethon.session"
+    SESSION_PYROGRAM_PATH = DATA_PATH / "pagermaid_pyrogram.session"
+    REAL_SESSION_PATH = None
 
+    @staticmethod
+    def get_session_file_path() -> "Path":
+        """Get the path to the session file."""
+        if SessionFileManager.REAL_SESSION_PATH is None:
+            if pgm_telethon:
+                SessionFileManager.REAL_SESSION_PATH = (
+                    SessionFileManager.get_session_file_path_telethon()
+                )
+            else:
+                SessionFileManager.REAL_SESSION_PATH = (
+                    SessionFileManager.get_session_file_path_pyrogram()
+                )
+        return SessionFileManager.REAL_SESSION_PATH
 
-def from_telethon_to_pyrogram():
-    if not TELETHON_SESSION_FILE.exists():
-        raise FileNotFoundError("Telethon session file not found.")
-    if PYROGRAM_SESSION_FILE.exists():
-        raise FileExistsError("Pyrogram session file already exists.")
-    session_manager = SessionManager.from_telethon_file(TELETHON_SESSION_FILE)
-    session_manager.session.api_id = int(input("API ID: "))
-    session_manager.session.user_id = int(input("User ID: "))
-    session_manager.pyrogram_file(PYROGRAM_SESSION_FILE)
-    print("Converted Telethon session to Pyrogram session successfully.")
+    @staticmethod
+    def get_session_file_stem() -> str:
+        """Get the stem of the session file."""
+        return SessionFileManager.get_session_file_path().stem
 
+    @staticmethod
+    def get_session_file_path_telethon() -> "Path":
+        """Determines the appropriate session file path for Telethon."""
+        if SessionConvert.is_telethon_file(SessionFileManager.SESSION_TELETHON_PATH):
+            return SessionFileManager.SESSION_TELETHON_PATH
+        if SessionConvert.is_telethon_file(SessionFileManager.SESSION_PATH):
+            return SessionFileManager.SESSION_PATH
+        for session_path in [
+            SessionFileManager.SESSION_PATH,
+            SessionFileManager.SESSION_PYROGRAM_PATH,
+        ]:
+            if SessionConvert.is_pyrogram_file(session_path):
+                session_manager = SessionConvert.from_pyrogram_file(session_path)
+                session_manager.telethon_file(SessionFileManager.SESSION_TELETHON_PATH)
+                return SessionFileManager.SESSION_TELETHON_PATH
+        return SessionFileManager.SESSION_PATH
 
-def main():
-    print("Session Conversion Utility")
-    print("1. Convert Pyrogram session to Telethon session")
-    print("2. Convert Telethon session to Pyrogram session")
-    choice = input("Enter your choice (1/2): ")
+    @staticmethod
+    def get_session_file_path_pyrogram() -> "Path":
+        """Determines the appropriate session file path for Pyrogram."""
+        if SessionConvert.is_pyrogram_file(SessionFileManager.SESSION_PYROGRAM_PATH):
+            return SessionFileManager.SESSION_PYROGRAM_PATH
+        if SessionConvert.is_pyrogram_file(SessionFileManager.SESSION_PATH):
+            return SessionFileManager.SESSION_PATH
+        for session_path in [
+            SessionFileManager.SESSION_PATH,
+            SessionFileManager.SESSION_TELETHON_PATH,
+        ]:
+            if SessionConvert.is_telethon_file(session_path):
+                session_manager = SessionConvert.from_telethon_file(session_path)
+                session_manager.session.user_id = 777000
+                session_manager.pyrogram_file(SessionFileManager.SESSION_PYROGRAM_PATH)
+                return SessionFileManager.SESSION_PYROGRAM_PATH
+        return SessionFileManager.SESSION_PATH
 
-    if choice == "1":
-        from_pyrogram_to_telethon()
-    elif choice == "2":
-        from_telethon_to_pyrogram()
-    else:
-        print("Invalid choice.")
-
-
-if __name__ == "__main__":
-    main()
+    @staticmethod
+    def safe_remove_session():
+        """Safely remove the session file."""
+        if SessionFileManager.REAL_SESSION_PATH is None:
+            return
+        safe_remove(SessionFileManager.REAL_SESSION_PATH)

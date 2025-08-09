@@ -116,12 +116,12 @@ env.bak/
 venv.bak/
 config.env
 config.yml
-pagermaid.session
-pagermaid.session-journal
+*.session
+*.session-journal
 *.pagermaid
-pagermaid_backup.tar.gz
+pagermaid*.tar.gz
 docker-compose.yml
-plugins/
+plugins*/
 data/
 pagermaid.egg-info/
 dump.rdb
@@ -129,6 +129,10 @@ keyword.list
 requirements2.txt
 languages/custom.yml
 unknown_errors.txt
+pagermaid*.txt
+exception*.txt
+output.log
+qrcode.png
 
 # Spyder project settings
 .spyderproject
@@ -151,5 +155,4 @@ dmypy.json
 # docker
 install.lock
 
-# backup
-pagermaid*.tar.gz
+.pdm-python

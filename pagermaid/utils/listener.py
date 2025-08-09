@@ -65,8 +65,9 @@ async def process_exit(start: int, _client, message=None):
     cid, mid = data.get("cid", 0), data.get("mid", 0)
     if start and data and cid and mid:
         with contextlib.suppress(Exception):
-            msg: "Message" = await _client.get_messages(cid, mid)
-            if msg:
+            msg_list = await _client.get_messages(cid, mid)
+            if msg_list:
+                msg: "Message" = msg_list[0]
                 await msg.edit(
                     (msg.text if from_self(msg) and msg.text else "")
                     + f"\n\n> {lang('restart_complete')}"
