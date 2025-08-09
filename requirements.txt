@@ -113,7 +113,7 @@ starlette==0.47.2 ; python_full_version >= '3.9'
     # via
     #   fastapi
     #   pagermaid-modify
-telethon @ git+https://github.com/TeamPGM/Telethon@d80898ecc5e78073c581244c867abc715c62bef5
+telethon @ git+https://github.com/TeamPGM/Telethon@1.5.0
     # via pagermaid-modify
 typing-extensions==4.13.2 ; python_full_version < '3.9'
     # via
