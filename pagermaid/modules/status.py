@@ -16,7 +16,7 @@ from telethon import functions
 from telethon.version import __version__ as telethon_version
 from telethon.tl.types import User, Chat, Channel
 
-from pagermaid.common.status import get_bot_uptime
+from pagermaid.common.status import get_status
 from pagermaid.config import Config
 from pagermaid.enums import Client, Message
 from pagermaid.listener import listener
@@ -49,7 +49,7 @@ async def status(message: Message):
     # database
     # database = lang('status_online') if redis_status() else lang('status_offline')
     # uptime https://gist.github.com/borgstrom/936ca741e885a1438c374824efb038b3
-    uptime = await get_bot_uptime()
+    status_data = await get_status()
     text = (
         f"**{lang('status_hint')}** \n"
         f"{lang('status_name')}: `{uname().node}` \n"
@@ -57,8 +57,13 @@ async def status(message: Message):
         f"{lang('status_release')}: `{uname().release}` \n"
         f"{lang('status_python')}: `{python_version()}` \n"
         f"{lang('status_telethon')}: `{telethon_version}` \n"
-        f"{lang('status_pgm')}: `{pgm_version}`\n"
-        f"{lang('status_uptime')}: `{uptime}`"
+        f"{lang('status_pgm')}: `{status_data.version}`\n"
+        f"{lang('status_uptime')}: `{status_data.run_time}`\n"
+        f"{lang('status_cpu')}: `{status_data.cpu_percent}`\n"
+        f"{lang('status_ram')}: `{status_data.ram_percent}`\n"
+        f"{lang('status_swap')}: `{status_data.swap_percent}`\n"
+        f"{lang('status_process_cpu')}: `{status_data.process_cpu_percent}`\n"
+        f"{lang('status_process_ram')}: `{status_data.process_ram_percent}`"
     )
     await message.edit(text)
 
