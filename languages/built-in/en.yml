@@ -373,7 +373,7 @@ del_BadRequestError: Something went wrong, woooo~ I don
 spn_deleted: deleted
 #status
 ## sysinfo
-sysinfo_des: Retrieve system information through neofetch.
+sysinfo_des: Retrieve system information through fastfetch (preferred) or neofetch.
 sysinfo_loading: Loading system information...
 sysinfo_not_found: Could not find fastfetch or neofetch, please install one of them.
 ## fortune
