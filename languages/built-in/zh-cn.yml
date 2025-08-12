@@ -373,7 +373,7 @@ del_BadRequestError: 出错了呜呜呜 ~ 缺少删除此消息的权限。
 spn_deleted: 删除了
 #status
 ## sysinfo
-sysinfo_des: 通过 neofetch 检索系统信息.
+sysinfo_des: 通过 fastfetch（优先）或 neofetch 检索系统信息。
 sysinfo_loading: 加载系统信息中 . . .
 sysinfo_not_found: 未找到 fastfetch 或 neofetch, 请安装其中一个。
 ## fortune
