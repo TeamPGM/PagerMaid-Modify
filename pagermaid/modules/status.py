@@ -38,7 +38,9 @@ async def sysinfo(message: Message):
     if not Config.SILENT:
         message = await message.edit(lang("sysinfo_loading"))
     if which("fastfetch"):
-        result = await execute("fastfetch --config none --logo none --pipe --structure title:separator:os:kernel:uptime:loadavg:packages:initsystem:shell:locale:processes:memory:swap:disk:netio")
+        result = await execute(
+            "fastfetch --config none --logo none --pipe --structure title:separator:os:kernel:uptime:loadavg:packages:initsystem:shell:locale:processes:memory:swap:disk:netio"
+        )
     elif platform == "win32":
         return await message.edit(neofetch_win(), parse_mode="html")
     elif which("neofetch"):
