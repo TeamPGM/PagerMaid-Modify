@@ -1,6 +1,7 @@
 """Pagermaid backup and recovery plugin."""
 
 import os
+import sys
 import tarfile
 from io import BytesIO
 from traceback import format_exc
@@ -120,5 +121,5 @@ async def recovery(message: Message):
         os.remove(pgm_backup_zip_name)
 
     await message.edit(lang("recovery_success") + " " + lang("apt_reboot"))
-    await message.client.disconnect()
+    sys.exit(0)
     return None

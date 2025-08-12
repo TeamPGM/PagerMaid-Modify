@@ -24,7 +24,7 @@ from pagermaid.config import Config
 from pagermaid.enums import Message
 from pagermaid.enums.command import CommandHandler, CommandHandlerDecorator
 from pagermaid.group_manager import Permission
-from pagermaid.hook import Hook
+from pagermaid.hook import HookRunner
 from pagermaid.services import bot
 from pagermaid.static import help_messages, read_context, all_permissions
 from pagermaid.utils import (
@@ -173,14 +173,14 @@ def listener(**args) -> CommandHandlerDecorator:
                     read_context[(context.chat_id, context.id)] = True
 
                 if command:
-                    await Hook.command_pre(
+                    await HookRunner.command_pre(
                         context,
                         parent_command or command,
                         command if parent_command else None,
                     )
                 await func.handler(context)
                 if command:
-                    await Hook.command_post(
+                    await HookRunner.command_post(
                         context,
                         parent_command or command,
                         command if parent_command else None,
@@ -205,7 +205,7 @@ def listener(**args) -> CommandHandlerDecorator:
                 logs.warning("Please Don't Delete Commands While it's Processing..")
             except (SystemExit, CancelledError):
                 await process_exit(start=False, _client=context.client, message=context)
-                await Hook.shutdown()
+                await HookRunner.shutdown()
                 web.stop()
             except BaseException as exc:
                 exc_info = sys.exc_info()[1]
@@ -235,7 +235,9 @@ def listener(**args) -> CommandHandlerDecorator:
                         None,
                         "PGM Error report generated.",
                     )
-                await Hook.process_error_exec(context, command, exc_info, exc_format)
+                await HookRunner.process_error_exec(
+                    context, command, exc_info, exc_format
+                )
             finally:
                 if (context.chat_id, context.id) in read_context:
                     del read_context[(context.chat_id, context.id)]
