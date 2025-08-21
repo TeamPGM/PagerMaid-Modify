@@ -1,6 +1,10 @@
 """This module contains utils to configure your account."""
 
+from io import BytesIO
 from os import remove
+from typing import Optional, TYPE_CHECKING, Union
+
+from PIL import Image
 from telethon.errors import ImageProcessFailedError, PhotoCropSizeSmallError
 from telethon.errors.rpcerrorlist import (
     PhotoExtInvalidError,
@@ -17,21 +21,23 @@ from telethon.tl.functions.photos import (
     UploadProfilePhotoRequest,
 )
 from telethon.tl.functions.users import GetFullUserRequest
+from telethon.tl.functions.channels import GetFullChannelRequest
 from telethon.tl.functions.contacts import BlockRequest, UnblockRequest
 from telethon.tl.types import (
     InputPhoto,
     MessageMediaPhoto,
     MessageEntityMentionName,
-    MessageEntityPhone,
+    Channel,
     User,
 )
-from telethon.tl.types.users import UserFull
 
 from pagermaid.config import Config
-from pagermaid.enums import Message, Client
 from pagermaid.listener import listener
-from pagermaid.utils import lang, safe_remove
+from pagermaid.utils import lang
 from pagermaid.utils.bot_utils import log
+
+if TYPE_CHECKING:
+    from pagermaid.enums import Client, Message
 
 
 @listener(
@@ -102,7 +108,7 @@ async def name(context: "Message"):
     command="pfp",
     description=lang("pfp_des"),
 )
-async def pfp(bot: Client, context: "Message"):
+async def pfp(bot: "Client", context: "Message"):
     """Sets your profile picture."""
     reply = await context.get_reply_message()
     photo = None
@@ -162,7 +168,7 @@ async def bio(bot: "Client", context: "Message"):
     description=lang("rmpfp_des"),
     parameters=f"<{lang('int')}>",
 )
-async def rmpfp(bot: Client, context: "Message"):
+async def rmpfp(bot: "Client", context: "Message"):
     """Removes your profile picture."""
     group = context.text[8:]
     if group == "all":
@@ -188,130 +194,176 @@ async def rmpfp(bot: Client, context: "Message"):
     await context.edit(f"`{lang('rmpfp_p')}{len(input_photos)} {lang('rmpfp_l')}`")
 
 
+async def get_user_profile_caption(context: "Message", target_entity: "User") -> str:
+    full_info = await context.client(GetFullUserRequest(target_entity))
+    target_user = full_info.users[0]
+    target_user_full = full_info.full_user
+
+    user_type = "Bot" if target_user.bot else lang("profile_user")
+    username_system = (
+        f"@{target_user.username}" if target_user.username else lang("profile_noset")
+    )
+    first_name = (
+        target_user.first_name.replace("\u2060", "") if target_user.first_name else ""
+    )
+    last_name = (
+        target_user.last_name.replace("\u2060", "")
+        if target_user.last_name
+        else lang("profile_noset")
+    )
+    biography = target_user_full.about or lang("profile_nobio")
+    common_chats_count = target_user_full.common_chats_count
+    verified = lang("profile_yes") if target_user.verified else lang("profile_no")
+    restricted = lang("profile_yes") if target_user.restricted else lang("profile_no")
+
+    return (
+        f"**👤 {lang('profile_name')}:**\n"
+        f"**{lang('profile_username')}:** {username_system}\n"
+        f"**ID:** `{target_user.id}`\n"
+        f"**{lang('profile_fname')}:** [{first_name}](tg://user?id={target_user.id})\n"
+        f"**{lang('profile_lname')}:** {last_name}\n"
+        f"**{lang('profile_bio')}:** {biography}\n"
+        f"**{lang('profile_gic')}:** {common_chats_count}\n"
+        f"**{lang('profile_verified')}:** {verified}\n"
+        f"**{lang('profile_restricted')}:** {restricted}\n"
+        f"**{lang('profile_type')}:** {user_type}\n"
+    )
+
+
+async def get_channel_profile_caption(
+    context: "Message", target_entity: "Channel"
+) -> str:
+    full_info = await context.client(GetFullChannelRequest(channel=target_entity))
+    channel = full_info.chats[0]
+    channel_full = full_info.full_chat
+
+    entity_type = (
+        lang("profile_group") if channel.megagroup else lang("profile_channel")
+    )
+    username_system = (
+        f"@{channel.username}" if channel.username else lang("profile_noset")
+    )
+    description = channel_full.about or lang("profile_noset")
+    members_count = channel_full.participants_count
+    verified = lang("profile_yes") if channel.verified else lang("profile_no")
+    restricted = lang("profile_yes") if channel.restricted else lang("profile_no")
+
+    return (
+        f"**🏢 {lang('profile_entity_info')}:**\n"
+        f"**{lang('profile_username')}:** {username_system}\n"
+        f"**ID:** `{channel.id}`\n"
+        f"**{lang('profile_title')}:** {channel.title}\n"
+        f"**{lang('profile_type')}:** {entity_type}\n"
+        f"**{lang('profile_bio')}:** {description}\n"
+        f"**{lang('profile_members')}:** {members_count}\n"
+        f"**{lang('profile_verified')}:** {verified}\n"
+        f"**{lang('profile_restricted')}:** {restricted}"
+    )
+
+
+async def download_profile_photo(
+    context: "Message", target_entity: Union["User", "Channel"]
+) -> Optional["BytesIO"]:
+    """Downloads the profile photo of the target entity."""
+    downloaded_photo = await context.client.download_profile_photo(
+        target_entity, download_big=True
+    )
+    resized_img = None
+    if not downloaded_photo:
+        return
+    try:
+        TARGET_WIDTH = 300
+        img = Image.open(downloaded_photo)
+        if img.width > TARGET_WIDTH:
+            aspect_ratio = img.height / img.width
+            new_height = int(TARGET_WIDTH * aspect_ratio)
+            resized_img = img.resize(
+                (TARGET_WIDTH, new_height), Image.Resampling.BICUBIC
+            )
+    except Exception:
+        pass
+    _file = BytesIO()
+    _file.name = "profile_photo.jpg"
+    if resized_img:
+        resized_img.save(_file, format="JPEG", quality=85)
+    else:
+        _file.write(downloaded_photo)
+    _file.seek(0)
+    return _file
+
+
 @listener(
     is_plugin=False,
     command="profile",
     description=lang("profile_des"),
-    parameters="<username>",
+    parameters="<username / id>",
 )
 async def profile(context: "Message"):
-    """Queries profile of a user."""
-    if len(context.parameter) > 1:
-        await context.edit(f"{lang('error_prefix')}{lang('arg_error')}")
-        return
+    """Queries profile of a user, channel, or group."""
     if not Config.SILENT:
         await context.edit(lang("profile_process"))
+
+    target_entity = None
+
     if context.reply_to_msg_id:
         reply_message = await context.get_reply_message()
-        if not reply_message:
-            return await context.edit(f"{lang('error_prefix')}{lang('arg_error')}")
-        user = reply_message.from_id
-        target_user = await context.client(GetFullUserRequest(user))
-    else:
-        if len(context.parameter) == 1:
-            user = context.parameter[0]
-            if user.isnumeric():
-                user = int(user)
-        else:
-            user_object = await context.client.get_me()
-            user = user_object.id
-        if context.message.entities is not None:
-            if isinstance(context.message.entities[0], MessageEntityMentionName):
-                user = context.message.entities[0].user_id
-            elif isinstance(context.message.entities[0], MessageEntityPhone):
-                user = int(context.parameter[0])
+        if reply_message:
+            if reply_message.fwd_from:
+                if reply_message.fwd_from.from_id:
+                    target_entity = await context.client.get_entity(
+                        reply_message.fwd_from.from_id
+                    )
+                else:
+                    await context.edit(
+                        f"{lang('error_prefix')}{lang('profile_e_hidden')}"
+                    )
+                    return
             else:
-                await context.edit(f"{lang('error_prefix')}{lang('arg_error')}")
-                return
+                target_entity = await reply_message.get_sender()
+    elif context.parameter:
+        user_input = context.parameter[0]
+        if user_input.isnumeric() or user_input.startswith("-100"):
+            try:
+                user_input = int(user_input)
+            except ValueError:
+                pass
         try:
-            user_object = await context.client.get_entity(user)
-            target_users: UserFull = await context.client(
-                GetFullUserRequest(user_object.id)
-            )
-            target_user = target_users.users[0]
-        except (TypeError, ValueError, OverflowError) as exception:
-            if str(exception).startswith("Cannot find any entity corresponding to"):
-                await context.edit(f"{lang('error_prefix')}{lang('profile_e_no')}")
-                return
-            if str(exception).startswith("No user has"):
-                await context.edit(f"{lang('error_prefix')}{lang('profile_e_nou')}")
-                return
-            if str(exception).startswith("Could not find the input entity for"):
-                await context.edit(f"{lang('error_prefix')}{lang('profile_e_nof')}")
-                return
-            if isinstance(exception, OverflowError):
-                await context.edit(f"{lang('error_prefix')}{lang('profile_e_long')}")
-                return
-            raise exception
-    user_type = "Bot" if target_user.bot else lang("profile_user")
-    username_system = (
-        f"@{target_user.username}"
-        if target_user.username is not None
-        else (lang("profile_noset"))
-    )
-    if not target_user.first_name:
+            target_entity = await context.client.get_entity(user_input)
+        except (TypeError, ValueError, OverflowError):
+            await context.edit(f"{lang('error_prefix')}{lang('arg_error')}")
+            return
+    else:
+        target_entity = await context.client.get_me()
+
+    if not target_entity:
         await context.edit(f"{lang('error_prefix')}{lang('profile_e_no')}")
         return
-    first_name = target_user.first_name.replace("\u2060", "")
-    last_name = (
-        target_user.last_name.replace("\u2060", "")
-        if target_user.last_name is not None
-        else (lang("profile_noset"))
-    )
-    biography = (
-        target_user.about if hasattr(target_user, "about") else lang("profile_nobio")
-    )
-    verified = lang("profile_yes") if target_user.verified else lang("profile_no")
-    restricted = lang("profile_yes") if target_user.restricted else lang("profile_no")
-    common_chats_count = (
-        target_user.common_chats_count
-        if hasattr(target_user, "common_chats_count")
-        else 0
-    )
-    caption = (
-        f"**{lang('profile_name')}:** \n"
-        f"{lang('profile_username')}: {username_system} \n"
-        f"ID: {target_user.id} \n"
-        f"{lang('profile_fname')}: {first_name} \n"
-        f"{lang('profile_lname')}: {last_name} \n"
-        f"{lang('profile_bio')}: {biography} \n"
-        f"{lang('profile_gic')}: {common_chats_count} \n"
-        f"{lang('profile_verified')}: {verified} \n"
-        f"{lang('profile_restricted')}: {restricted} \n"
-        f"{lang('profile_type')}: {user_type} \n"
-        f"[{first_name}](tg://user?id={target_user.id})"
-    )
-    photo = await context.client.download_profile_photo(
-        target_user.id, "./" + str(target_user.id) + ".jpg", download_big=True
-    )
+
     try:
-        reply_to = context.message.reply_to_msg_id
+        if isinstance(target_entity, User):
+            caption = await get_user_profile_caption(context, target_entity)
+        elif isinstance(target_entity, Channel):
+            caption = await get_channel_profile_caption(context, target_entity)
+        else:
+            await context.edit(f"{lang('error_prefix')}{lang('profile_e_unsupported')}")
+            return
+    except (TypeError, ValueError):
+        return await context.edit(f"{lang('error_prefix')}{lang('profile_e_no')}")
+
+    downloaded_photo = await download_profile_photo(context, target_entity)
+    if not downloaded_photo:
+        await context.edit(caption, link_preview=False)
+    else:
         try:
             await context.client.send_file(
                 context.chat_id,
-                photo,
+                downloaded_photo,
                 caption=caption,
                 link_preview=False,
-                force_document=False,
-                reply_to=reply_to,
+                reply_to=context.reply_to_msg_id,
             )
-            await context.delete()
-        except TypeError:
-            await context.edit(caption)
-    except:
-        try:
-            await context.client.send_file(
-                context.chat_id,
-                photo,
-                caption=caption,
-                link_preview=False,
-                force_document=False,
-            )
-            await context.delete()
-        except TypeError:
-            await context.edit(caption)
-    finally:
-        safe_remove(photo)
+        except Exception:
+            await context.edit(caption, link_preview=False)
 
 
 @listener(

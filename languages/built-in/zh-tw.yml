@@ -1,5 +1,5 @@
 ---
-#Chinese (Simplified)
+#Chinese (Traditional)
 #main
 web_TypeError: Error！Web 介面綁定了一個無效網址。
 web_KeyError: Error！設定檔缺少Web介面配置。
@@ -67,20 +67,26 @@ profile_e_no: 指定的用戶不存在。
 profile_e_nou: 指定的用戶名不存在。
 profile_e_nof: 無法透過此UserID找到對應的用戶。
 profile_e_long: 指定的UserID已超出長度限制，錯了吧？
+profile_e_hidden: 指定的UserID已隱藏資料
 profile_user: 用戶
 profile_noset: 好像沒有設定OAO
 profile_nobio: 沒有公開的介紹
 profile_yes: "是"
 profile_no: "否"
 profile_name: 用戶介紹
+profile_entity_info: 簡介
 profile_username: 用戶名
 profile_fname: 名字
 profile_lname: 姓氏
-profile_bio: 用戶介紹
+profile_title: 稱號
+profile_bio: 目前已知的情報
 profile_gic: 共同的群組
 profile_verified: 官方認證
 profile_restricted: 受到限制
 profile_type: 類型
+profile_channel: 頻道
+profile_group: 群組
+profile_members: 成員數量
 ## block
 block_des: 拉黑一個用戶
 block_process: 正在拉黑中 . . .

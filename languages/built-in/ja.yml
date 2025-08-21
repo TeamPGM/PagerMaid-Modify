@@ -1,5 +1,5 @@
 ---
-#Chinese (Simplified)
+#Japanese
 #main
 web_TypeError: Oops - Web interface is configured to bind to an invalid address。
 web_KeyError: Oops - Web interface configuration is mising in the config file。
@@ -67,20 +67,25 @@ profile_e_no: The specified user does not exist。
 profile_e_nou: ユーザー名 specified does not exist。
 profile_e_nof: ユーザーID specified does not correspond to a user.
 profile_e_long: UserID specified have exceeded integer limit。
+profile_e_hidden: 指定さたUserIDは情報を隠しました
 profile_user: ユーザー
-profile_noset: Not set.
-profile_nobio: Not set.
-profile_yes: "Yes"
-profile_no: "No"
-profile_name: プロファイル管理
-profile_username: ユーザ ID
-profile_fname: First name
-profile_lname: シェルター名
-profile_bio: ベオロ
-profile_gic: Group in common
-profile_verified: Verified
-profile_restricted: Restrict
-profile_type: Type
+profile_noset: Not set
+profile_nobio: 自己紹介がありません
+profile_yes: "はい"
+profile_no: "いいえ"
+profile_name: ユーザープロファイル
+profile_entity_info: エンティティ情報
+profile_username: ユーザー名
+profile_fname: 名
+profile_lname: 姓
+profile_title: タイトル
+profile_bio: 自己紹介
+profile_gic: 共通のグループ
+profile_verified: 認証み
+profile_restricted: 制限付き
+profile_type: タイプ
+profile_channel: チャンネル
+profile_group: グループ
 ## block
 block_des: ブロック･ユーザーです
 block_process: Processing.
