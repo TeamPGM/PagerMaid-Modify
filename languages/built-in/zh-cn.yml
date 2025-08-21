@@ -67,20 +67,26 @@ profile_e_no: 指定的用户不存在。
 profile_e_nou: 指定的道纹不存在。
 profile_e_nof: 无法通过此 UserID 找到对应的用户。
 profile_e_long: 指定的 UserID 已超出长度限制，您确定输对了？
+profile_e_hidden: 指定的 UserID 已隐藏信息
 profile_user: 用户
 profile_noset: 喵喵喵 ~ 好像没有设置
 profile_nobio: 没有公开的情报
 profile_yes: "是"
 profile_no: "否"
 profile_name: 用户简介
+profile_entity_info: 简介
 profile_username: 道纹
 profile_fname: 名字
 profile_lname: 姓氏
+profile_title: 名称
 profile_bio: 目前已知的情报
 profile_gic: 共同裙
 profile_verified: 官方认证
 profile_restricted: 受限制
 profile_type: 类型
+profile_channel: 频道
+profile_group: 群组
+profile_members: 成员数量
 ## block
 block_des: 拉黑一个用户
 block_process: 正在拉黑中 . . .

@@ -1,5 +1,5 @@
 ---
-#Chinese (Simplified)
+#English
 #main
 web_TypeError: Oops ~ Web interface is configured to bind to an invalid address.
 web_KeyError: Oops ~ Web interface configuration is missing in the config file.
@@ -67,20 +67,26 @@ profile_e_no: The specified user does not exist.
 profile_e_nou: The username specified does not exist.
 profile_e_nof: The UserID specified does not correspond to a user.
 profile_e_long: The UserID specified have exceeded the integer limit.
+profile_e_hidden: The UserID specified has hidden information.
 profile_user: User
 profile_noset: Not set.
 profile_nobio: Not set.
 profile_yes: "Yes"
 profile_no: "No"
 profile_name: Profile
+profile_entity_info: Entity Info
 profile_username: Username
-profile_fname: First name
-profile_lname: Last name
+profile_fname: First Name
+profile_lname: Last Name
+profile_title: Title
 profile_bio: Bio
-profile_gic: Group in common
+profile_gic: Groups in common
 profile_verified: Verified
 profile_restricted: Restricted
 profile_type: Type
+profile_channel: Channel
+profile_group: Group
+profile_members: Members
 ## block
 block_des: Block an user.
 block_process: Processing . . .
