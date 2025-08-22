@@ -35,7 +35,6 @@ from pagermaid.utils import (
 from pagermaid.utils.bot_utils import attach_report
 from pagermaid.utils.listener import (
     get_permission_name,
-    process_exit,
     format_exc as format_exc_text,
 )
 from pagermaid.web import web
@@ -204,8 +203,7 @@ def listener(**args) -> CommandHandlerDecorator:
             except MessageIdInvalidError:
                 logs.warning("Please Don't Delete Commands While it's Processing..")
             except (SystemExit, CancelledError):
-                await process_exit(start=False, _client=context.client, message=context)
-                await HookRunner.shutdown()
+                await HookRunner.shutdown(context)
                 web.stop()
             except BaseException as exc:
                 exc_info = sys.exc_info()[1]
