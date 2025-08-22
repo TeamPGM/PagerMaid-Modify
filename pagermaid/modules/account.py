@@ -265,8 +265,10 @@ async def download_profile_photo(
     context: "Message", target_entity: Union["User", "Channel"]
 ) -> Optional["BytesIO"]:
     """Downloads the profile photo of the target entity."""
+    _file = BytesIO()
+    _file.name = "profile_photo.jpg"
     downloaded_photo = await context.client.download_profile_photo(
-        target_entity, download_big=True
+        target_entity, _file, download_big=True
     )
     resized_img = None
     if not downloaded_photo:
