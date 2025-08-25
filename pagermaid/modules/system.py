@@ -64,7 +64,7 @@ async def sh(message: "Message"):
             await attach_log(result, message.chat_id, "output.log", message.id)
             return
         await message.edit(
-            f"`{user}`@{hostname} ~\n> `#` {command}\n\n`{final_result}`",
+            f"`{user}`@{hostname} ~\n> `#` {command}\n\n```\n{final_result}\n```",
             parse_mode="md",
         )
     else:
