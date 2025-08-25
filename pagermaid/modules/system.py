@@ -44,9 +44,7 @@ async def sh(message: "Message"):
         await message.edit(lang("arg_error"))
         return
 
-    message = await message.edit(
-        f"`{user}`@{hostname} ~\n> `$` {command}", parse_mode="html"
-    )
+    message = await message.edit(f"`{user}`@{hostname} ~\n> `$` {command}")
 
     result = await execute(command)
 
@@ -63,10 +61,7 @@ async def sh(message: "Message"):
         if (len(result) > 3072 and not Config.USE_PB) or final_result is None:
             await attach_log(result, message.chat_id, "output.log", message.id)
             return
-        await message.edit(
-            f"`{user}`@{hostname} ~\n> `#` {command}\n\n{final_result}",
-            parse_mode="html",
-        )
+        await message.edit(f"`{user}`@{hostname} ~\n> `#` {command}\n\n{final_result}")
     else:
         return
 
