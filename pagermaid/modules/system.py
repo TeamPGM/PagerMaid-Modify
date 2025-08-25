@@ -44,9 +44,7 @@ async def sh(message: "Message"):
         await message.edit(lang("arg_error"))
         return
 
-    message = await message.edit(
-        f"`{user}`@{hostname} ~\n> `$` {command}", parse_mode="md"
-    )
+    message = await message.edit(f"`{user}`@{hostname} ~\n> `$` {command}")
 
     result = await execute(command)
 
@@ -56,17 +54,14 @@ async def sh(message: "Message"):
             if Config.USE_PB:
                 url = await paste_pb(result)
                 if url:
-                    final_result = f"{url}/bash"
+                    final_result = html.escape(f"{url}/bash")
         else:
-            final_result = result
+            final_result = f"<code>{html.escape(result)}</code>"
 
         if (len(result) > 3072 and not Config.USE_PB) or final_result is None:
             await attach_log(result, message.chat_id, "output.log", message.id)
             return
-        await message.edit(
-            f"`{user}`@{hostname} ~\n> `#` {command}\n\n```\n{final_result}\n```",
-            parse_mode="md",
-        )
+        await message.edit(f"`{user}`@{hostname} ~\n> `#` {command}\n\n{final_result}")
     else:
         return
 
