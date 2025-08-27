@@ -28,7 +28,6 @@ RUN source ~/.bashrc \
         curl \
         wget \
         neofetch \
-        imagemagick \
         ffmpeg \
         fortune-mod \
         figlet \
