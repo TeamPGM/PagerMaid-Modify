@@ -274,8 +274,8 @@ async def plugin(message: Message):
 
         active, disabled, inactive = plugin_manager.get_plugins_status()
         active_set = set(active)
-        disabled_set = set(p.name for p in disabled)
-        inactive_set = set(p.name for p in inactive)
+        inactive_set = set(p.name for p in disabled)
+        disabled_set = set(p.name for p in inactive)
 
         page = 1
         if len(message.parameter) > 1:
