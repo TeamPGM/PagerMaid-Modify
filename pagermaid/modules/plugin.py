@@ -264,6 +264,54 @@ async def plugin(message: Message):
                 await message.edit(lang("apt_search_not_found"))
             else:
                 await message.edit(search_result, parse_mode="md")
+    elif message.parameter[0] == "list":
+        await plugin_manager.load_remote_plugins()
+        plugins = sorted(plugin_manager.remote_plugins, key=lambda x: x.name)
+
+        if not plugins:
+            await message.edit("No remote plugins found.")
+            return
+
+        active, disabled, inactive = plugin_manager.get_plugins_status()
+        active_set = set(active)
+        disabled_set = set(p.name for p in disabled)
+        inactive_set = set(p.name for p in inactive)
+
+        page = 1
+        if len(message.parameter) > 1:
+            if message.parameter[1].isdigit():
+                page = int(message.parameter[1])
+            else:
+                await message.edit(lang("arg_error"))
+                return
+
+        page_size = 15
+        total_pages = (len(plugins) + page_size - 1) // page_size
+
+        if not 1 <= page <= total_pages:
+            page = 1
+
+        start_index = (page - 1) * page_size
+        end_index = start_index + page_size
+        
+        plugins_to_show = plugins[start_index:end_index]
+        
+        text = f"**Plugin List ({page}/{total_pages})**\n\n"
+        text = f"**{lang('apt_plugin_list')} ({page}/{total_pages})**\n\n"
+        for plugin in plugins_to_show:
+            status_icon = '⚪️'
+            if plugin.name in active_set:
+                status_icon = '🟢'
+            elif plugin.name in disabled_set:
+                status_icon = '🔘'
+            elif plugin.name in inactive_set:
+                status_icon = '🔴'
+            
+            text += f"{status_icon} `{plugin.name}`\n  `·` {plugin.des_short}\n"
+        
+        text += f"\n🟢: {lang('apt_plugin_running')}, 🔘: {lang('apt_disable')},  🔴: {lang('apt_plugin_failed')}, ⚪️: {lang('apt_plugin_not_installed')}.\n"
+        text += f"{lang('apt_plugin_list_des')}"
+        await message.edit(text, parse_mode="md")
     elif message.parameter[0] == "export":
         if not exists(f"{plugin_directory}version.json"):
             await message.edit(lang("apt_why_not_install_a_plugin"))
