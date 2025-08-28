@@ -296,7 +296,6 @@ async def plugin(message: Message):
         
         plugins_to_show = plugins[start_index:end_index]
         
-        text = f"**Plugin List ({page}/{total_pages})**\n\n"
         text = f"**{lang('apt_plugin_list')} ({page}/{total_pages})**\n\n"
         for plugin in plugins_to_show:
             status_icon = '⚪️'
