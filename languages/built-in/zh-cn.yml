@@ -7,6 +7,11 @@ PhoneNumberInvalidError: 出错了呜呜呜 ~ 输入的电话号码无效。 请
 module: 模块
 error: 加载出错
 start: PagerMaid-Modify 已启动，在任何聊天中输入 -help 以获得帮助消息。
+telegram_auth_key_invalid: Telegram 授权密钥无效，正在移除 session。
+telegram_connecting: 正在连接 Telegram...
+telegram_connection_failed: Telegram 连接失败
+telegram_disconnected: 连接已断开
+telegram_retrying: 将在以下秒数后重试
 #utils
 msg_ValueError: 出错了呜呜呜 ~ 没有成功获取到消息！
 isinstance: 出错了呜呜呜 ~ 长度必须是整数!

@@ -7,6 +7,11 @@ PhoneNumberInvalidError: Oops ~ The phone number entered is invalid. Please make
 module: module
 error: loading error
 start: PagerMaid-Modify have started, type -help in any chat for help message.
+telegram_auth_key_invalid: Telegram authorization key is invalid, removing session.
+telegram_connecting: Connecting to Telegram...
+telegram_connection_failed: Telegram connection failed
+telegram_disconnected: Disconnected
+telegram_retrying: Retrying in
 #utils
 msg_ValueError: Oops ~ No messages were successfully obtained!
 isinstance: Oops ~ Length must be an integer!
