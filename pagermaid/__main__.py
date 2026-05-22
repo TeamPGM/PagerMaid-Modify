@@ -22,17 +22,27 @@ path.insert(1, f"{working_dir}{sep}plugins")
 INITIAL_RETRY_DELAY = 5
 MAX_RETRY_DELAY = 120
 STABLE_RETRY_RESET_AFTER = 300
+RETRYABLE_CONNECTION_ERRORS = (
+    OSError,
+    ConnectionError,
+    TimeoutError,
+    asyncio.TimeoutError,
+)
+
+
+async def run_web_tracked_task(task):
+    web.bot_main_task = task
+    try:
+        return await task
+    finally:
+        if web.bot_main_task is task:
+            web.bot_main_task = None
 
 
 async def sleep_before_retry(delay):
     logs.warning(f"{lang('telegram_retrying')} {delay}s")
     task = asyncio.create_task(asyncio.sleep(delay))
-    web.bot_main_task = task
-    try:
-        await task
-    finally:
-        if web.bot_main_task is task:
-            web.bot_main_task = None
+    await run_web_tracked_task(task)
     return min(delay * 2, MAX_RETRY_DELAY)
 
 
@@ -57,9 +67,8 @@ async def idle():
             if Config.WEB_ENABLE and Config.WEB_LOGIN:
                 t = asyncio.sleep(600)
                 task = asyncio.create_task(t)
-                web.bot_main_task = task
                 try:
-                    await task
+                    await run_web_tracked_task(task)
                 except asyncio.CancelledError:
                     break
                 continue
@@ -68,7 +77,7 @@ async def idle():
                 try:
                     logs.info(lang("telegram_connecting"))
                     await bot.connect()
-                except (OSError, ConnectionError, TimeoutError, asyncio.TimeoutError) as e:
+                except RETRYABLE_CONNECTION_ERRORS as e:
                     logs.warning(f"{lang('telegram_connection_failed')}: {type(e).__name__}: {e}")
                     retry_delay = await sleep_before_retry(retry_delay)
                     continue
@@ -76,13 +85,12 @@ async def idle():
             started_at = asyncio.get_running_loop().time()
             t = bot._run_until_disconnected()
             task = asyncio.create_task(t)
-            web.bot_main_task = task
             disconnected_logged = False
             try:
-                await task
+                await run_web_tracked_task(task)
             except asyncio.CancelledError:
                 break
-            except (OSError, ConnectionError, TimeoutError, asyncio.TimeoutError) as e:
+            except RETRYABLE_CONNECTION_ERRORS as e:
                 logs.warning(f"{lang('telegram_disconnected')}: {type(e).__name__}: {e}")
                 disconnected_logged = True
 
@@ -109,7 +117,7 @@ async def console_bot():
         logs.error(lang("telegram_auth_key_invalid"))
         SessionFileManager.safe_remove_session()
         exit()
-    except (OSError, ConnectionError, TimeoutError, asyncio.TimeoutError) as e:
+    except RETRYABLE_CONNECTION_ERRORS as e:
         logs.warning(f"{lang('telegram_connection_failed')}: {type(e).__name__}: {e}")
         raise
     bot.me = me
@@ -147,7 +155,7 @@ async def main():
                 try:
                     await console_bot()
                     break
-                except (OSError, ConnectionError, TimeoutError, asyncio.TimeoutError):
+                except RETRYABLE_CONNECTION_ERRORS:
                     retry_delay = await sleep_before_retry(retry_delay)
             logs.info(lang("start"))
         else:
