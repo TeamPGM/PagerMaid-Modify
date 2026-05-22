@@ -26,7 +26,13 @@ STABLE_RETRY_RESET_AFTER = 300
 
 async def sleep_before_retry(delay):
     logs.warning(f"{lang('telegram_retrying')} {delay}s")
-    await asyncio.sleep(delay)
+    task = asyncio.create_task(asyncio.sleep(delay))
+    web.bot_main_task = task
+    try:
+        await task
+    finally:
+        if web.bot_main_task is task:
+            web.bot_main_task = None
     return min(delay * 2, MAX_RETRY_DELAY)
 
 
@@ -75,7 +81,7 @@ async def idle():
                 await task
             except asyncio.CancelledError:
                 break
-            except Exception as e:
+            except (OSError, ConnectionError, TimeoutError, asyncio.TimeoutError) as e:
                 logs.warning(f"{lang('telegram_disconnected')}: {type(e).__name__}: {e}")
 
             if getattr(bot, "_should_restart", False):
