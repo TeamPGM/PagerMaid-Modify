@@ -30,66 +30,88 @@ RETRYABLE_CONNECTION_ERRORS = (
 )
 
 
-async def run_web_tracked_task(task):
-    web.bot_main_task = task
-    try:
-        return await task
-    finally:
-        if web.bot_main_task is task:
-            web.bot_main_task = None
+class ShutdownController:
+    def __init__(self):
+        self.requested = False
+        self.current_task = None
+
+    def request(self):
+        self.requested = True
+        if self.current_task and not self.current_task.done():
+            self.current_task.cancel()
+
+    async def wait(self, awaitable):
+        if self.requested:
+            if asyncio.iscoroutine(awaitable):
+                awaitable.close()
+            return False, None
+        task = asyncio.ensure_future(awaitable)
+        self.current_task = task
+        try:
+            result = await task
+            return not self.requested, result
+        except asyncio.CancelledError:
+            if self.requested:
+                return False, None
+            raise
+        finally:
+            if self.current_task is task:
+                self.current_task = None
 
 
-async def sleep_before_retry(delay):
+async def sleep_before_retry(delay, shutdown):
     logs.warning(f"{lang('telegram_retrying')} {delay}s")
-    task = asyncio.create_task(asyncio.sleep(delay))
-    await run_web_tracked_task(task)
-    return min(delay * 2, MAX_RETRY_DELAY)
+    keep_running, _ = await shutdown.wait(asyncio.sleep(delay))
+    if not keep_running:
+        return False, delay
+    return True, min(delay * 2, MAX_RETRY_DELAY)
 
 
-async def idle():
-    task = None
-    idle_task = asyncio.current_task()
+async def idle(shutdown):
     retry_delay = INITIAL_RETRY_DELAY
 
+    async def wait_before_retry():
+        nonlocal retry_delay
+        keep_running, retry_delay = await sleep_before_retry(retry_delay, shutdown)
+        return keep_running
+
     def signal_handler(_, __):
+        shutdown.request()
         if web.web_server_task:
             web.web_server_task.cancel()
-        if task and not task.done():
-            task.cancel()
-        elif idle_task and not idle_task.done():
-            idle_task.cancel()
 
     for s in (SIGINT, SIGTERM, SIGABRT):
         signal_fn(s, signal_handler)
 
     try:
         while True:
+            if shutdown.requested:
+                break
+
             if Config.WEB_ENABLE and Config.WEB_LOGIN:
-                t = asyncio.sleep(600)
-                task = asyncio.create_task(t)
-                try:
-                    await run_web_tracked_task(task)
-                except asyncio.CancelledError:
+                keep_running, _ = await shutdown.wait(asyncio.sleep(600))
+                if not keep_running:
                     break
                 continue
 
             if not bot.is_connected():
                 try:
                     logs.info(lang("telegram_connecting"))
-                    await bot.connect()
+                    keep_running, _ = await shutdown.wait(bot.connect())
+                    if not keep_running:
+                        break
                 except RETRYABLE_CONNECTION_ERRORS as e:
                     logs.warning(f"{lang('telegram_connection_failed')}: {type(e).__name__}: {e}")
-                    retry_delay = await sleep_before_retry(retry_delay)
+                    if not await wait_before_retry():
+                        break
                     continue
 
             started_at = asyncio.get_running_loop().time()
-            t = bot._run_until_disconnected()
-            task = asyncio.create_task(t)
             disconnected_logged = False
             try:
-                await run_web_tracked_task(task)
-            except asyncio.CancelledError:
-                break
+                keep_running, _ = await shutdown.wait(bot._run_until_disconnected())
+                if not keep_running:
+                    break
             except RETRYABLE_CONNECTION_ERRORS as e:
                 logs.warning(f"{lang('telegram_disconnected')}: {type(e).__name__}: {e}")
                 disconnected_logged = True
@@ -102,10 +124,12 @@ async def idle():
 
             if not disconnected_logged:
                 logs.warning(lang("telegram_disconnected"))
-            retry_delay = await sleep_before_retry(retry_delay)
+            if not await wait_before_retry():
+                break
     except asyncio.CancelledError:
-        if task and not task.done():
-            task.cancel()
+        if shutdown.requested:
+            return
+        raise
 
 
 async def console_bot():
@@ -145,6 +169,8 @@ async def web_bot():
 
 async def main():
     logs.info(lang("platform") + platform + lang("platform_load"))
+    shutdown = ShutdownController()
+    web.set_stop_handler(shutdown.request)
     if not scheduler.running:
         scheduler.start()
     await web.start()
@@ -153,14 +179,22 @@ async def main():
             retry_delay = INITIAL_RETRY_DELAY
             while True:
                 try:
-                    await console_bot()
+                    keep_running, _ = await shutdown.wait(console_bot())
+                    if not keep_running:
+                        return
                     break
                 except RETRYABLE_CONNECTION_ERRORS:
-                    retry_delay = await sleep_before_retry(retry_delay)
+                    keep_running, retry_delay = await sleep_before_retry(
+                        retry_delay, shutdown
+                    )
+                    if not keep_running:
+                        return
             logs.info(lang("start"))
         else:
-            await web_bot()
-        await idle()
+            keep_running, _ = await shutdown.wait(web_bot())
+            if not keep_running:
+                return
+        await idle(shutdown)
     finally:
         if scheduler.running:
             scheduler.shutdown()

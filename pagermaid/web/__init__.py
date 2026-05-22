@@ -35,7 +35,10 @@ class Web:
         self.app: FastAPI = FastAPI()
         self.web_server = None
         self.web_server_task = None
-        self.bot_main_task = None
+        self.stop_handler = None
+
+    def set_stop_handler(self, handler):
+        self.stop_handler = handler
 
     def init_web(self):
         self.app.include_router(base_api_router)
@@ -102,10 +105,10 @@ class Web:
         self.web_server_task = asyncio.create_task(self.web_server.main_loop())
 
     def stop(self):
+        if self.stop_handler:
+            self.stop_handler()
         if self.web_server_task:
             self.web_server_task.cancel()
-        if self.bot_main_task:
-            self.bot_main_task.cancel()
 
 
 web = Web()
