@@ -77,12 +77,14 @@ async def idle():
             t = bot._run_until_disconnected()
             task = asyncio.create_task(t)
             web.bot_main_task = task
+            disconnected_logged = False
             try:
                 await task
             except asyncio.CancelledError:
                 break
             except (OSError, ConnectionError, TimeoutError, asyncio.TimeoutError) as e:
                 logs.warning(f"{lang('telegram_disconnected')}: {type(e).__name__}: {e}")
+                disconnected_logged = True
 
             if getattr(bot, "_should_restart", False):
                 break
@@ -90,7 +92,8 @@ async def idle():
             if asyncio.get_running_loop().time() - started_at >= STABLE_RETRY_RESET_AFTER:
                 retry_delay = INITIAL_RETRY_DELAY
 
-            logs.warning(lang("telegram_disconnected"))
+            if not disconnected_logged:
+                logs.warning(lang("telegram_disconnected"))
             retry_delay = await sleep_before_retry(retry_delay)
     except asyncio.CancelledError:
         if task and not task.done():
@@ -137,18 +140,18 @@ async def main():
     if not scheduler.running:
         scheduler.start()
     await web.start()
-    if not (Config.WEB_ENABLE and Config.WEB_LOGIN):
-        retry_delay = INITIAL_RETRY_DELAY
-        while True:
-            try:
-                await console_bot()
-                break
-            except (OSError, ConnectionError, TimeoutError, asyncio.TimeoutError):
-                retry_delay = await sleep_before_retry(retry_delay)
-        logs.info(lang("start"))
-    else:
-        await web_bot()
     try:
+        if not (Config.WEB_ENABLE and Config.WEB_LOGIN):
+            retry_delay = INITIAL_RETRY_DELAY
+            while True:
+                try:
+                    await console_bot()
+                    break
+                except (OSError, ConnectionError, TimeoutError, asyncio.TimeoutError):
+                    retry_delay = await sleep_before_retry(retry_delay)
+            logs.info(lang("start"))
+        else:
+            await web_bot()
         await idle()
     finally:
         if scheduler.running:
