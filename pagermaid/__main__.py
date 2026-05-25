@@ -133,35 +133,62 @@ def _log_disconnect(reason):
         logs.warning(lang("telegram_disconnected"))
 
 
+async def _reconnect_or_continue(shutdown_event, retry_delay):
+    """Ensure the bot is connected. Returns (keep_running, next_retry_delay).
+
+    keep_running=False means the caller should stop the loop entirely.
+    """
+    if bot.is_connected():
+        return True, retry_delay
+
+    state, reason = await _try_connect(shutdown_event)
+    if state == _LoopState.CONTINUE:
+        return True, retry_delay
+    if state == _LoopState.SHUTDOWN:
+        return False, retry_delay
+
+    logs.warning(f"{lang('telegram_connection_failed')}: {reason}")
+    if not await _sleep_for_retry(retry_delay, shutdown_event):
+        return False, retry_delay
+    return True, _next_delay(retry_delay)
+
+
+async def _handle_session_end(state, reason, started_at, retry_delay, shutdown_event):
+    """Decide what to do after a session finishes. Returns (keep_running, next_retry_delay)."""
+    if state in (_LoopState.SHUTDOWN, _LoopState.STOP):
+        return False, retry_delay
+
+    loop = asyncio.get_running_loop()
+    if loop.time() - started_at >= STABLE_RETRY_RESET_AFTER:
+        retry_delay = INITIAL_RETRY_DELAY
+
+    _log_disconnect(reason)
+    if not await _sleep_for_retry(retry_delay, shutdown_event):
+        return False, retry_delay
+    return True, _next_delay(retry_delay)
+
+
 async def _run_bot_loop(shutdown_event):
     """Connect to Telegram and stay connected, retrying transient failures."""
     retry_delay = INITIAL_RETRY_DELAY
     loop = asyncio.get_running_loop()
 
     while not shutdown_event.is_set():
+        keep_running, retry_delay = await _reconnect_or_continue(
+            shutdown_event, retry_delay
+        )
+        if not keep_running:
+            return
         if not bot.is_connected():
-            state, reason = await _try_connect(shutdown_event)
-            if state == _LoopState.SHUTDOWN:
-                return
-            if state == _LoopState.RETRY:
-                logs.warning(f"{lang('telegram_connection_failed')}: {reason}")
-                if not await _sleep_for_retry(retry_delay, shutdown_event):
-                    return
-                retry_delay = _next_delay(retry_delay)
-                continue
+            continue
 
         started_at = loop.time()
         state, reason = await _run_session(shutdown_event)
-        if state in (_LoopState.SHUTDOWN, _LoopState.STOP):
+        keep_running, retry_delay = await _handle_session_end(
+            state, reason, started_at, retry_delay, shutdown_event
+        )
+        if not keep_running:
             return
-
-        if loop.time() - started_at >= STABLE_RETRY_RESET_AFTER:
-            retry_delay = INITIAL_RETRY_DELAY
-
-        _log_disconnect(reason)
-        if not await _sleep_for_retry(retry_delay, shutdown_event):
-            return
-        retry_delay = _next_delay(retry_delay)
 
 
 async def idle(shutdown_event):
