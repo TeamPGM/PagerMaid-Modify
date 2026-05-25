@@ -30,132 +30,150 @@ RETRYABLE_CONNECTION_ERRORS = (
 )
 
 
-class ShutdownController:
-    def __init__(self):
-        self.requested = False
-        self.current_task = None
+async def _wait_or_shutdown(awaitable, shutdown_event):
+    """Run *awaitable* and return its result, or ``None`` if ``shutdown_event`` fires first.
 
-    def request(self):
-        self.requested = True
-        if self.current_task and not self.current_task.done():
-            self.current_task.cancel()
-
-    async def wait(self, awaitable):
-        if self.requested:
-            if asyncio.iscoroutine(awaitable):
-                awaitable.close()
-            return False, None
-        task = asyncio.ensure_future(awaitable)
-        self.current_task = task
-        try:
-            result = await task
-            return not self.requested, result
-        except asyncio.CancelledError:
-            if self.requested:
-                return False, None
-            raise
-        finally:
-            if self.current_task is task:
-                self.current_task = None
+    Returns ``(completed, result)``:
+        completed=True  -> awaitable finished normally; ``result`` is its value.
+        completed=False -> shutdown was requested while waiting.
+    The pending awaitable is cancelled cleanly in the shutdown case.
+    """
+    task = asyncio.ensure_future(awaitable)
+    stop_task = asyncio.ensure_future(shutdown_event.wait())
+    try:
+        done, _ = await asyncio.wait(
+            {task, stop_task}, return_when=asyncio.FIRST_COMPLETED
+        )
+        if task in done:
+            return True, task.result()
+        return False, None
+    finally:
+        for t in (task, stop_task):
+            if not t.done():
+                t.cancel()
+                try:
+                    await t
+                except (asyncio.CancelledError, Exception):
+                    pass
 
 
-async def sleep_before_retry(delay, shutdown):
+def _next_delay(delay):
+    return min(delay * 2, MAX_RETRY_DELAY)
+
+
+async def _sleep_for_retry(delay, shutdown_event):
+    """Sleep up to *delay* seconds unless shutdown is requested.
+
+    Returns True if we should keep retrying, False if shutdown was requested.
+    """
     logs.warning(f"{lang('telegram_retrying')} {delay}s")
-    keep_running, _ = await shutdown.wait(asyncio.sleep(delay))
-    if not keep_running:
-        return False, delay
-    return True, min(delay * 2, MAX_RETRY_DELAY)
+    completed, _ = await _wait_or_shutdown(asyncio.sleep(delay), shutdown_event)
+    return completed
 
 
-async def idle(shutdown):
-    retry_delay = INITIAL_RETRY_DELAY
-
-    async def wait_before_retry():
-        nonlocal retry_delay
-        keep_running, retry_delay = await sleep_before_retry(retry_delay, shutdown)
-        return keep_running
-
+def _install_signal_handlers(shutdown_event):
     def signal_handler(_, __):
-        shutdown.request()
+        shutdown_event.set()
         if web.web_server_task:
             web.web_server_task.cancel()
 
     for s in (SIGINT, SIGTERM, SIGABRT):
         signal_fn(s, signal_handler)
 
-    try:
-        while True:
-            if shutdown.requested:
-                break
 
-            if Config.WEB_ENABLE and Config.WEB_LOGIN:
-                keep_running, _ = await shutdown.wait(asyncio.sleep(600))
-                if not keep_running:
-                    break
+async def _run_bot_loop(shutdown_event):
+    """Connect to Telegram and stay connected, retrying transient failures."""
+    retry_delay = INITIAL_RETRY_DELAY
+    loop = asyncio.get_running_loop()
+
+    while not shutdown_event.is_set():
+        if not bot.is_connected():
+            try:
+                logs.info(lang("telegram_connecting"))
+                completed, _ = await _wait_or_shutdown(bot.connect(), shutdown_event)
+                if not completed:
+                    return
+            except RETRYABLE_CONNECTION_ERRORS as e:
+                logs.warning(
+                    f"{lang('telegram_connection_failed')}: {type(e).__name__}: {e}"
+                )
+                if not await _sleep_for_retry(retry_delay, shutdown_event):
+                    return
+                retry_delay = _next_delay(retry_delay)
                 continue
 
-            if not bot.is_connected():
-                try:
-                    logs.info(lang("telegram_connecting"))
-                    keep_running, _ = await shutdown.wait(bot.connect())
-                    if not keep_running:
-                        break
-                except RETRYABLE_CONNECTION_ERRORS as e:
-                    logs.warning(f"{lang('telegram_connection_failed')}: {type(e).__name__}: {e}")
-                    if not await wait_before_retry():
-                        break
-                    continue
+        started_at = loop.time()
+        disconnect_reason = None
+        try:
+            completed, _ = await _wait_or_shutdown(
+                bot._run_until_disconnected(), shutdown_event
+            )
+            if not completed:
+                return
+        except RETRYABLE_CONNECTION_ERRORS as e:
+            disconnect_reason = f"{type(e).__name__}: {e}"
 
-            started_at = asyncio.get_running_loop().time()
-            disconnected_logged = False
-            try:
-                keep_running, _ = await shutdown.wait(bot._run_until_disconnected())
-                if not keep_running:
-                    break
-            except RETRYABLE_CONNECTION_ERRORS as e:
-                logs.warning(f"{lang('telegram_disconnected')}: {type(e).__name__}: {e}")
-                disconnected_logged = True
-
-            if getattr(bot, "_should_restart", False):
-                break
-
-            if asyncio.get_running_loop().time() - started_at >= STABLE_RETRY_RESET_AFTER:
-                retry_delay = INITIAL_RETRY_DELAY
-
-            if not disconnected_logged:
-                logs.warning(lang("telegram_disconnected"))
-            if not await wait_before_retry():
-                break
-    except asyncio.CancelledError:
-        if shutdown.requested:
+        if getattr(bot, "_should_restart", False):
             return
-        raise
+
+        if loop.time() - started_at >= STABLE_RETRY_RESET_AFTER:
+            retry_delay = INITIAL_RETRY_DELAY
+
+        if disconnect_reason:
+            logs.warning(f"{lang('telegram_disconnected')}: {disconnect_reason}")
+        else:
+            logs.warning(lang("telegram_disconnected"))
+
+        if not await _sleep_for_retry(retry_delay, shutdown_event):
+            return
+        retry_delay = _next_delay(retry_delay)
 
 
-async def console_bot():
-    try:
-        logs.info(lang("telegram_connecting"))
-        await start_client(bot)
-        me = await bot.get_me()
-    except AuthKeyError:
-        logs.error(lang("telegram_auth_key_invalid"))
-        SessionFileManager.safe_remove_session()
-        exit()
-    except RETRYABLE_CONNECTION_ERRORS as e:
-        logs.warning(f"{lang('telegram_connection_failed')}: {type(e).__name__}: {e}")
-        raise
-    bot.me = me
-    if me.bot:
-        SessionFileManager.safe_remove_session()
-        exit()
-    logs.info(f"{lang('save_id')} {me.first_name}({me.id})")
-    await load_all()
+async def idle(shutdown_event):
+    _install_signal_handlers(shutdown_event)
+
+    if Config.WEB_ENABLE and Config.WEB_LOGIN:
+        await shutdown_event.wait()
+        return
+
+    await _run_bot_loop(shutdown_event)
+
+
+async def console_bot(shutdown_event):
+    """Initial login flow. Retries transient connection errors until success or shutdown."""
+    retry_delay = INITIAL_RETRY_DELAY
+    while not shutdown_event.is_set():
+        try:
+            logs.info(lang("telegram_connecting"))
+            await start_client(bot)
+            me = await bot.get_me()
+        except AuthKeyError:
+            logs.error(lang("telegram_auth_key_invalid"))
+            SessionFileManager.safe_remove_session()
+            exit()
+        except RETRYABLE_CONNECTION_ERRORS as e:
+            logs.warning(
+                f"{lang('telegram_connection_failed')}: {type(e).__name__}: {e}"
+            )
+            if not await _sleep_for_retry(retry_delay, shutdown_event):
+                return
+            retry_delay = _next_delay(retry_delay)
+            continue
+
+        bot.me = me
+        if me.bot:
+            SessionFileManager.safe_remove_session()
+            exit()
+        logs.info(f"{lang('save_id')} {me.first_name}({me.id})")
+        await load_all()
+        return
 
 
 async def web_bot():
     try:
         await web_login.init()
     except AuthKeyError:
+        logs.error(lang("telegram_auth_key_invalid"))
         SessionFileManager.safe_remove_session()
         exit()
     if bot.me is not None:
@@ -169,32 +187,19 @@ async def web_bot():
 
 async def main():
     logs.info(lang("platform") + platform + lang("platform_load"))
-    shutdown = ShutdownController()
-    web.set_stop_handler(shutdown.request)
+    shutdown_event = web.shutdown_event
     if not scheduler.running:
         scheduler.start()
     await web.start()
     try:
         if not (Config.WEB_ENABLE and Config.WEB_LOGIN):
-            retry_delay = INITIAL_RETRY_DELAY
-            while True:
-                try:
-                    keep_running, _ = await shutdown.wait(console_bot())
-                    if not keep_running:
-                        return
-                    break
-                except RETRYABLE_CONNECTION_ERRORS:
-                    keep_running, retry_delay = await sleep_before_retry(
-                        retry_delay, shutdown
-                    )
-                    if not keep_running:
-                        return
+            await console_bot(shutdown_event)
+            if shutdown_event.is_set():
+                return
             logs.info(lang("start"))
         else:
-            keep_running, _ = await shutdown.wait(web_bot())
-            if not keep_running:
-                return
-        await idle(shutdown)
+            await web_bot()
+        await idle(shutdown_event)
     finally:
         if scheduler.running:
             scheduler.shutdown()

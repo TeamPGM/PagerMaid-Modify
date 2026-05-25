@@ -203,11 +203,7 @@ def listener(**args) -> CommandHandlerDecorator:
                 )
             except MessageIdInvalidError:
                 logs.warning("Please Don't Delete Commands While it's Processing..")
-            except CancelledError:
-                await HookRunner.shutdown(context)
-                web.stop()
-                raise
-            except SystemExit:
+            except (SystemExit, CancelledError):
                 await HookRunner.shutdown(context)
                 web.stop()
             except BaseException as exc:
