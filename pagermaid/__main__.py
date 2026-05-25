@@ -81,6 +81,58 @@ def _install_signal_handlers(shutdown_event):
         signal_fn(s, signal_handler)
 
 
+class _LoopState:
+    """Result of one iteration step. Keeps the main loop branching trivial."""
+
+    SHUTDOWN = "shutdown"
+    RETRY = "retry"
+    STOP = "stop"
+    CONTINUE = "continue"
+
+
+async def _try_connect(shutdown_event):
+    """Try to (re)connect the bot once.
+
+    Returns one of CONTINUE / SHUTDOWN / RETRY (plus optional error reason).
+    """
+    logs.info(lang("telegram_connecting"))
+    try:
+        completed, _ = await _wait_or_shutdown(bot.connect(), shutdown_event)
+    except RETRYABLE_CONNECTION_ERRORS as e:
+        return _LoopState.RETRY, f"{type(e).__name__}: {e}"
+    if not completed:
+        return _LoopState.SHUTDOWN, None
+    return _LoopState.CONTINUE, None
+
+
+async def _run_session(shutdown_event):
+    """Stay connected until shutdown, restart request, or transient error.
+
+    Returns (state, reason) where state is one of SHUTDOWN / STOP / RETRY.
+    """
+    reason = None
+    try:
+        completed, _ = await _wait_or_shutdown(
+            bot._run_until_disconnected(), shutdown_event
+        )
+    except RETRYABLE_CONNECTION_ERRORS as e:
+        reason = f"{type(e).__name__}: {e}"
+        completed = True
+
+    if not completed:
+        return _LoopState.SHUTDOWN, None
+    if getattr(bot, "_should_restart", False):
+        return _LoopState.STOP, None
+    return _LoopState.RETRY, reason
+
+
+def _log_disconnect(reason):
+    if reason:
+        logs.warning(f"{lang('telegram_disconnected')}: {reason}")
+    else:
+        logs.warning(lang("telegram_disconnected"))
+
+
 async def _run_bot_loop(shutdown_event):
     """Connect to Telegram and stay connected, retrying transient failures."""
     retry_delay = INITIAL_RETRY_DELAY
@@ -88,42 +140,25 @@ async def _run_bot_loop(shutdown_event):
 
     while not shutdown_event.is_set():
         if not bot.is_connected():
-            try:
-                logs.info(lang("telegram_connecting"))
-                completed, _ = await _wait_or_shutdown(bot.connect(), shutdown_event)
-                if not completed:
-                    return
-            except RETRYABLE_CONNECTION_ERRORS as e:
-                logs.warning(
-                    f"{lang('telegram_connection_failed')}: {type(e).__name__}: {e}"
-                )
+            state, reason = await _try_connect(shutdown_event)
+            if state == _LoopState.SHUTDOWN:
+                return
+            if state == _LoopState.RETRY:
+                logs.warning(f"{lang('telegram_connection_failed')}: {reason}")
                 if not await _sleep_for_retry(retry_delay, shutdown_event):
                     return
                 retry_delay = _next_delay(retry_delay)
                 continue
 
         started_at = loop.time()
-        disconnect_reason = None
-        try:
-            completed, _ = await _wait_or_shutdown(
-                bot._run_until_disconnected(), shutdown_event
-            )
-            if not completed:
-                return
-        except RETRYABLE_CONNECTION_ERRORS as e:
-            disconnect_reason = f"{type(e).__name__}: {e}"
-
-        if getattr(bot, "_should_restart", False):
+        state, reason = await _run_session(shutdown_event)
+        if state in (_LoopState.SHUTDOWN, _LoopState.STOP):
             return
 
         if loop.time() - started_at >= STABLE_RETRY_RESET_AFTER:
             retry_delay = INITIAL_RETRY_DELAY
 
-        if disconnect_reason:
-            logs.warning(f"{lang('telegram_disconnected')}: {disconnect_reason}")
-        else:
-            logs.warning(lang("telegram_disconnected"))
-
+        _log_disconnect(reason)
         if not await _sleep_for_retry(retry_delay, shutdown_event):
             return
         retry_delay = _next_delay(retry_delay)
