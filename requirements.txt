@@ -121,3 +121,5 @@ urllib3==2.6.3
     # via sentry-sdk
 uvicorn==0.44.0
     # via pagermaid-modify
+uvloop==0.22.1 ; sys_platform == 'linux' or sys_platform == 'darwin'
+    # via pagermaid-modify
