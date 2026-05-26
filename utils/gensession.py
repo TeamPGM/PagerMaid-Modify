@@ -1,5 +1,13 @@
-import os
+import shutil
+import subprocess
 from sys import executable
+
+
+def install_package(package: str):
+    if shutil.which("uv"):
+        subprocess.call(["uv", "pip", "install", "--python", executable, package])
+    else:
+        subprocess.call([executable, "-m", "pip", "install", package])
 
 try:
     from telethon.errors.rpcerrorlist import ApiIdInvalidError, PhoneNumberInvalidError
@@ -9,7 +17,7 @@ try:
     print("Found an existing installation of Telethon...\nSuccessfully Imported.")
 except ImportError:
     print("Installing Telethon...")
-    os.system(f"{executable} -m pip install telethon")
+    install_package("telethon")
     print("Done. Installed and imported Telethon.")
     from telethon.errors.rpcerrorlist import ApiIdInvalidError, PhoneNumberInvalidError
     from telethon.sessions import StringSession

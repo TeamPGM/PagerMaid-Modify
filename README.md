@@ -40,7 +40,7 @@ Pagermaid 是一个用在 Telegram 的实用工具。
 获得 `API_ID` 和 `API_HASH` 后，你可以通过下面两种方式获取 `SESSION`：
 
 * 在线获取：[![Repl.it](https://replit.com/badge/github/TeamPGM/PagerMaid-Modify)](https://replit.com/@mrwangzhe/gensession)
-* 本地获取：`cd utils && python3 -m pip install telethon && python3 gensession.py`
+* 本地获取：`cd utils && python3 gensession.py`，脚本会优先使用 `uv` 安装 Telethon，未安装 `uv` 时回退到 `pip`
 
 # 对存在使用本项目用户群组的提醒
 

@@ -1,3 +1,5 @@
+FROM ghcr.io/astral-sh/uv:latest AS uv
+
 FROM python:alpine
 
 ENV PAGERMAID_DIR=/pagermaid
@@ -6,13 +8,14 @@ ENV SHELL=/bin/bash
 
 WORKDIR /pagermaid/workdir
 
+COPY --from=uv /uv /usr/local/bin/uv
 COPY ./ /pagermaid/workdir
 
 RUN apk add --no-cache git bash libmagic curl tzdata libzbar figlet fortune openssl tini fastfetch \
     && apk add --no-cache --update --virtual .build-deps gcc python3-dev musl-dev linux-headers rust cargo \
     && git config --global pull.ff only \
-    && pip install -r requirements.txt \
-    && pip cache purge \
+    && uv pip install --system -r requirements.txt \
+    && uv cache clean \
     && rm -rf /root/.cargo \
     && apk del .build-deps
 

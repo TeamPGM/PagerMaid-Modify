@@ -1,6 +1,4 @@
-from sys import executable
-
-from pagermaid.utils import execute
+from pagermaid.utils import execute, package_install_shell_command
 
 
 async def update(force: bool = False):
@@ -8,5 +6,7 @@ async def update(force: bool = False):
     if force:
         await execute("git reset --hard origin/master")
     await execute("git pull --all")
-    await execute(f"{executable} -m pip install --upgrade -r requirements.txt")
-    await execute(f"{executable} -m pip install -r requirements.txt")
+    await execute(
+        package_install_shell_command(["--upgrade", "-r", "requirements.txt"])
+    )
+    await execute(package_install_shell_command(["-r", "requirements.txt"]))

@@ -1,6 +1,6 @@
 ## 特点
 
-- 容器在启动或重启时，将自动更新脚本并安装pip依赖。
+- 容器在启动或重启时，将自动更新脚本并安装 Python 依赖。
 
 - 包括redis缓存数据和插件在内，全部数据支持数据持久化，更新镜像或重建容器数据不丢失。
 
@@ -34,4 +34,3 @@ cp docker-compose.gen.yml docker-compose.yml
 4. 启动容器`docker-compose up -d`。
 
 5. 运行`docker exec -it pagermaid bash utils/docker-config.sh`进行配置。
-

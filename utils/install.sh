@@ -88,7 +88,9 @@ yum_python_check() {
         update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 >>/dev/null 2>&1
         PYV=$(which python3.6)
     fi
-    if command -v pip3 >>/dev/null 2>&1; then
+    if command -v uv >>/dev/null 2>&1; then
+        echo 'uv 存在 . . .'
+    elif command -v pip3 >>/dev/null 2>&1; then
         echo 'pip 存在 . . .'
     else
         echo "pip3 未安装在此系统上，正在进行安装"
@@ -165,7 +167,9 @@ apt_python_check() {
         update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1 >>/dev/null 2>&1
         PYV=$(which python3.6)
     fi
-    if command -v pip3 >>/dev/null 2>&1; then
+    if command -v uv >>/dev/null 2>&1; then
+        echo 'uv 存在 . . .'
+    elif command -v pip3 >>/dev/null 2>&1; then
         echo 'pip 存在 . . .'
     else
         echo "pip3 未安装在此系统上，正在进行安装"
@@ -219,8 +223,10 @@ debian_python_check() {
         PYV=$(which python3)
         update-alternatives --install /usr/bin/python3 python3 $PYV 1 >>/dev/null 2>&1
     fi
-    echo "正在检查 pip3 安装情况 . . ."
-    if command -v pip3 >>/dev/null 2>&1; then
+    echo "正在检查 uv/pip3 安装情况 . . ."
+    if command -v uv >>/dev/null 2>&1; then
+        echo 'uv 存在 . . .'
+    elif command -v pip3 >>/dev/null 2>&1; then
         echo 'pip 存在 . . .'
     else
         echo "pip3 未安装在此系统上，正在进行安装"
@@ -260,9 +266,14 @@ download_repo() {
 
 pypi_install() {
     echo "下载安装 pypi 依赖中 . . ."
-    $PYV -m pip install --upgrade pip >>/dev/null 2>&1
-    $PYV -m pip install -r requirements.txt >>/dev/null 2>&1
-    sudo -H $PYV -m pip install --ignore-installed PyYAML >>/dev/null 2>&1
+    if command -v uv >>/dev/null 2>&1; then
+        uv pip install --python "$PYV" -r requirements.txt >>/dev/null 2>&1
+        uv pip install --python "$PYV" --reinstall PyYAML >>/dev/null 2>&1
+    else
+        $PYV -m pip install --upgrade pip >>/dev/null 2>&1
+        $PYV -m pip install -r requirements.txt >>/dev/null 2>&1
+        sudo -H $PYV -m pip install --ignore-installed PyYAML >>/dev/null 2>&1
+    fi
 }
 
 configure() {
