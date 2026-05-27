@@ -15,6 +15,6 @@ if not _Config.API_ID or not _Config.API_HASH:
     _Config.API_HASH = _Config.DEFAULT_API_HASH
 
 with contextlib.suppress(ImportError):
-    import uvloop  # noqa
+    import winuvloop  # noqa
 
-    uvloop.install()
+    winuvloop.install()

@@ -121,5 +121,9 @@ urllib3==2.6.3
     # via sentry-sdk
 uvicorn==0.44.0
     # via pagermaid-modify
-uvloop==0.22.1 ; sys_platform == 'linux' or sys_platform == 'darwin'
+uvloop==0.22.1 ; platform_python_implementation == 'CPython' and sys_platform != 'win32'
+    # via winuvloop
+winloop==0.6.3 ; platform_python_implementation == 'CPython' and sys_platform == 'win32'
+    # via winuvloop
+winuvloop==0.2.4
     # via pagermaid-modify
