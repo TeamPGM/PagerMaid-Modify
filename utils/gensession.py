@@ -1,13 +1,19 @@
 import shutil
 import subprocess
+import sys
 from sys import executable
 
 
 def install_package(package: str):
     if shutil.which("uv"):
-        subprocess.call(["uv", "pip", "install", "--python", executable, package])
+        command = ["uv", "pip", "install", "--python", executable, package]
     else:
-        subprocess.call([executable, "-m", "pip", "install", package])
+        command = [executable, "-m", "pip", "install", package]
+    try:
+        subprocess.check_call(command)  # nosec B603 - command is built from a controlled allow-list
+    except subprocess.CalledProcessError as exc:
+        print(f"Failed to install {package}: {exc}")
+        sys.exit(exc.returncode or 1)
 
 try:
     from telethon.errors.rpcerrorlist import ApiIdInvalidError, PhoneNumberInvalidError

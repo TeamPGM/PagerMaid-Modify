@@ -18,4 +18,9 @@ def package_install_shell_command(args: Iterable[str], python: str = executable)
 
 
 def install_package(args: Iterable[str], python: str = executable) -> int:
-    return subprocess.call(package_install_command(args, python))
+    command = package_install_command(args, python)
+    try:
+        subprocess.check_call(command)  # nosec B603 - command is built from a controlled allow-list
+    except subprocess.CalledProcessError as exc:
+        return exc.returncode or 1
+    return 0

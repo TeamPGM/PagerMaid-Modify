@@ -1,4 +1,4 @@
-FROM ghcr.io/astral-sh/uv:latest AS uv
+FROM astral-sh/uv:0.11 AS uv
 
 FROM ubuntu:jammy
 ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
