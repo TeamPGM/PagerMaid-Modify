@@ -46,7 +46,7 @@ class TDSession(BaseModel):
 
 class SessionConvert:
     PYROGRAM_VERSION = 3
-    TELETHON_VERSION = 8
+    TELETHON_VERSION = 7
 
     def __init__(self, session: TDSession):
         self.session = session
@@ -209,7 +209,7 @@ class SessionConvert:
             (
                 id             INTEGER PRIMARY KEY,
                 access_hash    INTEGER,
-                type           INTEGER NOT NULL,
+                type           TEXT NOT NULL,
                 username       TEXT,
                 phone_number   TEXT,
                 last_update_on INTEGER NOT NULL DEFAULT (CAST(STRFTIME('%s', 'now') AS INTEGER))
