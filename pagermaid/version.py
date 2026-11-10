@@ -1,4 +1,4 @@
-pgm_version = "1.5.12"
-pgm_version_code = 1512
+pgm_version = "1.5.14"
+pgm_version_code = 1514
 pgm_telethon = True
 pgm_pyrogram = False
