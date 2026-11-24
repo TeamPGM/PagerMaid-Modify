@@ -28,7 +28,7 @@ dependencies = [
     "python-socks[asyncio]>=2.8.1",
     "winuvloop>=0.2.4",
 ]
-requires-python = ">=3.10.0"
+requires-python = ">=3.11.0"
 readme = "README.md"
 license = {text = "AGPL 3.0+"}
 
